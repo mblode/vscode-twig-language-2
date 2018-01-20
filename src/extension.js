@@ -5,7 +5,7 @@ const snippetsArr = require('./hover/filters.json');
 const functionsArr = require('./hover/functions.json');
 const twigArr = require('./hover/twig.json');
 
-const vscodeConfig = vscode.workspace.getConfiguration('twig-language');
+const vscodeConfig = vscode.workspace.getConfiguration('twig-language-2');
 
 function createHover(snippet, type) {
     const example =
