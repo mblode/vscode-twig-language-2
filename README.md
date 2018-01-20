@@ -36,7 +36,7 @@ ext install mblode.twig-language-2
 
 ```
 "files.associations": {
-    "*.twig": "html"
+    "*.html": "twig"
 },
 "emmet.includeLanguages": {
     "twig": "html"

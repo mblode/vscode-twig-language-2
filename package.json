@@ -3,7 +3,7 @@
     "displayName": "Twig Language 2",
     "description":
         "Snippets, Syntax Highlighting, Hover, and Formatting for Twig",
-    "version": "0.2.8",
+    "version": "0.2.9",
     "publisher": "mblode",
     "author": {
         "name": "Matthew Blode",
@@ -16,7 +16,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/mblode/vscode-twig-language-2`.git"
+        "url": "https://github.com/mblode/vscode-twig-language-2.git"
     },
     "icon": "images/icon.png",
     "engines": {
