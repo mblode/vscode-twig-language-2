@@ -1,25 +1,24 @@
-
 <a href="https://marketplace.visualstudio.com/items?itemName=mblode.twig-language">
   <img src="https://github.com/mblode/vscode-twig-language/blob/master/images/icon.png?raw=true" alt="" width=100 height=100>
 </a>
 
 ### VSCode Twig Language
 
-- Syntax highlighting
-- Snippets
-- Emmet
-- Pretty Diff Formatting
-- Hover
-- HTML intellisense
+* Syntax highlighting
+* Snippets
+* Emmet
+* Pretty Diff Formatting
+* Hover
+* HTML intellisense
 
 ## Table of contents
 
-- [Installation](#installation)
-- [Documentation](#documentation)
-- [Optional VSCode Config](#optional-vscode-config)
-- [Contribute](#contribute)
-- [Running extension locally](#running-extension-locally)
-- [Copyright and license](#copyright-and-license)
+* [Installation](#installation)
+* [Documentation](#documentation)
+* [Optional VSCode Config](#optional-vscode-config)
+* [Contribute](#contribute)
+* [Running extension locally](#running-extension-locally)
+* [Copyright and license](#copyright-and-license)
 
 ## Installation
 
@@ -36,9 +35,22 @@ ext install mblode.twig-language
 ## Use these VSCode settings
 
 ```
-"vsicons.associations.files": [ { "icon": "twig", "extensions": ["twig", "html"], "format": "svg" } ],
-"files.associations": {},
-"emmet.includeLanguages": {},
+"files.associations": {
+    "*.html": "twig"
+},
+"emmet.includeLanguages": {
+    "twig": "html"
+},
+"vsicons.associations.files": [
+    {
+        "icon": "twig",
+        "extensions": [
+            "twig",
+            "html"
+        ],
+        "format": "svg"
+    }
+],
 ```
 
 ## Documentation
@@ -58,7 +70,9 @@ Using PrettyDiff, this extension implements the only working code formatter for 
 ```
 1. CMD + Shift + P -> Format Document
 ```
+
 OR
+
 ```
 1. Select the text you want to Prettify
 2. CMD + Shift + P -> Format Selection
@@ -68,7 +82,6 @@ OR
 
 VSCode Twig language shows information about the symbol/object that's below the mouse cursor when you hover within Twig files.
 
-
 ### Craft CMS/Twig code snippets
 
 Adds a set of Craft CMS/Twig code snippets to use in your Twig templates.
@@ -76,7 +89,6 @@ Adds a set of Craft CMS/Twig code snippets to use in your Twig templates.
 #### Generic Triggers
 
 ```twig
-
 do                {% do ... %}
 extends           {% extends 'template' %}
 from              {% from 'template' import 'macro' %}
@@ -212,8 +224,8 @@ Whether to insert an empty line at the end of output.
 
 Sorts properties of objects attributs in HTML.
 
-- "all"
-- "none"
+* "all"
+* "none"
 
 **twig-language.wrap (default: 0)**
 
@@ -223,9 +235,9 @@ How many columns wide text content may be before wrapping onto a new line. The v
 
 Whether consecutive methods should be continuously chained onto a single line of code.
 
-- "chain"
-- "indent"
-- "none"
+* "chain"
+* "indent"
+* "none"
 
 **twig-language.ternaryLine (default: true)**
 
