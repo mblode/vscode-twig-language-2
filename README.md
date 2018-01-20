@@ -1,8 +1,8 @@
-<a href="https://marketplace.visualstudio.com/items?itemName=mblode.twig-language">
-  <img src="https://github.com/mblode/vscode-twig-language/blob/master/images/icon.png?raw=true" alt="" width=100 height=100>
+<a href="https://marketplace.visualstudio.com/items?itemName=mblode.twig-language-2">
+  <img src="https://github.com/mblode/vscode-twig-language-2/blob/master/images/icon.png?raw=true" alt="" width=100 height=100>
 </a>
 
-### VSCode Twig Language
+### VSCode Twig Language 2
 
 * Syntax highlighting
 * Snippets
@@ -22,14 +22,14 @@
 
 ## Installation
 
-Install through Visual Studio Code extensions. Search for `Twig Language`
+Install through Visual Studio Code extensions. Search for `Twig Language 2`
 
-[Visual Studio Code Market Place: Twig Language](https://marketplace.visualstudio.com/items?itemName=mblode.twig-language)
+[Visual Studio Code Market Place: Twig Language 2](https://marketplace.visualstudio.com/items?itemName=mblode.twig-language-2)
 
 It can also be installed using:
 
 ```
-ext install mblode.twig-language
+ext install mblode.twig-language-2
 ```
 
 ## Use these VSCode settings
@@ -55,7 +55,7 @@ ext install mblode.twig-language
 
 ## Documentation
 
-Twig Language is a Visual Studio Code extension that provides [snippets](), [syntax highlighting](), [hover](), and [formatting]() for the Twig file format.
+Twig Language 2 is a Visual Studio Code extension that provides [snippets](), [syntax highlighting](), [hover](), and [formatting]() for the Twig file format.
 
 ### Twig syntax highlighting and language support
 
@@ -80,7 +80,7 @@ OR
 
 ### Information about Twig code on hover
 
-VSCode Twig language shows information about the symbol/object that's below the mouse cursor when you hover within Twig files.
+VSCode Twig language 2 shows information about the symbol/object that's below the mouse cursor when you hover within Twig files.
 
 ### Craft CMS/Twig code snippets
 
@@ -208,30 +208,30 @@ formsearchresults        Example search form results
 
 ## Settings
 
-**twig-language.hover (default: true)**
+**twig-language-2.hover (default: true)**
 
 Whether to enable/disable Twig hover.
 
-**twig-language.formatting (default: true)**
+**twig-language-2.formatting (default: true)**
 
 Whether to enable/disable Twig PrettyDiff formatting.
 
-**twig-language.newline (default: true)**
+**twig-language-2.newline (default: true)**
 
 Whether to insert an empty line at the end of output.
 
-**twig-language.objSort (default: 'none')**
+**twig-language-2.objSort (default: 'none')**
 
 Sorts properties of objects attributs in HTML.
 
 * "all"
 * "none"
 
-**twig-language.wrap (default: 0)**
+**twig-language-2.wrap (default: 0)**
 
 How many columns wide text content may be before wrapping onto a new line. The value 0 disables text wrapping.
 
-**twig-language.methodchain (default: 'none')**
+**twig-language-2.methodchain (default: 'none')**
 
 Whether consecutive methods should be continuously chained onto a single line of code.
 
@@ -239,7 +239,7 @@ Whether consecutive methods should be continuously chained onto a single line of
 * "indent"
 * "none"
 
-**twig-language.ternaryLine (default: true)**
+**twig-language-2.ternaryLine (default: true)**
 
 Whether to keep ? and : operators of ternary statements on one line of code.
 

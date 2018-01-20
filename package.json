@@ -52,50 +52,50 @@
             "type": "object",
             "title": "Twig Language configuration",
             "properties": {
-                "twig-language.hover": {
+                "twig-language-2.hover": {
                     "type": "boolean",
                     "default": true,
                     "description": "Whether to enable/disable Twig hover."
                 },
-                "twig-language.formatting": {
+                "twig-language-2.formatting": {
                     "type": "boolean",
                     "default": true,
                     "description":
                         "Whether to enable/disable Twig PrettyDiff formatting."
                 },
-                "twig-language.tabSize": {
+                "twig-language-2.tabSize": {
                     "type": "integer",
                     "default": 4,
                     "description":
                         "Stores the number of times the inchar value must repeat to comprise a single indentation."
                 },
-                "twig-language.newline": {
+                "twig-language-2.newline": {
                     "type": "boolean",
                     "default": true,
                     "description":
                         "Whether to insert an empty line at the end of output."
                 },
-                "twig-language.objSort": {
+                "twig-language-2.objSort": {
                     "type": "string",
                     "enum": ["all", "none"],
                     "default": "none",
                     "description":
                         "Sorts properties of objects attributs in HTML."
                 },
-                "twig-language.wrap": {
+                "twig-language-2.wrap": {
                     "type": "integer",
                     "default": 0,
                     "description":
                         "How many columns wide text content may be before wrapping onto a new line. The value 0 disables text wrapping."
                 },
-                "twig-language.methodchain": {
+                "twig-language-2.methodchain": {
                     "type": "string",
                     "enum": ["chain", "indent", "none"],
                     "default": "none",
                     "description":
                         "Whether consecutive methods should be continuously chained onto a single line of code."
                 },
-                "twig-language.ternaryLine": {
+                "twig-language-2.ternaryLine": {
                     "type": "boolean",
                     "default": true,
                     "description":
