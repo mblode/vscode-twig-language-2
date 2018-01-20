@@ -3,7 +3,7 @@
     "displayName": "Twig Language 2",
     "description":
         "Snippets, Syntax Highlighting, Hover, and Formatting for Twig",
-    "version": "0.2.11",
+    "version": "0.3.0",
     "publisher": "mblode",
     "author": {
         "name": "Matthew Blode",

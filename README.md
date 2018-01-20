@@ -41,16 +41,6 @@ ext install mblode.twig-language-2
 "emmet.includeLanguages": {
     "twig": "html"
 },
-"vsicons.associations.files": [
-    {
-        "icon": "twig",
-        "extensions": [
-            "twig",
-            "html"
-        ],
-        "format": "svg"
-    }
-],
 ```
 
 ## Documentation
