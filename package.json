@@ -1,0 +1,121 @@
+{
+    "name": "twig-language-2",
+    "displayName": "Twig Language 2",
+    "description":
+        "Snippets, Syntax Highlighting, Hover, and Formatting for Twig",
+    "version": "0.2.6",
+    "publisher": "mblode",
+    "author": {
+        "name": "Matthew Blode",
+        "email": "m.blode@gmail.com",
+        "url": "https://matthewblode.com"
+    },
+    "homepage": "https://github.com/mblode/vscode-twig-language-2",
+    "bugs": {
+        "url": "https://github.com/mblode/vscode-twig-language-2/issues"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/mblode/vscode-twig-language-2`.git"
+    },
+    "icon": "images/icon.png",
+    "engines": {
+        "vscode": "^1.17.0"
+    },
+    "categories": ["Languages", "Snippets", "Other"],
+    "keywords": ["php", "twig", "snippets", "craft", "beautify"],
+    "activationEvents": ["onLanguage:twig"],
+    "main": "./src/extension",
+    "contributes": {
+        "languages": [
+            {
+                "id": "twig",
+                "aliases": ["HTML (Twig)", "twig"],
+                "extensions": [".twig", ".html", ".html.twig"],
+                "configuration": "./src/languages/twig.configuration.json"
+            }
+        ],
+        "grammars": [
+            {
+                "language": "twig",
+                "scopeName": "text.html.twig",
+                "path": "./src/syntaxes/twig.tmLanguage"
+            }
+        ],
+        "snippets": [
+            {
+                "language": "twig",
+                "path": "./src/snippets/snippets.json"
+            }
+        ],
+        "configuration": {
+            "type": "object",
+            "title": "Twig Language configuration",
+            "properties": {
+                "twig-language.hover": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Whether to enable/disable Twig hover."
+                },
+                "twig-language.formatting": {
+                    "type": "boolean",
+                    "default": true,
+                    "description":
+                        "Whether to enable/disable Twig PrettyDiff formatting."
+                },
+                "twig-language.tabSize": {
+                    "type": "integer",
+                    "default": 4,
+                    "description":
+                        "Stores the number of times the inchar value must repeat to comprise a single indentation."
+                },
+                "twig-language.newline": {
+                    "type": "boolean",
+                    "default": true,
+                    "description":
+                        "Whether to insert an empty line at the end of output."
+                },
+                "twig-language.objSort": {
+                    "type": "string",
+                    "enum": ["all", "none"],
+                    "default": "none",
+                    "description":
+                        "Sorts properties of objects attributs in HTML."
+                },
+                "twig-language.wrap": {
+                    "type": "integer",
+                    "default": 0,
+                    "description":
+                        "How many columns wide text content may be before wrapping onto a new line. The value 0 disables text wrapping."
+                },
+                "twig-language.methodchain": {
+                    "type": "string",
+                    "enum": ["chain", "indent", "none"],
+                    "default": "none",
+                    "description":
+                        "Whether consecutive methods should be continuously chained onto a single line of code."
+                },
+                "twig-language.ternaryLine": {
+                    "type": "boolean",
+                    "default": true,
+                    "description":
+                        "Whether to keep ? and : operators of ternary statements on one line of code."
+                }
+            }
+        }
+    },
+    "capabilities": {
+        "hoverProvider": "true"
+    },
+    "devDependencies": {
+        "@types/node": "*",
+        "babel-eslint": "7",
+        "eslint": "3.x",
+        "eslint-config-prettier": "^2.7.0",
+        "typescript": "^2.6.1",
+        "vscode": "^1.1.6"
+    },
+    "dependencies": {
+        "prettydiff2": "^2.2.7"
+    }
+}
