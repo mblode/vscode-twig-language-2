@@ -44,19 +44,6 @@ This extension provides language support for the Twig syntax.
 
 Using PrettyDiff, this extension implements the only working code formatter for Twig files in VSCode.
 
-#### Using Command Palette (CMD/CTRL + Shift + P)
-
-```
-1. CMD + Shift + P -> Format Document
-```
-
-OR
-
-```
-1. Select the text you want to Prettify
-2. CMD + Shift + P -> Format Selection
-```
-
 ### Information about Twig code on hover
 
 VSCode Twig language 2 shows information about the symbol/object that's below the mouse cursor when you hover within Twig files.
@@ -64,7 +51,3 @@ VSCode Twig language 2 shows information about the symbol/object that's below th
 ### Craft CMS/Twig code snippets
 
 Adds a set of Craft CMS/Twig code snippets to use in your Twig templates.
-
-## Copyright and license
-
-MIT © [Matthew Blode](https://matthewblode.com)
