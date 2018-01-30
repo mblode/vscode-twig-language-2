@@ -11,12 +11,6 @@
 * Hover
 * HTML intellisense
 
-## Installation
-
-Install through Visual Studio Code extensions. Search for `Twig Language 2`
-
-[Visual Studio Code Market Place: Twig Language 2](https://marketplace.visualstudio.com/items?itemName=mblode.twig-language-2)
-
 ## What has changed since version 1?
 
 I have created a new extension to fix the issues that I (and all of you) were having with file associations, issues with commenting and also the most important issue with the icon in the sidebar.
@@ -31,6 +25,12 @@ Simply add these lines to your VSCode settings to get emmet and HTML Intellisens
     "twig": "html"
 },
 ```
+
+## Installation
+
+Install through Visual Studio Code extensions. Search for `Twig Language 2`
+
+[Visual Studio Code Market Place: Twig Language 2](https://marketplace.visualstudio.com/items?itemName=mblode.twig-language-2)
 
 ## Documentation
 
