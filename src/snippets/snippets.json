@@ -669,24 +669,6 @@
         "description": "switch",
         "scope": "text.html.twig"
     },
-    "%%": {
-        "prefix": `\\%\\%`,
-        "body": "{% ${1:$TM_SELECTED_TEXT} %}$0",
-        "description": "{% ... %}",
-        "scope": "text.html.twig"
-    },
-    "##": {
-        "prefix": "\\#\\#",
-        "body": "{# ${1:$TM_SELECTED_TEXT} #}$0",
-        "description": "{# ... #}",
-        "scope": "text.html.twig"
-    },
-    "}}": {
-        "prefix": "\\}\\}",
-        "body": "{{ ${1:$TM_SELECTED_TEXT} }}$0",
-        "description": "{{ ... }}",
-        "scope": "text.html.twig"
-    },
     "urla": {
         "prefix": "urla",
         "body":
