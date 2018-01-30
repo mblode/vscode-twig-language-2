@@ -34,7 +34,7 @@ Install through Visual Studio Code extensions. Search for `Twig Language 2`
 
 ## Documentation
 
-Twig Language 2 is a Visual Studio Code extension that provides [snippets](), [syntax highlighting](), [hover](), and [formatting]() for the Twig file format.
+Twig Language 2 is a Visual Studio Code extension that provides snippets, syntax highlighting, hover, and formatting for the Twig file format.
 
 ### Twig syntax highlighting and language support
 
