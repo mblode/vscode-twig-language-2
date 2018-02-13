@@ -9,7 +9,6 @@
 * Emmet
 * Pretty Diff Formatting
 * Hover
-* HTML intellisense
 
 ## What has changed since version 1?
 
