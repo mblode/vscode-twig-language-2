@@ -2,7 +2,7 @@
     "name": "twig-language-2",
     "displayName": "Twig Language 2",
     "description": "Snippets, Syntax Highlighting, Hover, and Formatting for Twig",
-    "version": "0.4.0",
+    "version": "0.4.1",
     "publisher": "mblode",
     "author": {
         "name": "Matthew Blode",
@@ -81,8 +81,8 @@
                 },
                 "twig-language-2.tabSize": {
                     "type": "integer",
-                    "default": 4,
-                    "description": "Stores the number of times the inchar value must repeat to comprise a single indentation."
+                    "default": 0,
+                    "description": " 0 will default to the editor's tab size. Stores the number of 'inchar' values to comprise a single indentation."
                 },
                 "twig-language-2.newline": {
                     "type": "boolean",

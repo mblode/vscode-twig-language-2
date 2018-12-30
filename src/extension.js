@@ -5,7 +5,7 @@ const snippetsArr = require('./hover/filters.json');
 const functionsArr = require('./hover/functions.json');
 const twigArr = require('./hover/twig.json');
 
-const vscodeConfig = vscode.workspace.getConfiguration('twig-language-2');
+const twigConfig = vscode.workspace.getConfiguration('twig-language-2');
 
 function createHover(snippet, type) {
     const example =
@@ -30,12 +30,17 @@ const prettyDiff = (document, range, options) => {
     settings.lexer = "markup";
     settings.mode = "beautify";
     settings.source = content;
-    settings.insize = vscodeConfig.tabSize;
-    settings.newline = vscodeConfig.newLine;
-    settings.objsort = vscodeConfig.methodChain;
-    settings.wrap = vscodeConfig.wrap;
-    settings.methodchain = vscodeConfig.methodchain;
-    settings.ternaryline = vscodeConfig.ternaryLine;
+    settings.newline = twigConfig.newLine;
+    settings.objsort = twigConfig.methodChain;
+    settings.wrap = twigConfig.wrap;
+    settings.methodchain = twigConfig.methodchain;
+    settings.ternaryline = twigConfig.ternaryLine;
+
+    if (twigConfig.tabSize == 0) {
+        settings.indent_size = vscode.workspace.getConfiguration().get('editor.tabSize');
+    } else {
+        settings.indent_size = twigConfig.tabSize;
+    }
 
     output = prettydiff.mode(settings);
 
@@ -50,7 +55,7 @@ function activate(context) {
     registerDocType('twig');
 
     function registerDocType(type) {
-        if (vscodeConfig.hover === true) {
+        if (twigConfig.hover === true) {
             context.subscriptions.push(
                 vscode.languages.registerHoverProvider(type, {
                     provideHover(document, position, token) {
@@ -88,7 +93,7 @@ function activate(context) {
             );
         }
 
-        if (vscodeConfig.formatting === true) {
+        if (twigConfig.formatting === true) {
             context.subscriptions.push(
                 vscode.languages.registerDocumentFormattingEditProvider(type, {
                     provideDocumentFormattingEdits: function(
