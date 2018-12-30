@@ -12,9 +12,9 @@
 
 ## What has changed since version 1?
 
-I have created a new extension to fix the issues that I (and all of you) were having with file associations, issues with commenting and also the most important issue with the icon in the sidebar.
+I have created a new extension to fix the issues that I (and all of you) were having with file association, commenting and VS Code UI issues.
 
-Simply add these lines to your VS Code settings to get emmet and HTML Intellisense working and also to associate HTML files as twig syntax.
+Simply add these lines to your VS Code settings to get emmet working and also to associate HTML files as twig syntax.
 
 ```
 "files.associations": {
