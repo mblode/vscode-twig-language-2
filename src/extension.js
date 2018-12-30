@@ -1,5 +1,5 @@
 const vscode = require('vscode');
-const prettydiff = require('prettydiff2');
+let prettydiff = require('prettydiff');
 
 const snippetsArr = require('./hover/filters.json');
 const functionsArr = require('./hover/functions.json');
@@ -21,20 +21,25 @@ function createHover(snippet, type) {
 const prettyDiff = (document, range, options) => {
     const result = [];
     const content = document.getText(range);
+    let output = "";
 
-    const newText = prettydiff({
-        source: content,
-        lang: 'twig',
-        mode: 'beautify',
-        insize: vscodeConfig.tabSize,
-        newline: vscodeConfig.newLine,
-        objsort: vscodeConfig.methodChain,
-        wrap: vscodeConfig.wrap,
-        methodchain: vscodeConfig.methodchain,
-        ternaryline: vscodeConfig.ternaryLine,
-    });
+    let settings = prettydiff.defaults;
 
-    result.push(vscode.TextEdit.replace(range, newText));
+    settings.api = "dom";
+    settings.language = "twig";
+    settings.lexer = "markup";
+    settings.mode = "beautify";
+    settings.source = content;
+    settings.insize = vscodeConfig.tabSize;
+    settings.newline = vscodeConfig.newLine;
+    settings.objsort = vscodeConfig.methodChain;
+    settings.wrap = vscodeConfig.wrap;
+    settings.methodchain = vscodeConfig.methodchain;
+    settings.ternaryline = vscodeConfig.ternaryLine;
+
+    output = prettydiff.mode(settings);
+
+    result.push(vscode.TextEdit.replace(range, output));
     return result;
 };
 
@@ -112,19 +117,7 @@ function activate(context) {
                             options,
                             token
                         ) {
-                            let end = range.end;
-                            if (end.character === 0) {
-                                end = end.translate(-1, Number.MAX_VALUE);
-                            } else {
-                                end = end.translate(0, Number.MAX_VALUE);
-                            }
-
-                            const rng = new vscode.Range(
-                                new vscode.Position(range.start.line, 0),
-                                end
-                            );
-
-                            return prettyDiff(document, rng, options);
+                            return prettyDiff(document, range, options);
                         }
                     }
                 )

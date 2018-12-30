@@ -1,9 +1,8 @@
 {
     "name": "twig-language-2",
     "displayName": "Twig Language 2",
-    "description":
-        "Snippets, Syntax Highlighting, Hover, and Formatting for Twig",
-    "version": "0.3.2",
+    "description": "Snippets, Syntax Highlighting, Hover, and Formatting for Twig",
+    "version": "0.4.0",
     "publisher": "mblode",
     "author": {
         "name": "Matthew Blode",
@@ -20,18 +19,36 @@
     },
     "icon": "images/icon.png",
     "engines": {
-        "vscode": "^1.17.0"
+        "vscode": "^1.30.0"
     },
-    "categories": ["Languages", "Snippets", "Other"],
-    "keywords": ["php", "twig", "snippets", "craft", "beautify"],
-    "activationEvents": ["onLanguage:twig"],
+    "categories": [
+        "Programming Languages",
+        "Snippets",
+        "Other"
+    ],
+    "keywords": [
+        "php",
+        "twig",
+        "snippets",
+        "craft",
+        "beautify"
+    ],
+    "activationEvents": [
+        "onLanguage:twig"
+    ],
     "main": "./src/extension",
     "contributes": {
         "languages": [
             {
                 "id": "twig",
-                "aliases": ["HTML (Twig)", "twig"],
-                "extensions": [".twig", ".html.twig"],
+                "aliases": [
+                    "HTML (Twig)",
+                    "twig"
+                ],
+                "extensions": [
+                    ".twig",
+                    ".html.twig"
+                ],
                 "configuration": "./src/languages/twig.configuration.json"
             }
         ],
@@ -60,46 +77,46 @@
                 "twig-language-2.formatting": {
                     "type": "boolean",
                     "default": true,
-                    "description":
-                        "Whether to enable/disable Twig PrettyDiff formatting."
+                    "description": "Whether to enable/disable Twig PrettyDiff formatting."
                 },
                 "twig-language-2.tabSize": {
                     "type": "integer",
                     "default": 4,
-                    "description":
-                        "Stores the number of times the inchar value must repeat to comprise a single indentation."
+                    "description": "Stores the number of times the inchar value must repeat to comprise a single indentation."
                 },
                 "twig-language-2.newline": {
                     "type": "boolean",
                     "default": true,
-                    "description":
-                        "Whether to insert an empty line at the end of output."
+                    "description": "Whether to insert an empty line at the end of output."
                 },
                 "twig-language-2.objSort": {
                     "type": "string",
-                    "enum": ["all", "none"],
+                    "enum": [
+                        "all",
+                        "none"
+                    ],
                     "default": "none",
-                    "description":
-                        "Sorts properties of objects attributs in HTML."
+                    "description": "Sorts properties of objects attributs in HTML."
                 },
                 "twig-language-2.wrap": {
                     "type": "integer",
                     "default": 0,
-                    "description":
-                        "How many columns wide text content may be before wrapping onto a new line. The value 0 disables text wrapping."
+                    "description": "How many columns wide text content may be before wrapping onto a new line. The value 0 disables text wrapping."
                 },
                 "twig-language-2.methodchain": {
                     "type": "string",
-                    "enum": ["chain", "indent", "none"],
+                    "enum": [
+                        "chain",
+                        "indent",
+                        "none"
+                    ],
                     "default": "none",
-                    "description":
-                        "Whether consecutive methods should be continuously chained onto a single line of code."
+                    "description": "Whether consecutive methods should be continuously chained onto a single line of code."
                 },
                 "twig-language-2.ternaryLine": {
                     "type": "boolean",
                     "default": true,
-                    "description":
-                        "Whether to keep ? and : operators of ternary statements on one line of code."
+                    "description": "Whether to keep ? and : operators of ternary statements on one line of code."
                 }
             }
         }
@@ -108,14 +125,14 @@
         "hoverProvider": "true"
     },
     "devDependencies": {
-        "@types/node": "*",
-        "babel-eslint": "7",
-        "eslint": "3.x",
+        "@types/mocha": "^2.2.42",
+        "@types/node": "^8.10.25",
+        "eslint": "^4.11.0",
         "eslint-config-prettier": "^2.7.0",
         "typescript": "^2.6.1",
-        "vscode": "^1.1.6"
+        "vscode": "^1.1.21"
     },
     "dependencies": {
-        "prettydiff2": "^2.2.7"
+        "prettydiff": "^100.0.0"
     }
 }
