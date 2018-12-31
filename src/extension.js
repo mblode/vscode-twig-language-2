@@ -30,11 +30,11 @@ const prettyDiff = (document, range, options) => {
     settings.lexer = "markup";
     settings.mode = "beautify";
     settings.source = content;
-    settings.newline = twigConfig.newLine;
-    settings.objsort = twigConfig.methodChain;
+    settings.new_line = twigConfig.newLine;
+    settings.object_sort = twigConfig.objSort;
     settings.wrap = twigConfig.wrap;
-    settings.methodchain = twigConfig.methodchain;
-    settings.ternaryline = twigConfig.ternaryLine;
+    settings.method_chain = twigConfig.methodchain;
+    settings.ternary_line = twigConfig.ternaryLine;
 
     if (twigConfig.tabSize == 0) {
         settings.indent_size = vscode.workspace.getConfiguration().get('editor.tabSize');
