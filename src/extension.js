@@ -122,7 +122,12 @@ function activate(context) {
                             options,
                             token
                         ) {
-                            return prettyDiff(document, range, options);
+                            let end = range.end;
+                            if (end.character === 0) end = end.translate(-1, Number.MAX_VALUE);
+                            else end = end.translate(0, Number.MAX_VALUE);
+                            const rng = new vscode.Range(new vscode.Position(range.start.line, 0), end);
+
+                            return prettyDiff(document, rng, options);
                         }
                     }
                 )
