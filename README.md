@@ -12,6 +12,8 @@
 
 ## What has changed since version 1?
 
+This extension does **not** have HTML Intellisense. If you need HTML Intellisense (which can be quite useful), please download my other Twig Language extension: https://github.com/mblode/vscode-twig-language.
+
 I have created a new extension to fix the issues that I (and all of you) were having with file association, commenting and VS Code UI issues.
 
 Simply add these lines to your VS Code settings to get emmet working and also to associate HTML files as twig syntax.
