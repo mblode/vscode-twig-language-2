@@ -1398,10 +1398,10 @@ os-tmpdir@~1.0.2:
   resolved "https://registry.yarnpkg.com/os-tmpdir/-/os-tmpdir-1.0.2.tgz#bbe67406c79aa85c5cfec766fe5734555dfa1274"
   integrity sha1-u+Z0BseaqFxc/sdm/lc0VV36EnQ=
 
-parse-framework@^2.4.11:
-  version "2.4.11"
-  resolved "https://registry.yarnpkg.com/parse-framework/-/parse-framework-2.4.11.tgz#605dc906e51c585e3decabec7a123513c90e1726"
-  integrity sha512-9B3NBfDlQo/CoFYF2YzmF8z+7ekdz3AqlXhWuZ3a070iqDL+T/ga9TPWHDOoTgK2s5bm+q6URnGF/cSGUbkdGA==
+parse-framework@^2.4.18:
+  version "2.4.18"
+  resolved "https://registry.yarnpkg.com/parse-framework/-/parse-framework-2.4.18.tgz#89a5d26cb378f9711291983831f68c5429dfa357"
+  integrity sha512-1SRhh9VP1BESvogw4UKsNVyDSndRH4pxmtTgbifzsgjqL5cB7JjpRJUSR10QIvgJZaSQnGgXHNl870YHrgZuxw==
   dependencies:
     "@types/node" "^10.12.15"
 
@@ -1459,13 +1459,13 @@ prelude-ls@~1.1.2:
   integrity sha1-IZMqVJ9eUv/ZqCf1cOBL5iqX2lQ=
 
 prettydiff@^100.0.0:
-  version "100.0.2"
-  resolved "https://registry.yarnpkg.com/prettydiff/-/prettydiff-100.0.2.tgz#19f102e5fd4d755fbad3dbedf92635bcdd1dd089"
-  integrity sha512-h5p7dbtN1nS+FFd9PqY6dBA1ErE5m/4dZ7cp7P9xUSJldR6BBUQN/3/utjGwEEQxUGArsg5Hsb7a/rbC2bJ1dQ==
+  version "100.1.3"
+  resolved "https://registry.yarnpkg.com/prettydiff/-/prettydiff-100.1.3.tgz#e0266c2c30b5212b1b902c74a20e99a6bb9877cb"
+  integrity sha512-A/Xq/HIaDahCHcR463cX5/iovaCMdq9spNujCtSvCDFJOPhHrdeFLYpThviLov8JDhZJzkCQEHCOGZ5ABfSx0Q==
   dependencies:
     "@types/node" "^10.12.18"
     file-saver "^1.3.8"
-    parse-framework "^2.4.11"
+    parse-framework "^2.4.18"
 
 process-nextick-args@^2.0.0, process-nextick-args@~2.0.0:
   version "2.0.0"

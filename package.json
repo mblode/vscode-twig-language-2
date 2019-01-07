@@ -91,7 +91,7 @@
                 },
                 "twig-language-2.objSort": {
                     "type": "boolean",
-					"default": false,
+                    "default": false,
                     "description": "Sorts properties of objects attributs in HTML."
                 },
                 "twig-language-2.wrap": {
@@ -101,12 +101,12 @@
                 },
                 "twig-language-2.methodchain": {
                     "type": "integer",
-					"default": 0,
+                    "default": 0,
                     "description": "Whether consecutive methods should be continuously chained onto a single line of code."
                 },
                 "twig-language-2.ternaryLine": {
                     "type": "boolean",
-					"default": true,
+                    "default": true,
                     "description": "Whether to keep ? and : operators of ternary statements on one line of code."
                 }
             }
