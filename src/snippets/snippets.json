@@ -2,14 +2,14 @@
     "asset": {
         "prefix": "asset",
         "body":
-            "{% set asset = ${1:entry.assetFieldHandle}.first() %}\n\n{% if asset %}\n\t<img src=\"{{ asset.getUrl(\"${2:thumb}\") }}\" width=\"{{ asset.getWidth(\"${2:thumb}\") }}\" height=\"{{ asset.getHeight(\"${2:thumb}\") }}\" alt=\"{{ asset.title }}\">\n{% endif %}",
+            "{% set asset = ${1:entry.assetFieldHandle}.one() %}\n\n{% if asset %}\n\t<img src=\"{{ asset.getUrl(\"${2:thumb}\") }}\" width=\"{{ asset.getWidth(\"${2:thumb}\") }}\" height=\"{{ asset.getHeight(\"${2:thumb}\") }}\" alt=\"{{ asset.title }}\">\n{% endif %}",
         "description": "asset",
         "scope": "text.html.twig"
     },
     "assets": {
         "prefix": "assets",
         "body":
-            "{% for image in craft.assets.\n\t.sourceId(\"${1:1}\")\n\t.kind(\"${2:image}\")\n\t.limit(${3:10})\n}) %}\n\t<img src=\"{{ image.url${4:(\"${5:thumb}\")} }}\" width=\"${6:200}\" height=\"${7:200}\" alt=\"{{ image.title }}\">\n{% endfor %}\n$0",
+            "{% for image in craft.assets.\n\t.sourceId(\"${1:1}\")\n\t.kind(\"${2:image}\")\n\t.limit(${3:10})\n}).all() %}\n\t<img src=\"{{ image.url${4:(\"${5:thumb}\")} }}\" width=\"${6:200}\" height=\"${7:200}\" alt=\"{{ image.title }}\">\n{% endfor %}\n$0",
         "description": "craft.assets",
         "scope": "text.html.twig"
     },
@@ -64,14 +64,14 @@
     "formlogin": {
         "prefix": "formlogin",
         "body":
-            "<form method=\"post\" accept-charset=\"UTF-8\">\n\t{{ getCsrfInput() }}\n\t<input type=\"hidden\" name=\"action\" value=\"users/login\">\n\n\t<h3><label for=\"loginName\">Username or email</label></h3>\n\t<input id=\"loginName\" type=\"text\" name=\"loginName\"\n\t\tvalue=\"{{ craft.session.rememberedUsername }}\">\n\n\t<h3><label for=\"password\">Password</label></h3>\n\t<input id=\"password\" type=\"password\" name=\"password\">\n\n\t<label>\n\t\t<input type=\"checkbox\" name=\"rememberMe\" value=\"1\">\n\t\tRemember me\n\t</label>\n\n\t<input type=\"submit\" value=\"Login\">\n\n\t{% if errorMessage is defined %}\n\t\t<p>{{ errorMessage }}</p>\n\t{% endif %}\n</form>\n\n<p><a href=\"{{ url(\"forgotpassword\") }}\">Forget your password?</a></p>",
+            "<form method=\"post\" accept-charset=\"UTF-8\">\n\t{{ csrfInput() }}\n\t<input type=\"hidden\" name=\"action\" value=\"users/login\">\n\n\t<h3><label for=\"loginName\">Username or email</label></h3>\n\t<input id=\"loginName\" type=\"text\" name=\"loginName\"\n\t\tvalue=\"{{ craft.app.user.rememberedUsername }}\">\n\n\t<h3><label for=\"password\">Password</label></h3>\n\t<input id=\"password\" type=\"password\" name=\"password\">\n\n\t<label>\n\t\t<input type=\"checkbox\" name=\"rememberMe\" value=\"1\">\n\t\tRemember me\n\t</label>\n\n\t<input type=\"submit\" value=\"Login\">\n\n\t{% if errorMessage is defined %}\n\t\t<p>{{ errorMessage }}</p>\n\t{% endif %}\n</form>\n\n<p><a href=\"{{ url(\"forgotpassword\") }}\">Forgot your password?</a></p>",
         "description": "craft.user - example login form",
         "scope": "text.html.twig"
     },
     "formuserprofile": {
         "prefix": "formuserprofile",
         "body":
-            "<form method=\"post\" accept-charset=\"UTF-8\">\n\t{{ getCsrfInput() }}\n\t<input type=\"hidden\" name=\"action\" value=\"users/saveUser\">\n\t<input type=\"hidden\" name=\"redirect\" value=\"users/{{ currentUser.username }}\">\n\t<input type=\"hidden\" name=\"userId\" value=\"{{ currentUser.id }}\">\n\n\t<label for=\"location\">Location</label>\n\t<input type=\"text\" id=\"location\" name=\"fields[location]\" value=\"{{ currentUser.location }}\">\n\n\t<label for=\"bio\">Bio</label>\n\t<textarea id=\"bio\" name=\"fields[bio]\">{{ currentUser.bio }}</textarea>\n\n\t<input type=\"submit\" value=\"Save Profile\">\n</form>",
+            "<form method=\"post\" accept-charset=\"UTF-8\">\n\t{{ csrfInput() }}\n\t<input type=\"hidden\" name=\"action\" value=\"users/save-user\">\n\t{{ redirectInput(\"users/\"~currentUser.username) }}\n\t<input type=\"hidden\" name=\"userId\" value=\"{{ currentUser.id }}\">\n\n\t<label for=\"location\">Location</label>\n\t<input type=\"text\" id=\"location\" name=\"fields[location]\" value=\"{{ currentUser.location }}\">\n\n\t<label for=\"bio\">Bio</label>\n\t<textarea id=\"bio\" name=\"fields[bio]\">{{ currentUser.bio }}</textarea>\n\n\t<input type=\"submit\" value=\"Save Profile\">\n</form>",
         "description": "craft.user - example user profile form",
         "scope": "text.html.twig"
     },
@@ -79,21 +79,21 @@
     "formuserregistration": {
         "prefix": "formuserregistration",
         "body":
-            "<form method=\"post\" accept-charset=\"UTF-8\">\n\t{{ getCsrfInput() }}\n\t<input type=\"hidden\" name=\"action\" value=\"users/saveUser\">\n\t<input type=\"hidden\" name=\"redirect\" value=\"\">\n\n\t{% macro errorList(errors) %}\n\t\t{% if errors %}\n\t\t\t<ul class=\"errors\">\n\t\t\t\t{% for error in errors %}\n\t\t\t\t\t<li>{{ error }}</li>\n\t\t\t\t{% endfor %}\n\t\t\t</ul>\n\t\t{% endif %}\n\t{% endmacro %}\n\n\t{% from _self import errorList %}\n\n\t<h3><label for=\"username\">Username</label></h3>\n\t<input id=\"username\" type=\"text\" name=\"username\"\n\t\t{%- if account is defined %} value=\"{{ account.username }}\"{% endif -%}>\n\n\t{% if account is defined %}\n\t\t{{ errorList(account.getErrors(\"username\")) }}\n\t{% endif %}\n\n\t<h3><label for=\"email\">Email</label></h3>\n\t<input id=\"email\" type=\"text\" name=\"email\"\n\t\t{%- if account is defined %} value=\"{{ account.email }}\"{% endif %}>\n\n\t{% if account is defined %}\n\t\t{{ errorList(account.getErrors(\"email\")) }}\n\t{% endif %}\n\n\t<h3><label for=\"password\">Password</label></h3>\n\t<input id=\"password\" type=\"password\" name=\"password\">\n\n\t{% if account is defined %}\n\t\t{{ errorList(account.getErrors(\"password\")) }}\n\t{% endif %}\n\n\t<input type=\"submit\" value=\"Register\">\n</form>",
+            "<form method=\"post\" accept-charset=\"UTF-8\">\n\t{{ csrfInput() }}\n\t<input type=\"hidden\" name=\"action\" value=\"users/save-user\">\n\t{{ redirectInput(\"\") }}\n\n\t{% macro errorList(errors) %}\n\t\t{% if errors %}\n\t\t\t<ul class=\"errors\">\n\t\t\t\t{% for error in errors %}\n\t\t\t\t\t<li>{{ error }}</li>\n\t\t\t\t{% endfor %}\n\t\t\t</ul>\n\t\t{% endif %}\n\t{% endmacro %}\n\n\t{% from _self import errorList %}\n\n\t<h3><label for=\"username\">Username</label></h3>\n\t<input id=\"username\" type=\"text\" name=\"username\"\n\t\t{%- if user is defined %} value=\"{{ user.username }}\"{% endif -%}>\n\n\t{% if user is defined %}\n\t\t{{ errorList(user.getErrors(\"username\")) }}\n\t{% endif %}\n\n\t<h3><label for=\"email\">Email</label></h3>\n\t<input id=\"email\" type=\"text\" name=\"email\"\n\t\t{%- if user is defined %} value=\"{{ user.email }}\"{% endif %}>\n\n\t{% if user is defined %}\n\t\t{{ errorList(user.getErrors(\"email\")) }}\n\t{% endif %}\n\n\t<h3><label for=\"password\">Password</label></h3>\n\t<input id=\"password\" type=\"password\" name=\"password\">\n\n\t{% if user is defined %}\n\t\t{{ errorList(user.getErrors(\"password\")) }}\n\t{% endif %}\n\n\t<input type=\"submit\" value=\"Register\">\n</form>",
         "description": "craft.user - example user registration form",
         "scope": "text.html.twig"
     },
     "formforgotpassword": {
         "prefix": "formforgotpassword",
         "body":
-            "<form method=\"post\" accept-charset=\"UTF-8\">\n\t{{ getCsrfInput() }}\n\t<input type=\"hidden\" name=\"action\" value=\"users/forgotPassword\">\n\t<input type=\"hidden\" name=\"redirect\" value=\"\">\n\n\t<h3><label for=\"loginName\">Username or email</label></h3>\n\t<input id=\"loginName\" type=\"text\" name=\"loginName\"\n\t\tvalue=\"{% if loginName is defined %}{{ loginName }}{% else %}{{ craft.session.rememberedUsername }}{% endif %}\">\n\n\t{% if errors is defined %}\n\t\t<ul class=\"errors\">\n\t\t\t{% for error in errors %}\n\t\t\t\t<li>{{ error }}</li>\n\t\t\t{% endfor %}\n\t\t</ul>\n\t{% endif %}\n\n\t<input type=\"submit\" value=\"Submit\">\n</form>",
+            "<form method=\"post\" accept-charset=\"UTF-8\">\n\t{{ csrfInput() }}\n\t<input type=\"hidden\" name=\"action\" value=\"users/send-password-reset-email\">\n\t{{ redirectInput(\"\") }}\n\n\t<h3><label for=\"loginName\">Username or email</label></h3>\n\t<input id=\"loginName\" type=\"text\" name=\"loginName\"\n\t\tvalue=\"{% if loginName is defined %}{{ loginName }}{% else %}{{ craft.app.user.rememberedUsername }}{% endif %}\">\n\n\t{% if errors is defined %}\n\t\t<ul class=\"errors\">\n\t\t\t{% for error in errors %}\n\t\t\t\t<li>{{ error }}</li>\n\t\t\t{% endfor %}\n\t\t</ul>\n\t{% endif %}\n\n\t<input type=\"submit\" value=\"Submit\">\n</form>",
         "description": "craft.user - example forgot password form",
         "scope": "text.html.twig"
     },
     "formsetpassword": {
         "prefix": "formsetpassword",
         "body":
-            "<form method=\"post\" accept-charset=\"UTF-8\">\n\t{{ getCsrfInput() }}\n\t<input type=\"hidden\" name=\"action\" value=\"users/setPassword\">\n\t<input type=\"hidden\" name=\"code\" value=\"{{ code }}\">\n\t<input type=\"hidden\" name=\"id\" value=\"{{ id }}\">\n\n\t<h3><label for=\"newPassword\">New Password</label></h3>\n\t<input id=\"newPassword\" type=\"password\" name=\"newPassword\">\n\t{% if errors is defined %}\n\t\t<ul class=\"errors\">\n\t\t\t{% for error in errors %}\n\t\t\t\t<li>{{ error }}</li>\n\t\t\t{% endfor %}\n\t\t</ul>\n\t{% endif %}\n\n\t<input type=\"submit\" value=\"Submit\">\n</form>",
+            "<form method=\"post\" accept-charset=\"UTF-8\">\n\t{{ csrfInput() }}\n\t<input type=\"hidden\" name=\"action\" value=\"users/set-password\">\n\t<input type=\"hidden\" name=\"code\" value=\"{{ code }}\">\n\t<input type=\"hidden\" name=\"id\" value=\"{{ id }}\">\n\n\t<h3><label for=\"newPassword\">New Password</label></h3>\n\t<input id=\"newPassword\" type=\"password\" name=\"newPassword\">\n\t{% if errors is defined %}\n\t\t<ul class=\"errors\">\n\t\t\t{% for error in errors %}\n\t\t\t\t<li>{{ error }}</li>\n\t\t\t{% endfor %}\n\t\t</ul>\n\t{% endif %}\n\n\t<input type=\"submit\" value=\"Submit\">\n</form>",
         "description": "craft.user - example set password form",
         "scope": "text.html.twig"
     },
@@ -107,63 +107,63 @@
     "formsearchresults": {
         "prefix": "formsearchresults",
         "body":
-            "<h1>Search Results</h1>\n\n{% set query = craft.request.getParam(\"q\") %}\n{% set entries = craft.entries.search(query).order(\"score\") %}\n\n{% if entries|length %}\n\t<p>{{ entries|length }} results:</p>\n\n\t<ul>\n\t\t{% for entry in entries %}\n\t\t\t<li><a href=\"{{ entry.url }}\">{{ entry.title }}</a></li>\n\t\t{% endfor %}\n\t</ul>\n{% else %}\n\t<p>Your search for “{{ query }}” didn’t return any results.</p>\n{% endif %}",
+            "<h1>Search Results</h1>\n\n{% set query = craft.app.request.getParam(\"q\") %}\n{% set entries = craft.entries.search(query).orderBy(\"score\").all() %}\n\n{% if entries | length %}\n\t<p>{{ entries | length }} results:</p>\n\n\t<ul>\n\t\t{% for entry in entries %}\n\t\t\t<li><a href=\"{{ entry.url }}\">{{ entry.title }}</a></li>\n\t\t{% endfor %}\n\t</ul>\n{% else %}\n\t<p>Your search for “{{ query }}” didn’t return any results.</p>\n{% endif %}",
         "description": "craft.entries - example search results",
         "scope": "text.html.twig"
     },
     "rss": {
         "prefix": "rss",
         "body":
-            "<?xml version=\"1.0\"?>\n<rss version=\"2.0\">\n\t<channel>\n\t\t<title>{{ siteName }}</title>\n\t\t<link>{{ siteUrl }}</link>\n\t\t<atom:link href=\"{{ craft.request.url }}\" rel=\"self\" type=\"application/rss+xml\" />\n\t\t<description>{{ globals.siteDescription }}</description>\n\t\t<language>en-us</language>\n\t\t<pubDate>{{ now.rss }}</pubDate>\n\t\t<lastBuildDate>{{ now.rss }}</lastBuildDate>\n\n\t\t{% for entry in craft.entries.find() %}\n\t\t\t<item>\n\t\t\t\t<title>{{ entry.title }}</title>\n\t\t\t\t<link>{{ entry.url }}</link>\n\t\t\t\t<pubDate>{{ entry.postDate.rss }}</pubDate>\n\t\t\t\t<author>{{ entry.author }}</author>\n\t\t\t\t<guid>{{ entry.url }}</guid>\n\t\t\t\t<description><![CDATA[\n\t\t\t\t\t{{ entry.body }}\n\t\t\t\t]]></description>\n\t\t\t</item>\n\t\t{% endfor %}\n\t</channel>\n</rss>",
+            "<?xml version=\"1.0\"?>\n<rss version=\"2.0\" xmlns:atom=\"http://www.w3.org/2005/Atom\">\n\t<channel>\n\t\t<title>{{ siteName }}</title>\n\t\t<link>{{ siteUrl }}</link>\n\t\t<atom:link href=\"{{ craft.app.request.absoluteUrl }}\" rel=\"self\" type=\"application/rss+xml\" />\n\t\t<description>{{ globals.siteDescription }}</description>\n\t\t<language>en-us</language>\n\t\t<pubDate>{{ now | rss }}</pubDate>\n\t\t<lastBuildDate>{{ now | rss }}</lastBuildDate>\n\n\t\t{% for entry in craft.entries.all() %}\n\t\t\t<item>\n\t\t\t\t<title>{{ entry.title }}</title>\n\t\t\t\t<link>{{ entry.url }}</link>\n\t\t\t\t<pubDate>{{ entry.postDate | rss }}</pubDate>\n\t\t\t\t<author>{{ entry.author }}</author>\n\t\t\t\t<guid>{{ entry.url }}</guid>\n\t\t\t\t<description><![CDATA[\n\t\t\t\t\t{{ entry.body }}\n\t\t\t\t]]></description>\n\t\t\t</item>\n\t\t{% endfor %}\n\t</channel>\n</rss>",
         "description": "craft.entries - example rss feed",
         "scope": "text.html.twig"
     },
     "assetso": {
         "prefix": "assetso",
         "body":
-            "{% set assets = craft.assets({\n\tsourceId: \"${1:1}\",\n\tkind:     \"${2:image}\",\n\tlimit:    ${3:10}\n}) %}\n\n{% for image in assets %}\n\t<img src=\"{{ image.url${4:(\"${5:thumb}\")} }}\" width=\"${6:200}\" height=\"${7:200}\" alt=\"{{ image.title }}\">\n{% endfor %}\n$0",
+            "{% set assets = craft.assets({\n\tsourceId: \"${1:1}\",\n\tkind: \"${2:image}\",\n\tlimit: ${3:10}\n}).all() %}\n\n{% for image in assets %}\n\t<img src=\"{{ image.url${4:(\"${5:thumb}\")} }}\" width=\"${6:200}\" height=\"${7:200}\" alt=\"{{ image.title }}\">\n{% endfor %}\n$0",
         "description": "craft.assets - object syntax",
         "scope": "text.html.twig"
     },
     "categorieso": {
         "prefix": "categorieso",
         "body":
-            "{% set categories = craft.categories({\n\tgroup: \"${1:categoryGroupHandle}\",\n\tlimit: \"${2:11}\"\n}) %}\n\n<ul>\n\t{% nav category in categories %}\n\t\t<li>\n\t\t\t<a href=\"{{ category.url }}\">{{ category.title }}</a>\n\t\t\t{% ifchildren %}\n\t\t\t\t<ul>\n\t\t\t\t\t{% children %}\n\t\t\t\t</ul>\n\t\t\t{% endifchildren %}\n\t\t</li>\n\t{% endnav %}\n</ul>",
+            "{% set categories = craft.categories({\n\tgroup: \"${1:categoryGroupHandle}\",\n\tlimit: \"${2:11}\"\n}).all() %}\n\n<ul>\n\t{% nav category in categories %}\n\t\t<li>\n\t\t\t<a href=\"{{ category.url }}\">{{ category.title }}</a>\n\t\t\t{% ifchildren %}\n\t\t\t\t<ul>\n\t\t\t\t\t{% children %}\n\t\t\t\t</ul>\n\t\t\t{% endifchildren %}\n\t\t</li>\n\t{% endnav %}\n</ul>",
         "description": "craft.categories - object syntax",
         "scope": "text.html.twig"
     },
     "categories": {
         "prefix": "categories",
         "body":
-            "<ul>\n\t{% nav category in craft.categories\n\t\t.group(\"${1:categoryGroupHandle}\")\n\t\t.limit(${2:11})\n\t\t%}\n\t\t<li>\n\t\t\t<a href=\"{{ category.url }}\">{{ category.title }}</a>\n\t\t\t{% ifchildren %}\n\t\t\t\t<ul>\n\t\t\t\t\t{% children %}\n\t\t\t\t</ul>\n\t\t\t{% endifchildren %}\n\t\t</li>\n\t{% endnav %}\n</ul>",
+            "<ul>\n\t{% nav category in craft.categories\n\t\t.group(\"${1:categoryGroupHandle}\")\n\t\t.limit(${2:11})\n\t\t.all()\n\t%}\n\t\t<li>\n\t\t\t<a href=\"{{ category.url }}\">{{ category.title }}</a>\n\t\t\t{% ifchildren %}\n\t\t\t\t<ul>\n\t\t\t\t\t{% children %}\n\t\t\t\t</ul>\n\t\t\t{% endifchildren %}\n\t\t</li>\n\t{% endnav %}\n</ul>",
         "description": "craft.categories",
         "scope": "text.html.twig"
     },
     "entrieso": {
         "prefix": "entrieso",
         "body":
-            "{% set entries = craft.entries({\n\tsection: \"${1:sectionName}\",\n\tlimit:   \"${2:10}\"\n}) %}\n\n{% for entry in entries %}\n\t<a href=\"{{ entry.url }}\">{{ entry.title }}</a>\n{% endfor %}\n$0",
+            "{% set entries = craft.entries({\n\tsection: \"${1:sectionName}\",\n\tlimit: \"${2:10}\"\n}).all() %}\n\n{% for entry in entries %}\n\t<a href=\"{{ entry.url }}\">{{ entry.title }}</a>\n{% endfor %}\n$0",
         "description": "craft.entries - object syntax",
         "scope": "text.html.twig"
     },
     "entries": {
         "prefix": "entries",
         "body":
-            "{% for entry in craft.entries\n\t.section(\"${1:sectionName}\")\n\t.limit(${2:10})\n\t%}\n\t<a href=\"{{ entry.url }}\">{{ entry.title }}</a>\n{% endfor %}\n$0",
+            "{% for entry in craft.entries\n\t.section(\"${1:sectionName}\")\n\t.limit(${2:10})\n\t.all()\n%}\n\t<a href=\"{{ entry.url }}\">{{ entry.title }}</a>\n{% endfor %}\n$0",
         "description": "craft.entries",
         "scope": "text.html.twig"
     },
     "feed": {
         "prefix": "feed",
         "body":
-            "{% set feedUrl = \"${1:http://feeds.feedburner.com/blogandtonic}\" %}\n{% set limit = ${2:10} %}\n{% set items = craft.feeds.getFeedItems(feedUrl, limit) %}\n\n{% for item in items %}\n\t<article>\n\t\t<h3><a href=\"{{ item.permalink }}\">{{ item.title }}</a></h3>\n\t\t<p class=\"author\">{{ item.authors[0].name }}</p>\n\t\t<p class=\"date\">{{ item.date }}</p>\n\n\t\t{{ item.summary }}\n\t</article>\n{% endfor %}",
+            "{% set feedUrl = \"${1:http://feeds.feedburner.com/blogandtonic}\" %}\n{% set limit = ${2:10} %}\n{% set items = craft.feeds.getFeedItems(feedUrl, limit).all() %}\n\n{% for item in items %}\n\t<article>\n\t\t<h3><a href=\"{{ item.permalink }}\">{{ item.title }}</a></h3>\n\t\t<p class=\"author\">{{ item.authors[0].name }}</p>\n\t\t<p class=\"date\">{{ item.date }}</p>\n\n\t\t{{ item.summary }}\n\t</article>\n{% endfor %}",
         "description": "feed",
         "scope": "text.html.twig"
     },
     "t": {
         "prefix": "t",
-        "body": "{{ $1|t }}$0",
-        "description": "translate with |t"
+        "body": "{{ $1 | t }}$0",
+        "description": "translate with | t"
     },
     "replace": {
         "prefix": "replace",
@@ -184,34 +184,34 @@
     "tagso": {
         "prefix": "tagso",
         "body":
-            "{% set tags = craft.tags({\n\tgroup: \"${1:tagGroupHandle}\"\n}) %}\n\n<ul>\n{% for tag in tags %}\n\t<li>{{ tag }}</a></li>\n{% endfor %}\n</ul>\n$0",
+            "{% set tags = craft.tags({\n\tgroup: \"${1:tagGroupHandle}\"\n}).all() %}\n\n<ul>\n\t{% for tag in tags %}\n\t\t<li>{{ tag }}</a></li>\n\t{% endfor %}\n</ul>\n$0",
         "description": "craft.tags - object syntax",
         "scope": "text.html.twig"
     },
     "tags": {
         "prefix": "tags",
         "body":
-            "<ul>\n{% for tag in craft.tags\n\t.group(\"${1:tagGroupHandle}\")\n\t%}\n\t<li>{{ tag }}</li>\n{% endfor %}\n</ul>\n$0",
+            "<ul>\n\t{% for tag in craft.tags.group(\"${1:tagGroupHandle}\").all() %}\n\t\t<li>{{ tag }}</li>\n\t{% endfor %}\n</ul>\n$0",
         "description": "craft.tags",
         "scope": "text.html.twig"
     },
     "userso": {
         "prefix": "userso",
         "body":
-            "{% set users = craft.users({\n\tgroup: \"${1:userGroupHandle}\"\n}) %}\n\n{% for user in users %}\n\t{{ user.firstName }} {{ user.lastName }}\n{% endfor %}\n$0",
+            "{% set users = craft.users({\n\tgroup: \"${1:userGroupHandle}\"\n}).all() %}\n\n{% for user in users %}\n\t{{ user.firstName }} {{ user.lastName }}\n{% endfor %}\n$0",
         "description": "craft.users - object syntax",
         "scope": "text.html.twig"
     },
     "users": {
         "prefix": "users",
         "body":
-            "{% for user in craft.users\n\t.group(\"${1:userGroupHandle}\")\n\t%}\n\t{{ user.firstName }} {{ user.lastName }}\n{% endfor %}\n$0",
+            "{% for user in craft.users.group(\"${1:userGroupHandle}\").all() %}\n\t{{ user.firstName }} {{ user.lastName }}\n{% endfor %}\n$0",
         "description": "craft.users",
         "scope": "text.html.twig"
     },
     "csrf": {
         "prefix": "csrf",
-        "body": "{{ getCsrfInput() }}\n$0",
+        "body": "{{ csrfInput() }}\n$0",
         "description": "csrf",
         "scope": "text.html.twig"
     },
@@ -247,7 +247,7 @@
     },
     "endautoescape": {
         "prefix": "endautoescape",
-        "body": "endautoescape",
+        "body": "{% endautoescape %}$0",
         "description": "endautoescape",
         "scope": "text.html.twig"
     },
@@ -281,21 +281,10 @@
         "description": "endfor",
         "scope": "text.html.twig"
     },
-    "endfor1": {
-        "prefix": "endfor",
-        "body": "{% endfor %}$0",
-        "description": "text.html.twig"
-    },
     "endif": {
         "prefix": "endif",
         "body": "{% endif %}$0",
         "description": "endif",
-        "scope": "text.html.twig"
-    },
-    "endif1": {
-        "prefix": "endif",
-        "body": "{% endif %}$0",
-        "description": "else",
         "scope": "text.html.twig"
     },
     "endifchildren": {
@@ -304,22 +293,16 @@
         "description": "endifchildren",
         "scope": "text.html.twig"
     },
-    "endincludecss": {
-        "prefix": "endincludecss",
-        "body": "{% endincludecss %}$0",
-        "description": "endincludecss",
+    "endcss": {
+        "prefix": "endcss",
+        "body": "{% endcss %}$0",
+        "description": "endcss",
         "scope": "text.html.twig"
     },
-    "endincludehirescss": {
-        "prefix": "endincludehirescss",
-        "body": "{% endincludehirescss %}$0",
-        "description": "endincludehirescss",
-        "scope": "text.html.twig"
-    },
-    "endincludejs": {
-        "prefix": "endincludejs",
-        "body": "{% endincludejs %}$0",
-        "description": "endincludejs",
+    "endjs": {
+        "prefix": "endjs",
+        "body": "{% endjs %}$0",
+        "description": "endjs",
         "scope": "text.html.twig"
     },
     "endmacro": {
@@ -407,16 +390,16 @@
         "description": "from",
         "scope": "text.html.twig"
     },
-    "getfoothtml": {
-        "prefix": "getfoothtml",
-        "body": "{{ getFootHtml() }}\n$0",
-        "description": "getfoothtml",
+    "endbody": {
+        "prefix": "endbody",
+        "body": "{{ endBody() }}\n$0",
+        "description": "endBody",
         "scope": "text.html.twig"
     },
-    "getheadhtml": {
-        "prefix": "getheadhtml",
-        "body": "{{ getHeadHtml() }}\n$0",
-        "description": "getheadhtml",
+    "head": {
+        "prefix": "head",
+        "body": "{{ head() }}\n$0",
+        "description": "head",
         "scope": "text.html.twig"
     },
     "if": {
@@ -486,34 +469,28 @@
         "description": "include w/ params",
         "scope": "text.html.twig"
     },
-    "includecss": {
-        "prefix": "includecss",
-        "body": "{% includeCssFile \"${1:/resources/css/global.css}\" %}\n$0",
-        "description": "includeCssFile",
+    "css1": {
+        "prefix": "css",
+        "body": "{% do view.registerCssFile(\"${1:/resources/css/global.css}\") %}\n$0",
+        "description": "registerCssFile",
         "scope": "text.html.twig"
     },
-    "includecss1": {
-        "prefix": "includecss",
-        "body": "{% includehirescss %}\n\t$1\n{% endincludehirescss %}\n$0",
-        "description": "includeCssHiRes",
+    "js": {
+        "prefix": "js",
+        "body": "{% js %}\n\t$1\n{% endjs %}\n$0",
+        "description": "js",
         "scope": "text.html.twig"
     },
-    "includejs": {
-        "prefix": "includejs",
-        "body": "{% includejs %}\n\t$1\n{% endincludejs %}\n$0",
-        "description": "includeJs",
+    "js1": {
+        "prefix": "js",
+        "body": "{% do view.registerJsFile(\"${1:/resources/js/global.js}\") %}\n$0",
+        "description": "registerJsFile",
         "scope": "text.html.twig"
     },
-    "includejs1": {
-        "prefix": "includejs",
-        "body": "{% includeJsFile \"${1:/resources/js/global.js}\" %}\n$0",
-        "description": "includeJsFile",
-        "scope": "text.html.twig"
-    },
-    "includecss2": {
-        "prefix": "includecss",
-        "body": "{% includecss %}\n\t$1\n{% endincludecss %}\n$0",
-        "description": "includeCss",
+    "css": {
+        "prefix": "css",
+        "body": "{% css %}\n\t$1\n{% endcss %}\n$0",
+        "description": "css",
         "scope": "text.html.twig"
     },
     "macro": {
@@ -525,28 +502,28 @@
     "matrix": {
         "prefix": "matrix",
         "body":
-            "{% for block in ${1:entry.matrixFieldHandle} %}\n\n\t{% if block.type == \"${2:blockHandle}\" %}\n\t\t{{ block.${3:fieldHandle} }}\n\t{% endif %}\n\n\t{% if block.type == \"${4:blockHandle}\" %}\n\t\t{{ block.${5:fieldHandle} }}\n\t{% endif %}\n\n{% endfor %}\n$0",
+            "{% for block in ${1:entry.matrixFieldHandle}.all() %}\n\n\t{% if block.type == \"${2:blockHandle}\" %}\n\t\t{{ block.${3:fieldHandle} }}\n\t{% endif %}\n\n\t{% if block.type == \"${4:blockHandle}\" %}\n\t\t{{ block.${5:fieldHandle} }}\n\t{% endif %}\n\n{% endfor %}\n$0",
         "description": "matrix",
         "scope": "text.html.twig"
     },
     "matrixif": {
         "prefix": "matrixif",
         "body":
-            "{% for block in ${1:entry.matrixFieldHandle} %}\n\n\t{% if block.type == \"${2:blockHandle}\" %}\n\t\t{{ block.${3:fieldHandle} }}\n\t{% endif %}\n\n\t{% if block.type == \"${4:blockHandle}\" %}\n\t\t{{ block.${5:fieldHandle} }}\n\t{% endif %}\n\n{% endfor %}\n$0",
+            "{% for block in ${1:entry.matrixFieldHandle}.all() %}\n\n\t{% if block.type == \"${2:blockHandle}\" %}\n\t\t{{ block.${3:fieldHandle} }}\n\t{% endif %}\n\n\t{% if block.type == \"${4:blockHandle}\" %}\n\t\t{{ block.${5:fieldHandle} }}\n\t{% endif %}\n\n{% endfor %}\n$0",
         "description": "matrixif",
         "scope": "text.html.twig"
     },
     "matrixifelse": {
         "prefix": "matrixifelse",
         "body":
-            "{% for block in ${1:entry.matrixFieldHandle} %}\n\n\t{% if block.type == \"${2:blockHandle}\" %}\n\n\t\t{{ block.${3:fieldHandle} }}\n\n\t{% elseif block.type == \"${4:blockHandle}\" %}\n\n\t\t$0\n\t\n\t{% endif %}\n\n{% endfor %}",
+            "{% for block in ${1:entry.matrixFieldHandle}.all() %}\n\n\t{% if block.type == \"${2:blockHandle}\" %}\n\n\t\t{{ block.${3:fieldHandle} }}\n\n\t{% elseif block.type == \"${4:blockHandle}\" %}\n\n\t\t$0\n\t\n\t{% endif %}\n\n{% endfor %}",
         "description": "matrixifelse",
         "scope": "text.html.twig"
     },
     "matrixswitch": {
         "prefix": "matrixswitch",
         "body":
-            "{% for block in ${1:entry.matrixFieldHandle} %}\n\n\t{% switch block.type %}\n\n\t\t{% case \"${2:blockHandle}\" %}\n\n\t\t\t{{ block.${3:fieldHandle} }}\n\n\t\t{% case \"${4:blockHandle}\" %}\n\n\t\t\t$0\n\n\t{% endswitch %}\n\n{% endfor %}",
+            "{% for block in ${1:entry.matrixFieldHandle}.all() %}\n\n\t{% switch block.type %}\n\n\t\t{% case \"${2:blockHandle}\" %}\n\n\t\t\t{{ block.${3:fieldHandle} }}\n\n\t\t{% case \"${4:blockHandle}\" %}\n\n\t\t\t$0\n\n\t{% endswitch %}\n\n{% endfor %}",
         "description": "matrixswitch",
         "scope": "text.html.twig"
     },
@@ -571,14 +548,14 @@
     "paginate": {
         "prefix": "paginate",
         "body":
-            "{% paginate ${1:elements} as ${2:pageInfo}, ${3:name} %}\n\n{% for item in ${3:name} %}\n\t$0\n{% endfor %}\n\n{% if ${2:pageInfo}.prevUrl %}<a href=\"{{ ${2:pageInfo}.prevUrl }}\">Previous Page</a>{% endif %}\n{% if ${2:pageInfo}.nextUrl %}<a href=\"{{ ${2:pageInfo}.nextUrl }}\">Next Page</a>{% endif %}",
+            "{% paginate ${1:elements} as ${2:pageInfo}, ${3:pageEntries} %}\n\n{% for item in ${3:pageEntries} %}\n\t$0\n{% endfor %}\n\n{% if ${2:pageInfo}.prevUrl %}<a href=\"{{ ${2:pageInfo}.prevUrl }}\">Previous Page</a>{% endif %}\n{% if ${2:pageInfo}.nextUrl %}<a href=\"{{ ${2:pageInfo}.nextUrl }}\">Next Page</a>{% endif %}",
         "description": "paginate simple",
         "scope": "text.html.twig"
     },
     "paginate1": {
         "prefix": "paginate",
         "body":
-            "{# PAGINATION\n\t\t\nFor this pagination to work properly, we need to be sure to set\nthe paginateBase variable in the template we are including the \npagination in.\n\n{% set paginateBase = \"/blog/p\" %}\n#}\n\n{% if pageInfo.totalPages > 1 %}\n<ul>\n\t{% if pageInfo.currentPage != \"1\"  %}\n\t\t<li><a href=\"{{ paginateBase ~ \"1\" }}\">First Page</a></li>\n\t{% endif %}\n\n\t{% if pageInfo.prevUrl %}\n\t\t<li><a href=\"{{ pageInfo.prevUrl }}\">Previous Page</a></li>\n\t{% endif %}\n\n\t{% for pageNumber in 1..pageInfo.totalPages %}\n\t\t<li {% if pageInfo.currentPage == pageNumber %}class=\"active-page\"{% endif %}>\n\t\t\t<a href=\"{{ paginateBase ~ pageNumber }}\">{{ pageNumber }}</a>\n\t\t</li>\n\t{% endfor %}\n\n\t{% if pageInfo.nextUrl %}\n\t\t<li><a href=\"{{ pageInfo.nextUrl }}\">Next Page</a></li>\n\t{% endif %}\n\n\t{% if pageInfo.currentPage != pageInfo.total %}\n\t\t<li><a href=\"{{ paginateBase ~ pageInfo.total }}\">Last Page</a></li>\n\t{% endif %}\n</ul>\n{% endif %}\n$0",
+            "{# PAGINATION\n\t\t\nFor this pagination to work properly, we need to be sure to set\nthe paginateBase variable in the template we are including the \npagination in.\n\n{% set paginateBase = \"/blog/p\" %}\n#}\n\n{% if pageInfo.totalPages > 1 %}\n<ul>\n\t{% if pageInfo.currentPage != \"1\" %}\n\t\t<li><a href=\"{{ paginateBase ~ \"1\" }}\">First Page</a></li>\n\t{% endif %}\n\n\t{% if pageInfo.prevUrl %}\n\t\t<li><a href=\"{{ pageInfo.prevUrl }}\">Previous Page</a></li>\n\t{% endif %}\n\n\t{% for pageNumber in 1..pageInfo.totalPages %}\n\t\t<li {% if pageInfo.currentPage == pageNumber %}class=\"active-page\"{% endif %}>\n\t\t\t<a href=\"{{ paginateBase ~ pageNumber }}\">{{ pageNumber }}</a>\n\t\t</li>\n\t{% endfor %}\n\n\t{% if pageInfo.nextUrl %}\n\t\t<li><a href=\"{{ pageInfo.nextUrl }}\">Next Page</a></li>\n\t{% endif %}\n\n\t{% if pageInfo.currentPage != pageInfo.total %}\n\t\t<li><a href=\"{{ paginateBase ~ pageInfo.total }}\">Last Page</a></li>\n\t{% endif %}\n</ul>\n{% endif %}\n$0",
         "description": "paginate advanced",
         "scope": "text.html.twig"
     },
@@ -592,25 +569,25 @@
     "getparam": {
         "prefix": "getparam",
         "body":
-            "craft.request.getParam(${1:\"Query String or Post Variable Name\"})\n$0",
+            "craft.app.request.getParam(${1:\"Query String or Post Variable Name\"})\n$0",
         "description": "request getParam",
         "scope": "text.html.twig"
     },
-    "getpost": {
-        "prefix": "getpost",
-        "body": "craft.request.getPost(${1:\"postVariableName\"})\n$0",
-        "description": "request getPost",
+    "getbodyparam": {
+        "prefix": "getbodyparam",
+        "body": "craft.app.request.getBodyParam(${1:\"postVariableName\"})\n$0",
+        "description": "request getBodyParam",
         "scope": "text.html.twig"
     },
-    "getquery": {
-        "prefix": "getquery",
-        "body": "craft.request.getQuery(${1:\"queryStringName\"})\n$0",
-        "description": "request getQuery",
+    "getqueryparam": {
+        "prefix": "getqueryparam",
+        "body": "craft.app.request.getQueryParam(${1:\"queryStringName\"})\n$0",
+        "description": "request getQueryParam",
         "scope": "text.html.twig"
     },
     "getsegment": {
         "prefix": "getsegment",
-        "body": "craft.request.getSegment(${1:2})\n$0",
+        "body": "craft.app.request.getSegment(${1:2})\n$0",
         "description": "request getSegment",
         "scope": "text.html.twig"
     },
@@ -628,7 +605,7 @@
     },
     "round": {
         "prefix": "round",
-        "body": "round($1)$0",
+        "body": "{{ $1 | round(1, 'floor') }}$0",
         "description": "round",
         "scope": "text.html.twig"
     },

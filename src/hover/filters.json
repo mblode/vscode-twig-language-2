@@ -62,7 +62,7 @@
         "description":
             "filter formats a given string by replacing the placeholders (placeholders follows the sprintf notation)",
         "example":
-            "{% set foo = \"foo\" %}\n{{ \"I like %s and %s.\"|format(foo, \"bar\") }}\n\n{# outputs I like foo and bar #}"
+            "{% set foo = \"foo\" %}\n{{ \"I like %s and %s.\"| format(foo, \"bar\") }}\n\n{# outputs I like foo and bar #}"
     },
     "join": {
         "prefix": "join",
@@ -140,7 +140,7 @@
     },
     "round": {
         "prefix": "round",
-        "body": "round(${0}, '${floor}')",
+        "body": "${0} | round(1, '${floor}')",
         "text": "round",
         "description": "filter rounds a number to a given precision"
     },

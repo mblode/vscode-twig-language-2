@@ -47,7 +47,7 @@
         "description":
             "Filter sections allow you to apply regular Twig filters on a block of template data. Just wrap the code in the special filter section",
         "example":
-            "{% filter lower|escape %}\n    <strong>SOME TEXT</strong>\n{% endfilter %}\n\n{# outputs \"&lt;strong&gt;some text&lt;/strong&gt;\" #}"
+            "{% filter lower | escape %}\n    <strong>SOME TEXT</strong>\n{% endfilter %}\n\n{# outputs \"&lt;strong&gt;some text&lt;/strong&gt;\" #}"
     },
     "flush": {
         "prefix": "flush",
