@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.0] - 2019-02-26
+
+### Changed
+
+- Updated snippets for Craft CMS 3
+
 ## [0.5.1] - 2019-01-31
 
 ## Added
