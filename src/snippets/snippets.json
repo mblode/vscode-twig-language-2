@@ -227,6 +227,18 @@
         "description": "do",
         "scope": "text.html.twig"
     },
+    "dojs": {
+        "prefix": "dojs",
+        "body": "{% do view.registerJsFile \"${1:url}\" %}$0",
+        "description": "do js",
+        "scope": "text.html.twig"
+    },
+    "docss": {
+        "prefix": "docss",
+        "body": "{% do view.registerCssFile \"${1:url}\" %}$0",
+        "description": "do css",
+        "scope": "text.html.twig"
+    },
     "dump": {
         "prefix": "dump",
         "body": "<pre>\n\t{{ dump($1) }}\n</pre>",
