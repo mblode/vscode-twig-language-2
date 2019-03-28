@@ -118,7 +118,7 @@
                     "type": "boolean",
                     "default": true,
                     "description": "Markup self-closing tags end will end with ' />' instead of '/>'."
-                },
+                }
             }
         }
     },
