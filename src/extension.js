@@ -35,6 +35,8 @@ const prettyDiff = (document, range, options) => {
     settings.wrap = twigConfig.wrap;
     settings.method_chain = twigConfig.methodchain;
     settings.ternary_line = twigConfig.ternaryLine;
+    settings.preserve = twigConfig.preserve;
+    settings.space_close = twigConfig.spaceClose;
 
     if (twigConfig.tabSize == 0) {
         settings.indent_size = vscode.workspace.getConfiguration().get('editor.tabSize');
