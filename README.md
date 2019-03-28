@@ -4,11 +4,11 @@
 
 ### VS Code Twig Language 2
 
-* Syntax highlighting
-* Snippets
-* Emmet
-* Pretty Diff 3 Formatting
-* Hover
+- Syntax highlighting
+- Snippets
+- Emmet
+- Pretty Diff 3 Formatting
+- Hover
 
 ## What has changed since version 1?
 

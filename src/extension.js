@@ -26,8 +26,8 @@ const prettyDiff = (document, range, options) => {
     let settings = prettydiff.defaults;
 
     settings.api = "dom";
-    settings.language = "twig";
-    // settings.lexer = "markup";
+    settings.language = "html";
+    settings.lexer = "markup";
     settings.mode = "beautify";
     settings.source = content;
     settings.new_line = twigConfig.newLine;
