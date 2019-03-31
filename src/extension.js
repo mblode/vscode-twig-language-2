@@ -1,7 +1,7 @@
 import vscode from 'vscode'
 import prettydiff from 'prettydiff'
 import pattern from './format/pattern'
-import { editor, defaults, rules } from './format/config'
+import { defaults, rules } from './format/config'
 
 import snippetsArr from './hover/filters.json'
 import functionsArr from './hover/functions.json'

@@ -2,7 +2,7 @@
     "name": "twig-language-2",
     "displayName": "Twig Language 2",
     "description": "Snippets, Syntax Highlighting, Hover, and Formatting for Twig",
-    "version": "0.7.0",
+    "version": "0.7.1",
     "publisher": "mblode",
     "license": "MIT",
     "author": {
@@ -56,18 +56,6 @@
         ],
         "grammars": [
             {
-                "language": "html",
-                "scopeName": "source.html",
-                "path": "./src/syntaxes/twig.tmLanguage",
-                "embeddedLanguages": {
-                    "source.json": "json",
-                    "source.css": "css",
-                    "source.css.scss": "scss",
-                    "source.js": "javascript",
-                    "source.ts": "typescript"
-                }
-            },
-            {
                 "language": "twig",
                 "scopeName": "text.html.twig",
                 "path": "./src/syntaxes/twig.tmLanguage",
@@ -103,7 +91,7 @@
                 "twig-language-2.tabSize": {
                     "type": "integer",
                     "default": 0,
-                    "description": " 0 will default to the editor's tab size. Stores the number of 'inchar' values to comprise a single indentation."
+                    "description": "0 will default to the editor's tab size. Stores the number of 'inchar' values to comprise a single indentation."
                 },
                 "twig-language-2.newline": {
                     "type": "boolean",
