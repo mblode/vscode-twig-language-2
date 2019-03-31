@@ -1,9 +1,11 @@
-const vscode = require('vscode');
-let prettydiff = require('prettydiff');
+import vscode from 'vscode'
+import prettydiff from 'prettydiff'
+import pattern from './format/pattern'
+import { editor, defaults, rules } from './format/config'
 
-const snippetsArr = require('./hover/filters.json');
-const functionsArr = require('./hover/functions.json');
-const twigArr = require('./hover/twig.json');
+import snippetsArr from './hover/filters.json'
+import functionsArr from './hover/functions.json'
+import twigArr from './hover/twig.json'
 
 const twigConfig = vscode.workspace.getConfiguration('twig-language-2');
 
@@ -18,36 +20,20 @@ function createHover(snippet, type) {
     });
 }
 
-const prettyDiff = (document, range, options) => {
+const blocks = (code, open, name, source, close) => {
+    const config = Object.assign({}, defaults, rules[name], { source })
+    const pretty = prettydiff.mode(config)
+    return pattern.ignore(`${open.trim()}\n\n${pretty.trim()}\n\n${close.trim()}`)
+}
+
+const prettyDiff = (document, range) => {
     const result = [];
-    const content = document.getText(range);
-    let output = "";
-
-    let settings = prettydiff.defaults;
-
-    settings.api = "dom";
-    settings.language = "html";
-    settings.lexer = "markup";
-    settings.mode = "beautify";
-    settings.source = content;
-    settings.new_line = twigConfig.newLine;
-    settings.object_sort = twigConfig.objSort;
-    settings.wrap = twigConfig.wrap;
-    settings.method_chain = twigConfig.methodchain;
-    settings.ternary_line = twigConfig.ternaryLine;
-    settings.preserve = twigConfig.preserve;
-    settings.space_close = twigConfig.spaceClose;
-
-    if (twigConfig.tabSize == 0) {
-        settings.indent_size = vscode.workspace.getConfiguration().get('editor.tabSize');
-    } else {
-        settings.indent_size = twigConfig.tabSize;
-    }
-
-    output = prettydiff.mode(settings);
-
-    result.push(vscode.TextEdit.replace(range, output));
-    return result;
+    const contents = document.getText(range)
+    const source = contents.replace(pattern.matches(), blocks)
+    const assign = Object.assign({}, defaults, rules.html, { source })
+    const output = prettydiff.mode(assign).replace(pattern.ignored, '')
+    result.push(vscode.TextEdit.replace(range, output.trim()));
+    return result
 };
 
 function activate(context) {
@@ -60,7 +46,7 @@ function activate(context) {
         if (twigConfig.hover === true) {
             context.subscriptions.push(
                 vscode.languages.registerHoverProvider(type, {
-                    provideHover(document, position, token) {
+                    provideHover(document, position) {
                         const range = document.getWordRangeAtPosition(position);
                         const word = document.getText(range);
 
@@ -98,10 +84,8 @@ function activate(context) {
         if (twigConfig.formatting === true) {
             context.subscriptions.push(
                 vscode.languages.registerDocumentFormattingEditProvider(type, {
-                    provideDocumentFormattingEdits: function(
-                        document,
-                        options,
-                        token
+                    provideDocumentFormattingEdits: function (
+                        document
                     ) {
                         const start = new vscode.Position(0, 0);
                         const end = new vscode.Position(
@@ -109,7 +93,7 @@ function activate(context) {
                             document.lineAt(document.lineCount - 1).text.length
                         );
                         const rng = new vscode.Range(start, end);
-                        return prettyDiff(document, rng, options);
+                        return prettyDiff(document, rng);
                     }
                 })
             );
@@ -118,18 +102,16 @@ function activate(context) {
                 vscode.languages.registerDocumentRangeFormattingEditProvider(
                     type,
                     {
-                        provideDocumentRangeFormattingEdits: function(
+                        provideDocumentRangeFormattingEdits: function (
                             document,
-                            range,
-                            options,
-                            token
+                            range
                         ) {
                             let end = range.end;
                             if (end.character === 0) end = end.translate(-1, Number.MAX_VALUE);
                             else end = end.translate(0, Number.MAX_VALUE);
                             const rng = new vscode.Range(new vscode.Position(range.start.line, 0), end);
 
-                            return prettyDiff(document, rng, options);
+                            return prettyDiff(document, rng);
                         }
                     }
                 )
