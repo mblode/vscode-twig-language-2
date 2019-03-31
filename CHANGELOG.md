@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.0] - 2019-04-01
+
+### Changed
+
+- Fixed bug that clears entire document and only leaves the script tag
+- Preserved new lines
+- Updated packages
+- Converted extension to ES6
+
 ## [0.6.0] - 2019-02-26
 
 ### Changed
