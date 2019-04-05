@@ -44,40 +44,19 @@ export const rules = {
         mode: 'beautify',
         language: 'JSON',
         lexer: 'script',
-        indent_size: tabSize,
-        new_line: twigConfig.newLine,
-        object_sort: twigConfig.objSort,
-        wrap: twigConfig.wrap,
-        method_chain: twigConfig.methodchain,
-        ternary_line: twigConfig.ternaryLine,
-        preserve: twigConfig.preserve,
-        space_close: twigConfig.spaceClose,
+        indent_size: tabSize
     },
     stylesheet: {
         mode: 'beautify',
         language: 'SCSS',
         lexer: 'style',
-        indent_size: tabSize,
-        new_line: twigConfig.newLine,
-        object_sort: twigConfig.objSort,
-        wrap: twigConfig.wrap,
-        method_chain: twigConfig.methodchain,
-        ternary_line: twigConfig.ternaryLine,
-        preserve: twigConfig.preserve,
-        space_close: twigConfig.spaceClose,
+        indent_size: tabSize
     },
     javascript: {
         mode: 'beautify',
         language: 'JavaScript',
         lexer: 'script',
-        indent_size: tabSize,
-        new_line: twigConfig.newLine,
-        object_sort: twigConfig.objSort,
-        wrap: twigConfig.wrap,
-        method_chain: twigConfig.methodchain,
-        ternary_line: twigConfig.ternaryLine,
-        preserve: twigConfig.preserve,
-        space_close: twigConfig.spaceClose,
+        indent_size: tabSize
     }
 }
 

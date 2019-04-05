@@ -48,40 +48,19 @@ const rules = {
         mode: 'beautify',
         language: 'JSON',
         lexer: 'script',
-        indent_size: tabSize,
-        new_line: twigConfig.newLine,
-        object_sort: twigConfig.objSort,
-        wrap: twigConfig.wrap,
-        method_chain: twigConfig.methodchain,
-        ternary_line: twigConfig.ternaryLine,
-        preserve: twigConfig.preserve,
-        space_close: twigConfig.spaceClose,
+        indent_size: tabSize
     },
     stylesheet: {
         mode: 'beautify',
         language: 'SCSS',
         lexer: 'style',
-        indent_size: tabSize,
-        new_line: twigConfig.newLine,
-        object_sort: twigConfig.objSort,
-        wrap: twigConfig.wrap,
-        method_chain: twigConfig.methodchain,
-        ternary_line: twigConfig.ternaryLine,
-        preserve: twigConfig.preserve,
-        space_close: twigConfig.spaceClose,
+        indent_size: tabSize
     },
     javascript: {
         mode: 'beautify',
         language: 'JavaScript',
         lexer: 'script',
-        indent_size: tabSize,
-        new_line: twigConfig.newLine,
-        object_sort: twigConfig.objSort,
-        wrap: twigConfig.wrap,
-        method_chain: twigConfig.methodchain,
-        ternary_line: twigConfig.ternaryLine,
-        preserve: twigConfig.preserve,
-        space_close: twigConfig.spaceClose,
+        indent_size: tabSize
     }
 };
 
@@ -125,9 +104,13 @@ function createHover(snippet, type) {
 }
 
 const blocks = (code, open, name, source, close) => {
-    const config = Object.assign({}, defaults, rules[name], { source });
-    const pretty = prettydiff.mode(config);
-    return pattern.ignore(`${open.trim()}\n\n${pretty.trim()}\n\n${close.trim()}`)
+    if (pattern.enforce.includes(name) && open[0] === '{') {
+        const config = Object.assign({}, defaults, rules[name], { source });
+        const pretty = prettydiff.mode(config);
+        return pattern.ignore(`${open.trim()}\n\n${pretty.trim()}\n\n${close.trim()}`)
+    } else {
+        return pattern.ignore(`${code}`)
+    }
 };
 
 const prettyDiff = (document, range) => {

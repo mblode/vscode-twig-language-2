@@ -21,9 +21,13 @@ function createHover(snippet, type) {
 }
 
 const blocks = (code, open, name, source, close) => {
-    const config = Object.assign({}, defaults, rules[name], { source })
-    const pretty = prettydiff.mode(config)
-    return pattern.ignore(`${open.trim()}\n\n${pretty.trim()}\n\n${close.trim()}`)
+    if (pattern.enforce.includes(name) && open[0] === '{') {
+        const config = Object.assign({}, defaults, rules[name], { source })
+        const pretty = prettydiff.mode(config)
+        return pattern.ignore(`${open.trim()}\n\n${pretty.trim()}\n\n${close.trim()}`)
+    } else {
+        return pattern.ignore(`${code}`)
+    }
 }
 
 const prettyDiff = (document, range) => {
