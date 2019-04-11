@@ -40,12 +40,6 @@ export const rules = {
             'style',
             'comment']
     },
-    schema: {
-        mode: 'beautify',
-        language: 'JSON',
-        lexer: 'script',
-        indent_size: tabSize
-    },
     stylesheet: {
         mode: 'beautify',
         language: 'SCSS',

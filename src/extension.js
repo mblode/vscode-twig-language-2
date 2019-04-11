@@ -8,6 +8,7 @@ import functionsArr from './hover/functions.json'
 import twigArr from './hover/twig.json'
 
 const twigConfig = vscode.workspace.getConfiguration('twig-language-2');
+const replace = (range, output) => [vscode.TextEdit.replace(range, output)]
 
 function createHover(snippet, type) {
     const example =
@@ -22,23 +23,25 @@ function createHover(snippet, type) {
 
 const blocks = (code, open, name, source, close) => {
     // if (pattern.enforce.includes(name) && open[0] === '{') {
-        const config = Object.assign({}, defaults, rules[name], { source })
-        const pretty = prettydiff.mode(config)
+        let config = Object.assign({}, defaults, rules[name], { source })
+        let pretty = prettydiff.mode(config)
         return pattern.ignore(`${open.trim()}\n\n${pretty.trim()}\n\n${close.trim()}`)
-    // } else {
-    //     return pattern.ignore(`${code}`)
     // }
+    // return pattern.ignore(`${code}`)
 }
 
-const prettyDiff = (document, range) => {
-    const result = []
-    const contents = document.getText(range)
-    const source = contents.replace(pattern.matches(), blocks)
-    const assign = Object.assign({}, defaults, rules.html, { source })
-    const output = prettydiff.mode(assign).replace(pattern.ignored, '')
-    result.push(vscode.TextEdit.replace(range, output.trim()))
-    return result
-};
+function applyFormat (document, range) {
+    let contents = document.getText(range)
+    let source = contents.replace(pattern.matches(), blocks)
+    let assign = Object.assign({}, defaults, rules.html, {
+        source
+    })
+
+    let output = prettydiff.mode(assign)
+    output = output.replace(pattern.ignored, '')
+
+    return `${output.trim()}`
+}
 
 function activate(context) {
     const active = vscode.window.activeTextEditor
@@ -96,8 +99,10 @@ function activate(context) {
                             document.lineCount - 1,
                             document.lineAt(document.lineCount - 1).text.length
                         );
+
                         const rng = new vscode.Range(start, end)
-                        return prettyDiff(document, rng);
+                        let output = applyFormat(document, rng)
+                        return replace(rng, output)
                     }
                 })
             );
@@ -114,8 +119,8 @@ function activate(context) {
                             if (end.character === 0) end = end.translate(-1, Number.MAX_VALUE)
                             else end = end.translate(0, Number.MAX_VALUE)
                             const rng = new vscode.Range(new vscode.Position(range.start.line, 0), end)
-
-                            return prettyDiff(document, rng)
+                            let output = applyFormat(document, rng)
+                            return replace(rng, output)
                         }
                     }
                 )

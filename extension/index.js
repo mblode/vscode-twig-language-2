@@ -44,12 +44,6 @@ const rules = {
             'style',
             'comment']
     },
-    schema: {
-        mode: 'beautify',
-        language: 'JSON',
-        lexer: 'script',
-        indent_size: tabSize
-    },
     stylesheet: {
         mode: 'beautify',
         language: 'SCSS',
@@ -91,6 +85,7 @@ const attribute={prefix:"attribute",body:"{{ attribute($1) }}$2",description:"Th
 const show={prefix:"show",body:"{{ $1 }}",description:"{{ }}"};const execute={prefix:"execute",body:"{% $1 %}",description:"{% %}"};const autoescape={prefix:"autoescape",body:["{% autoescape %}","\t$1","{% endautoescape %}"],description:"Whether automatic escaping is enabled or not, you can mark a section of a template to be escaped or not by using the autoescape tag",example:"{% autoescape %}\n    Everything will be automatically escaped in this block\n    using the HTML strategy\n{% endautoescape %}\n\n{% autoescape 'html' %}\n    Everything will be automatically escaped in this block\n    using the HTML strategy\n{% endautoescape %}\n\n{% autoescape 'js' %}\n    Everything will be automatically escaped in this block\n    using the js escaping strategy\n{% endautoescape %}\n\n{% autoescape false %}\n    Everything will be outputted as is in this block\n{% endautoescape %}"};const block$1={prefix:"block",body:["{% block ${name} %}","\t$1","{% endblock ${name} %}"],description:"When a template uses inheritance and if you want to print a block multiple times, use the block function"};const embed={prefix:"embed",body:["{% embed \"${filename}.twig\" %}","\t$1","{% endembed  %}"],description:"The embed tag combines the behaviour of include and extends. It allows you to include another template's contents, just like include does. But it also allows you to override any block defined inside the included template, like when extending a template"};const filter={prefix:"filter",body:["{% filter ${filter name} %}","\t$1","{% endfilter  %}"],description:"Filter sections allow you to apply regular Twig filters on a block of template data. Just wrap the code in the special filter section",example:"{% filter lower | escape %}\n    <strong>SOME TEXT</strong>\n{% endfilter %}\n\n{# outputs \"&lt;strong&gt;some text&lt;/strong&gt;\" #}"};const flush={prefix:"flush",body:["{% flush %}"],description:"The flush tag tells Twig to flush the output buffer",example:"{% flush %}"};const loop={prefix:"loop",body:"loop.",description:"special variables inside of a for loop block"};const _self={prefix:"_self",body:"_self",description:"To import macros from the current file, use the special _self variable for the source"};const include$1={prefix:"include",body:"{% include \"${filename}.twig\" %}",description:"The include statement includes a template and returns the rendered content of that file into the current namespace"};const macro={prefix:"macro",body:["{% macro ${name}($1) %}","\t$2","{% endmacro %}"],description:"Twig snippets"};const sandbox={prefix:"sandbox",body:["{% sandbox %}","\t$1","{% endsandbox %}"],description:"The sandbox tag can be used to enable the sandboxing mode for an included template, when sandboxing is not enabled globally for the Twig environment"};const set={prefix:"set",body:["{% set ${name} = ${value} %}$1"],description:"Assign values to variables"};const spaceless={prefix:"spaceless",body:["{% spaceless %}","\t$1","{% endspaceless %}"],description:"Use the spaceless tag to remove whitespace between HTML tags, not whitespace within HTML tags or whitespace in plain text"};const use={prefix:"use",body:"{% use \"${filename}.twig\" %}",description:"Twig snippets"};const verbatim={prefix:"verbatim",body:["{% verbatim %}","\t$1","{% endverbatim %}"],description:"The verbatim tag marks sections as being raw text that should not be parsed. For example to put Twig syntax as example into a template you can use this snippet"};var twigArr = {show:show,execute:execute,autoescape:autoescape,block:block$1,"do": {prefix:"do",body:["{% do $1 %}"],description:"The do tag works exactly like the regular variable expression ({{ ... }}) just that it doesn't print anything",example:"{% do 1 + 2 %}"},embed:embed,"extends": {prefix:"extends",body:"{% extends \"${filename}.twig\" %}",description:"Twig snippets"},filter:filter,flush:flush,"for": {prefix:"for",body:["{% for ${row} in ${array} %}","\t$1","{% endfor %}"],description:"Loop over each item in a sequence"},"for if": {prefix:"for if",body:["{% for ${row} in ${array} if ${condition} %}","\t$1","{% endfor %}"],description:"Loop over each item in a sequence"},"for else": {prefix:"for else",body:["{% for ${row} in ${array} %}","\t$1","{% else %}","\t$2","{% endfor %}"],description:"Loop over each item in a sequence"},"for if else": {prefix:"for if else",body:["{% for ${row} in ${array} if ${condition} %}","\t$1","{% else %}","\t$2","{% endfor %}"],description:"Loop over each item in a sequence"},loop:loop,"if": {prefix:"if",body:["{% if ${condition} %}","\t$1","{% endif %}"],description:"The if statement in Twig is comparable with the if statements of PHP"},"if else": {prefix:"if else",body:["{% if ${condition} %}","\t$1","{% else %}","\t$2","{% endif %}"],description:"The if statement in Twig is comparable with the if statements of PHP"},"else": {prefix:"else",body:"{% else %}",description:"The if statement in Twig is comparable with the if statements of PHP"},"else if": {prefix:"else if",body:"{% elseif ${condition} %}",description:"The if statement in Twig is comparable with the if statements of PHP"},"import": {prefix:"import",body:"{% import \"${filename}.twig\" as ${alias}%}",description:"Twig supports putting often used code into macros. These macros can go into different templates and get imported from there."},_self:_self,include:include$1,macro:macro,sandbox:sandbox,set:set,"set block": {prefix:"set (block)",body:["{% set ${name} %}","\t$1","{% endset %}"],description:"Inside code blocks you can also assign values to variables. Assignments use the set tag and can have multiple targets"},spaceless:spaceless,use:use,verbatim:verbatim};
 
 const twigConfig$1 = vscode.workspace.getConfiguration('twig-language-2');
+const replace$1 = (range, output) => [vscode.TextEdit.replace(range, output)];
 
 function createHover(snippet, type) {
     const example =
@@ -105,23 +100,25 @@ function createHover(snippet, type) {
 
 const blocks = (code, open, name, source, close) => {
     // if (pattern.enforce.includes(name) && open[0] === '{') {
-        const config = Object.assign({}, defaults, rules[name], { source });
-        const pretty = prettydiff.mode(config);
+        let config = Object.assign({}, defaults, rules[name], { source });
+        let pretty = prettydiff.mode(config);
         return pattern.ignore(`${open.trim()}\n\n${pretty.trim()}\n\n${close.trim()}`)
-    // } else {
-    //     return pattern.ignore(`${code}`)
     // }
+    // return pattern.ignore(`${code}`)
 };
 
-const prettyDiff = (document, range) => {
-    const result = [];
-    const contents = document.getText(range);
-    const source = contents.replace(pattern.matches(), blocks);
-    const assign = Object.assign({}, defaults, rules.html, { source });
-    const output = prettydiff.mode(assign).replace(pattern.ignored, '');
-    result.push(vscode.TextEdit.replace(range, output.trim()));
-    return result
-};
+function applyFormat (document, range) {
+    let contents = document.getText(range);
+    let source = contents.replace(pattern.matches(), blocks);
+    let assign = Object.assign({}, defaults, rules.html, {
+        source
+    });
+
+    let output = prettydiff.mode(assign);
+    output = output.replace(pattern.ignored, '');
+
+    return `${output.trim()}`
+}
 
 function activate(context) {
     const active = vscode.window.activeTextEditor;
@@ -179,8 +176,10 @@ function activate(context) {
                             document.lineCount - 1,
                             document.lineAt(document.lineCount - 1).text.length
                         );
+
                         const rng = new vscode.Range(start, end);
-                        return prettyDiff(document, rng);
+                        let output = applyFormat(document, rng);
+                        return replace$1(rng, output)
                     }
                 })
             );
@@ -197,8 +196,8 @@ function activate(context) {
                             if (end.character === 0) end = end.translate(-1, Number.MAX_VALUE);
                             else end = end.translate(0, Number.MAX_VALUE);
                             const rng = new vscode.Range(new vscode.Position(range.start.line, 0), end);
-
-                            return prettyDiff(document, rng)
+                            let output = applyFormat(document, rng);
+                            return replace$1(rng, output)
                         }
                     }
                 )
