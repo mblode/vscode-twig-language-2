@@ -22,12 +22,16 @@ function createHover(snippet, type) {
 }
 
 const blocks = (code, open, name, source, close) => {
-    // if (pattern.enforce.includes(name) && open[0] === '{') {
+    if (name == "html") {
+        let config = Object.assign({}, defaults, rules[name], { source })
+        let pretty = prettydiff.mode(config)
+        return pattern.ignore(`${open.trim()}\n${pretty.trim()}\n${close.trim()}`)
+    } else if (pattern.enforce.includes(name) && open[0] === '{') {
         let config = Object.assign({}, defaults, rules[name], { source })
         let pretty = prettydiff.mode(config)
         return pattern.ignore(`${open.trim()}\n\n${pretty.trim()}\n\n${close.trim()}`)
-    // }
-    // return pattern.ignore(`${code}`)
+    }
+    return pattern.ignore(`${code}`)
 }
 
 function applyFormat (document, range) {
