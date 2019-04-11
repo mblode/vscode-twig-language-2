@@ -379,6 +379,26 @@
         </dict>
         <dict>
             <key>begin</key>
+            <string>(?ix)   # Enable free spacing mode, case insensitive
+                        # Make sure our opening js tag has word boundaries
+                        (?&lt;=\{\%\sjs\s\%\}|\{\%\sincludejs\s\%\})
+                    </string>
+            <key>comment</key>
+            <string>Add JS support to set tags that use the pattern "css" in their name</string>
+            <key>end</key>
+            <string>(?ix)(?=\{\%\sendjs\s\%\}|\{\%\sendincludejs\s\%\})</string>
+            <key>name</key>
+            <string>source.js.embedded.twig</string>
+            <key>patterns</key>
+            <array>
+                <dict>
+                <key>include</key>
+                <string>source.js</string>
+                </dict>
+            </array>
+        </dict>
+        <dict>
+            <key>begin</key>
             <string>(&lt;/?)((?i:body|head|html)\b)</string>
             <key>captures</key>
             <dict>
