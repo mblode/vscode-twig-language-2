@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.0] - 2019-04-17
+
+### Changed
+
+- Pretty Diff formatting bug has been solved correctly
+
+### Added
+
+- Added many more configuration options
+
 ## [0.7.0] - 2019-04-01
 
 ### Changed
