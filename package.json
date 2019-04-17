@@ -2,12 +2,12 @@
     "name": "twig-language-2",
     "displayName": "Twig Language 2",
     "description": "Snippets, Syntax Highlighting, Hover, and Formatting for Twig",
-    "version": "0.8.0",
+    "version": "0.8.1",
     "publisher": "mblode",
     "license": "MIT",
     "author": {
         "name": "Matthew Blode",
-        "email": "m.blode@gmail.com",
+        "email": "m@blode.co",
         "url": "https://matthewblode.com"
     },
     "homepage": "https://github.com/mblode/vscode-twig-language-2",
@@ -76,7 +76,7 @@
         ],
         "configuration": {
             "type": "object",
-            "title": "Twig Language configuration",
+            "title": "Twig Language 2",
             "properties": {
                 "twig-language-2.hover": {
                     "type": "boolean",

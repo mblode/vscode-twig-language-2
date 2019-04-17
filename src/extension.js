@@ -80,10 +80,7 @@ function prettyDiff(document, range) {
 
 function activate(context) {
     const active = vscode.window.activeTextEditor
-    if (! active || ! active.document)
-        return
-
-
+    if (!active || !active.document) return
 
     registerDocType('twig');
 
