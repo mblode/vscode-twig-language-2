@@ -49,7 +49,7 @@ function prettyDiff(document, range) {
         format_object: config.formatObject,
         function_name: config.functionName,
         indent_level: config.indentLevel,
-        indentSize: tabSize,
+        indent_size: tabSize,
         method_chain: config.methodChain,
         never_flatten: config.neverFlatten,
         new_line: config.newLine,
@@ -71,6 +71,7 @@ function prettyDiff(document, range) {
     };
 
     let settings = Object.assign({}, defaults, rules, {source});
+
     output = prettydiff.mode(settings);
     settings.end = 0;
     settings.start = 0;
