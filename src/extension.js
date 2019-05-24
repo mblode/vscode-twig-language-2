@@ -18,9 +18,8 @@ function createHover(snippet, type) {
 
 function prettyDiff(document, range) {
     const result = [];
-    const source = document.getText(range);
     let output = "";
-    const defaults = prettydiff.defaults;
+    let options = prettydiff.options;
 
     let tabSize = editor.tabSize;
 
@@ -28,53 +27,52 @@ function prettyDiff(document, range) {
         tabSize = config.tabSize;
     }
 
-    const rules = {
-        mode: 'beautify',
-        language: 'html',
-        lexer: 'markup',
-        brace_line: config.braceLine,
-        brace_padding: config.bracePadding,
-        brace_style: config.braceStyle,
-        braces: config.braces,
-        comment_line: config.commentLine,
-        comments: config.comments,
-        compressed_css: config.compressedCss,
-        correct: config.correct,
-        cssInsertLines: config.cssInsertLines,
-        else_line: config.elseLine,
-        end_comma: config.endComma,
-        force_attribute: config.forceAttribute,
-        force_indent: config.forceIndent,
-        format_array: config.formatArray,
-        format_object: config.formatObject,
-        function_name: config.functionName,
-        indent_level: config.indentLevel,
-        indent_size: tabSize,
-        method_chain: config.methodChain,
-        never_flatten: config.neverFlatten,
-        new_line: config.newLine,
-        no_case_indent: config.noCaseIndent,
-        no_lead_zero: config.noLeadZero,
-        object_sort: config.objectSort,
-        preserve: config.preserve,
-        preserve_comment: config.preserveComment,
-        quote_convert: config.quoteConvert,
-        space: config.space,
-        space_close: config.spaceSlose,
-        tag_merge: config.tagMerge,
-        tag_sort: config.tagSort,
-        ternary_line: config.ternaryLine,
-        unformatted: config.unformatted,
-        variable_list: config.variableList,
-        vertical: config.vertical,
-        wrap: config.wrap
-    };
+    options.source = document.getText(range);
+    options.mode = 'beautify';
+    options.language = 'html';
+    options.lexer = 'markup';
+    options.brace_line = config.braceLine;
+    options.brace_padding = config.bracePadding;
+    options.brace_style = config.braceStyle;
+    options.braces = config.braces;
+    options.comment_line = config.commentLine;
+    options.comments = config.comments;
+    options.compressed_css = config.compressedCss;
+    options.correct = config.correct;
+    options.cssInsertLines = config.cssInsertLines;
+    options.else_line = config.elseLine;
+    options.end_comma = config.endComma;
+    options.force_attribute = config.forceAttribute;
+    options.force_indent = config.forceIndent;
+    options.format_array = config.formatArray;
+    options.format_object = config.formatObject;
+    options.function_name = config.functionName;
+    options.indent_level = config.indentLevel;
+    options.indent_size = tabSize;
+    options.method_chain = config.methodChain;
+    options.never_flatten = config.neverFlatten;
+    options.new_line = config.newLine;
+    options.no_case_indent = config.noCaseIndent;
+    options.no_lead_zero = config.noLeadZero;
+    options.object_sort = config.objectSort;
+    options.preserve = config.preserve;
+    options.preserve_comment = config.preserveComment;
+    options.quote_convert = config.quoteConvert;
+    options.space = config.space;
+    options.space_close = config.spaceSlose;
+    options.tag_merge = config.tagMerge;
+    options.tag_sort = config.tagSort;
+    options.ternary_line = config.ternaryLine;
+    options.unformatted = config.unformatted;
+    options.variable_list = config.variableList;
+    options.vertical = config.vertical;
+    options.wrap = config.wrap;
 
-    let settings = Object.assign({}, defaults, rules, {source});
+    output = prettydiff();
 
-    output = prettydiff.mode(settings);
-    settings.end = 0;
-    settings.start = 0;
+    options.end = 0;
+    options.start = 0;
+
     result.push(vscode.TextEdit.replace(range, output));
     return result;
 };
