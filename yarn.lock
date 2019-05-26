@@ -1398,14 +1398,14 @@ prelude-ls@~1.1.2:
   resolved "https://registry.yarnpkg.com/prelude-ls/-/prelude-ls-1.1.2.tgz#21932a549f5e52ffd9a827f570e04be62a97da54"
   integrity sha1-IZMqVJ9eUv/ZqCf1cOBL5iqX2lQ=
 
-prettydiff@^101.0.6:
-  version "101.0.6"
-  resolved "https://registry.yarnpkg.com/prettydiff/-/prettydiff-101.0.6.tgz#c548e5e4615143fa3095f40975cd0b812b941832"
-  integrity sha512-7gC6rlsIlHlJxu5NiNOlwaE60C9HpbSq1RhZC1c4HI+pjIGSeHEMR9UaYo0VWUYll+U4+t9W83x1oW0ZXlTxBg==
+prettydiff@^101.0.8:
+  version "101.0.8"
+  resolved "https://registry.yarnpkg.com/prettydiff/-/prettydiff-101.0.8.tgz#8df769723f7006e7674da1aafa2bafcef6f172a5"
+  integrity sha512-geYAWXTU+hktny3UXBqh5ivm8fqTHgwfz1Kj/jxW2m208IrRpxdDTifDFb0sGMBR5J8NzZXk5o29nOVV7SwcDA==
   dependencies:
     "@types/node" "^10.14.7"
     file-saver "^1.3.8"
-    sparser "^1.1.14"
+    sparser "^1.1.15"
 
 progress@^2.0.0:
   version "2.0.3"
@@ -1699,10 +1699,10 @@ source-map@^0.6.0:
   resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.6.1.tgz#74722af32e9614e9c287a8d0bbde48b5e2f1a263"
   integrity sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==
 
-sparser@^1.1.14:
-  version "1.1.14"
-  resolved "https://registry.yarnpkg.com/sparser/-/sparser-1.1.14.tgz#110ea7af59e85b527957c9c5b1ca2d37577e92fa"
-  integrity sha512-cRU56qlkEEjNiJ+1x5ZZLMwshCGCFas58T9qCF+KOGJ1uWut82xcXy0VIqI9D0Ew6SjR5moKm+eMEGaP2nuIDw==
+sparser@^1.1.15:
+  version "1.1.15"
+  resolved "https://registry.yarnpkg.com/sparser/-/sparser-1.1.15.tgz#1b9bbb4bae1024f310c2136f9e91e7d199a2252a"
+  integrity sha512-Zh32S3HsPLboO+6JY3DiLFSKTz7x6z6Ns4CbJqBhTmp8H2g3R4DXET/zsMZKMqgutgosXNx6Qt3bqdNktBWcSw==
   dependencies:
     "@types/node" "^10.12.27"
 
