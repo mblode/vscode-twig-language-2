@@ -22,9 +22,15 @@ function prettyDiff(document, range) {
     let options = prettydiff.options;
 
     let tabSize = editor.tabSize;
+    let indentChar = " ";
 
     if (config.tabSize > 0) {
         tabSize = config.tabSize;
+    }
+
+    if (config.indentStyle == "tab") {
+        tabSize = 0;
+        indentChar = "\t";
     }
 
     options.source = document.getText(range);
@@ -48,6 +54,7 @@ function prettyDiff(document, range) {
     options.format_object = config.formatObject;
     options.function_name = config.functionName;
     options.indent_level = config.indentLevel;
+    options.indent_char = indentChar;
     options.indent_size = tabSize;
     options.method_chain = config.methodChain;
     options.never_flatten = config.neverFlatten;
