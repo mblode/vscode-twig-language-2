@@ -2,7 +2,7 @@
     "name": "twig-language-2",
     "displayName": "Twig Language 2",
     "description": "Snippets, Syntax Highlighting, Hover, and Formatting for Twig",
-    "version": "0.9.0",
+    "version": "0.9.1",
     "publisher": "mblode",
     "license": "MIT",
     "author": {
@@ -320,17 +320,17 @@
         "watch": "rollup -c -w"
     },
     "devDependencies": {
-        "@types/mocha": "^5.2.6",
-        "@types/node": "^12.12.7",
-        "eslint": "^6.6.0",
-        "eslint-config-prettier": "^6.5.0",
-        "typescript": "^3.7.2",
+        "@types/mocha": "^7.0.2",
+        "@types/node": "^13.11.0",
+        "eslint": "^6.8.0",
+        "eslint-config-prettier": "^6.10.1",
+        "typescript": "^3.8.3",
         "vscode": "^1.1.36"
     },
     "dependencies": {
         "prettydiff": "^101.2.6",
-        "rollup": "^1.26.3",
-        "rollup-plugin-babel": "^4.3.3",
+        "rollup": "^2.3.4",
+        "rollup-plugin-babel": "^4.4.0",
         "rollup-plugin-json": "^4.0.0"
     }
 }
