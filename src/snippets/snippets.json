@@ -347,6 +347,12 @@
         "description": "endswitch",
         "scope": "text.html.twig"
     },
+    "endtrans": {
+        "prefix": "endtrans",
+        "body": "{% endtrans %}$0",
+        "description": "endtrans",
+        "scope": "text.html.twig"
+    },
     "endverbatim": {
         "prefix": "endverbatim",
         "body": "{% endverbatim %}$0",
@@ -656,6 +662,12 @@
         "body":
             "{% switch ${1:variable} %}\n\n\t{% case \"${2:value1}\" %}\n\t\n\n\t{% case \"${3:value2}\" %}\n\t\n\n\t{% default %}\n\t\n\n{% endswitch %}\n$0",
         "description": "switch",
+        "scope": "text.html.twig"
+    },
+    "trans": {
+        "prefix": "trans",
+        "body": "{% trans %}$0{% trans %}",
+        "description": "trans",
         "scope": "text.html.twig"
     },
     "urla": {
