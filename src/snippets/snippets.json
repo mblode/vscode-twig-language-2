@@ -666,7 +666,7 @@
     },
     "trans": {
         "prefix": "trans",
-        "body": "{% trans %}$0{% trans %}",
+        "body": "{% trans %}$0{% endtrans %}",
         "description": "trans",
         "scope": "text.html.twig"
     },
