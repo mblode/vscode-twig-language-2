@@ -418,6 +418,25 @@
         </dict>
         <dict>
             <key>begin</key>
+            <string>(?ix)   # Enable free spacing mode, case insensitive
+                        (?&lt;=\{\%\sscss\s\%\}|\{\%\sincludescss\s\%\}|\{\%\sincludehiresscss\s\%\})
+                        </string>
+            <key>comment</key>
+            <string>Add SCSS support to set tags that use the pattern "scss" in their name</string>
+            <key>end</key>
+            <string>(?ix)(?=\{\%\sendscss\s\%\}|\{\%\sendincludescss\s\%\}|\{\%\sendincludehiresscss\s\%\})</string>
+            <key>name</key>
+            <string>source.css.scss.embedded.twig</string>
+            <key>patterns</key>
+            <array>
+                <dict>
+                    <key>include</key>
+                    <string>source.css.scss</string>
+                </dict>
+            </array>
+        </dict>
+        <dict>
+            <key>begin</key>
             <string>(&lt;/?)((?i:body|head|html)\b)</string>
             <key>captures</key>
             <dict>
