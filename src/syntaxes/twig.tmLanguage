@@ -1371,6 +1371,10 @@
                 </dict>
                 <dict>
                     <key>include</key>
+                    <string>#twig-operators</string>
+                </dict>
+                <dict>
+                    <key>include</key>
                     <string>#twig-strings</string>
                 </dict>
                 <dict>
