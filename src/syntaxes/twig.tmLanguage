@@ -951,7 +951,7 @@
                         </dict>
                     </dict>
                     <key>match</key>
-                    <string>(?&lt;=\s)(\?|:|and|not|or)(?=\s)</string>
+                    <string>(?&lt;=\s)(\?|:|\?:|\?\?|and|not|or)(?=\s)</string>
                 </dict>
 
                 <!-- RANGE -->
