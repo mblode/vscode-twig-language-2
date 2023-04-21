@@ -1682,6 +1682,10 @@
                 </dict>
                 <dict>
                     <key>include</key>
+                    <string>#twig-operators</string>
+                </dict>
+                <dict>
+                    <key>include</key>
                     <string>#twig-functions-warg</string>
                 </dict>
                 <dict>
