@@ -951,7 +951,7 @@
                         </dict>
                     </dict>
                     <key>match</key>
-                    <string>(?&lt;=\s)(\?|:|and|not|or)(?=\s)</string>
+                    <string>(?&lt;=\s)(\?|:|\?:|\?\?|and|not|or)(?=\s)</string>
                 </dict>
 
                 <!-- RANGE -->
@@ -1279,6 +1279,10 @@
                 </dict>
                 <dict>
                     <key>include</key>
+                    <string>#twig-operators</string>
+                </dict>
+                <dict>
+                    <key>include</key>
                     <string>#twig-strings</string>
                 </dict>
                 <dict>
@@ -1364,6 +1368,10 @@
                 <dict>
                     <key>include</key>
                     <string>#twig-constants</string>
+                </dict>
+                <dict>
+                    <key>include</key>
+                    <string>#twig-operators</string>
                 </dict>
                 <dict>
                     <key>include</key>
@@ -1671,6 +1679,10 @@
                 <dict>
                     <key>include</key>
                     <string>#twig-constants</string>
+                </dict>
+                <dict>
+                    <key>include</key>
+                    <string>#twig-operators</string>
                 </dict>
                 <dict>
                     <key>include</key>
