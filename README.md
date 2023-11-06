@@ -22,7 +22,7 @@
 
 ## What has changed since version 1?
 
-This extension does **not** have HTML Intellisense. If you need HTML Intellisense (which can be quite useful), please download my other Twig Language extension: https://github.com/mblode/vscode-twig-language.
+This extension does **not** have HTML Intellisense. If you need HTML Intellisense (which can be quite useful), please download my other Twig Language extension: <https://github.com/mblode/vscode-twig-language>.
 
 I have created a new extension to fix the issues that I (and all of you) were having with file association, commenting and VS Code UI issues.
 
@@ -213,7 +213,7 @@ info            All craft globals (site info, date, users, template tags)
 
 👤 **Matthew Blode**
 
-* Github: [@mblode](https://github.com/mblode)
+- Github: [@mblode](https://github.com/mblode)
 
 ## 🤝 Contributing
 
