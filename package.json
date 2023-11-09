@@ -2,7 +2,7 @@
     "name": "twig-language-2",
     "displayName": "Twig Language 2",
     "description": "Snippets, Syntax Highlighting, Hover, and Formatting for Twig",
-    "version": "0.9.3",
+    "version": "0.9.2",
     "publisher": "mblode",
     "license": "MIT",
     "author": {
@@ -20,7 +20,7 @@
     },
     "icon": "images/icon.png",
     "engines": {
-        "vscode": "^1.84.0"
+        "vscode": "^1.30.0"
     },
     "categories": [
         "Formatters",
@@ -35,8 +35,10 @@
         "craft",
         "beautify"
     ],
-    "activationEvents": [],
-    "main": "./out/extension.js",
+    "activationEvents": [
+        "onLanguage:twig"
+    ],
+    "main": "./extension/index",
     "contributes": {
         "languages": [
             {
@@ -313,25 +315,22 @@
         "hoverProvider": "true"
     },
     "scripts": {
-        "vscode:prepublish": "npm run compile",
-        "compile": "tsc -p ./",
-        "watch": "tsc -watch -p ./",
-        "lint": "eslint src --ext ts"
+        "start": "rollup -c",
+        "build": "rollup -c",
+        "watch": "rollup -c -w"
     },
     "devDependencies": {
-        "@types/mocha": "^10.0.3",
-        "@types/node": "20.x",
-        "@types/request-promise": "^4.1.50",
-        "@types/vscode": "^1.84.0",
-        "@typescript-eslint/eslint-plugin": "^6.10.0",
-        "@typescript-eslint/parser": "^6.10.0",
-        "@vscode/test-electron": "^2.3.6",
-        "eslint": "^8.53.0",
-        "glob": "^10.3.10",
-        "mocha": "^10.2.0",
-        "typescript": "^5.2.2"
+        "@types/mocha": "^8.0.3",
+        "@types/node": "^14.6.0",
+        "eslint": "^7.7.0",
+        "eslint-config-prettier": "^6.11.0",
+        "typescript": "^4.0.2",
+        "vscode": "^1.1.37"
     },
     "dependencies": {
-        "prettydiff": "^101.2.6"
+        "prettydiff": "^101.2.6",
+        "rollup": "^2.26.5",
+        "rollup-plugin-babel": "^4.4.0",
+        "rollup-plugin-json": "^4.0.0"
     }
 }
