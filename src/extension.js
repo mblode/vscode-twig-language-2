@@ -66,7 +66,7 @@ function prettyDiff(document, range) {
     options.preserve_comment = config.preserveComment;
     options.quote_convert = config.quoteConvert;
     options.space = config.space;
-    options.space_close = config.spaceSlose;
+    options.space_close = config.spaceClose;
     options.tag_merge = config.tagMerge;
     options.tag_sort = config.tagSort;
     options.ternary_line = config.ternaryLine;
@@ -85,9 +85,6 @@ function prettyDiff(document, range) {
 };
 
 function activate(context) {
-    const active = vscode.window.activeTextEditor
-    if (!active || !active.document) return
-
     registerDocType('twig');
 
     function registerDocType(type) {
