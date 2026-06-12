@@ -591,6 +591,10 @@
         <!-- TWIG START -->
         <dict>
             <key>include</key>
+            <string>#twig-verbatim</string>
+        </dict>
+        <dict>
+            <key>include</key>
             <string>#twig-print-tag</string>
         </dict>
         <dict>
@@ -874,6 +878,55 @@
             </dict>
             <key>name</key>
             <string>comment.block.twig</string>
+        </dict>
+
+        <!-- VERBATIM -->
+        <key>twig-verbatim</key>
+        <dict>
+            <key>begin</key>
+            <string>(\{%-?)\s*(verbatim)\s*(-?%\})</string>
+            <key>beginCaptures</key>
+            <dict>
+                <key>1</key>
+                <dict>
+                    <key>name</key>
+                    <string>punctuation.definition.tag.twig</string>
+                </dict>
+                <key>2</key>
+                <dict>
+                    <key>name</key>
+                    <string>keyword.control.twig</string>
+                </dict>
+                <key>3</key>
+                <dict>
+                    <key>name</key>
+                    <string>punctuation.definition.tag.twig</string>
+                </dict>
+            </dict>
+            <key>end</key>
+            <string>(\{%-?)\s*(endverbatim)\s*(-?%\})</string>
+            <key>endCaptures</key>
+            <dict>
+                <key>1</key>
+                <dict>
+                    <key>name</key>
+                    <string>punctuation.definition.tag.twig</string>
+                </dict>
+                <key>2</key>
+                <dict>
+                    <key>name</key>
+                    <string>keyword.control.twig</string>
+                </dict>
+                <key>3</key>
+                <dict>
+                    <key>name</key>
+                    <string>punctuation.definition.tag.twig</string>
+                </dict>
+            </dict>
+            <key>name</key>
+            <string>meta.tag.template.verbatim.twig</string>
+            <key>contentName</key>
+            <string>string.unquoted.verbatim.twig</string>
         </dict>
 
         <!-- CONSTANTS -->
@@ -1549,11 +1602,16 @@
                 <key>1</key>
                 <dict>
                     <key>name</key>
+                    <string>keyword.operator.logical.twig</string>
+                </dict>
+                <key>2</key>
+                <dict>
+                    <key>name</key>
                     <string>support.function.twig</string>
                 </dict>
             </dict>
             <key>match</key>
-            <string>(?&lt;=is\s)(defined|empty|even|iterable|odd)</string>
+            <string>(?&lt;=is\s)(?:(not)\s+)?(defined|empty|even|iterable|odd|null|same\s+as)</string>
         </dict>
 
         <!-- MACROS -->
