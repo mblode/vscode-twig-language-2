@@ -712,5 +712,23 @@
         "body": "{% verbatim %}\n\t$0\n{% endverbatim %}",
         "description": "verbatim",
         "scope": "text.html.twig"
+    },
+    "with": {
+        "prefix": "with",
+        "body": "{% with %}\n\t$0\n{% endwith %}",
+        "description": "with",
+        "scope": "text.html.twig"
+    },
+    "withb": {
+        "prefix": "withb",
+        "body": "{% with { ${1:foo}: ${2:bar} } %}\n\t$0\n{% endwith %}",
+        "description": "with (with variables)",
+        "scope": "text.html.twig"
+    },
+    "endwith": {
+        "prefix": "endwith",
+        "body": "{% endwith %}$0",
+        "description": "endwith",
+        "scope": "text.html.twig"
     }
 }
