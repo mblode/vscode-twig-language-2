@@ -209,12 +209,6 @@ info            All craft globals (site info, date, users, template tags)
 
 ```
 
-## Author
-
-👤 **Matthew Blode**
-
-* Github: [@mblode](https://github.com/mblode)
-
 ## 🤝 Contributing
 
 Contributions, issues and feature requests are welcome !<br />Feel free to check [issues page](https://github.com/mblode/vscode-twig-language-2/issues).
@@ -223,7 +217,11 @@ Contributions, issues and feature requests are welcome !<br />Feel free to check
 
 Give a ⭐️ if this project helped you !
 
-## 📝 License
+## License
 
-Copyright © 2019 [Matthew Blode](https://github.com/mblode).<br />
-This project is [MIT](https://github.com/mblode/vscode-twig-language-2/blob/master/LICENSE.md) licensed.
+MIT
+
+---
+
+Crafted by [<img src="https://matthewblode.com/avatar-circle.png" width="20" align="top" />](https://matthewblode.com) [Matthew Blode](https://matthewblode.com)
+
