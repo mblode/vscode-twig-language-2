@@ -1,7 +1,12 @@
 .vscode/**
 .vscode-test/**
 test/**
+.github/**
 .gitignore
+.gitattributes
 jsconfig.json
 vsc-extension-quickstart.md
 .eslintrc.json
+rollup.config.js
+package-lock.json
+**/*.vsix
