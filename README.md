@@ -8,7 +8,7 @@ Open a `.twig` file and get highlighting, 113 Twig and Craft CMS snippets, and a
 
 <p align="center">
   <a href="https://marketplace.visualstudio.com/items?itemName=mblode.twig-language-2">
-    <img src="https://img.shields.io/visual-studio-marketplace/v/mblode.twig-language-2?style=flat&colorA=000000&colorB=000000" />
+    <img src="https://vsmarketplacebadges.dev/version-short/mblode.twig-language-2.svg?style=flat&colorA=000000&colorB=000000" />
   </a>
   <a href="https://github.com/mblode/vscode-twig-language-2/blob/master/LICENSE.md">
     <img src="https://img.shields.io/github/license/mblode/vscode-twig-language-2?style=flat&colorA=000000&colorB=000000" />
