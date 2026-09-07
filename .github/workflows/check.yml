@@ -1,0 +1,34 @@
+name: Check
+on:
+  push:
+    branches: [master]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  formatter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          tools: composer:v2
+      - run: npm ci
+      - run: composer install --working-dir=test/php --no-interaction --prefer-dist
+      - run: npm test
+      - run: npm run test:oracle
+      - run: npm run package
+      - run: unzip 'twig-language-2-*.vsix' -d /tmp/twig-vsix
+      - run: xvfb-run -a npm run test:extension
+        env:
+          VSCODE_VERSION: stable
+          TWIG_EXTENSION_PATH: /tmp/twig-vsix/extension
+      - uses: actions/upload-artifact@v4
+        with:
+          name: twig-language-2
+          path: "*.vsix"

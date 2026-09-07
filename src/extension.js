@@ -1,148 +1,132 @@
-import vscode from 'vscode'
-import prettydiff from 'prettydiff'
-import snippetsArr from './hover/filters.json'
-import functionsArr from './hover/functions.json'
-import twigArr from './hover/twig.json'
-
-const editor = vscode.workspace.getConfiguration('editor');
-const config = vscode.workspace.getConfiguration('twig-language-2');
-
-function createHover(snippet, type) {
-    const example = typeof snippet.example == 'undefined' ? '' : snippet.example
-    const description = typeof snippet.description == 'undefined' ? '' : snippet.description
-    return new vscode.Hover({
-        language: type,
-        value: description + '\n\n' + example
-    });
-}
-
-function prettyDiff(document, range) {
-    const result = [];
-    let output = "";
-    let options = prettydiff.options;
-
-    let tabSize = editor.tabSize;
-    let indentChar = " ";
-
-    if (config.tabSize > 0) {
-        tabSize = config.tabSize;
-    }
-
-    if (config.indentStyle == "tab") {
-        tabSize = 0;
-        indentChar = "\t";
-    }
-
-    options.source = document.getText(range);
-    options.mode = 'beautify';
-    options.language = 'html';
-    options.lexer = 'markup';
-    options.brace_line = config.braceLine;
-    options.brace_padding = config.bracePadding;
-    options.brace_style = config.braceStyle;
-    options.braces = config.braces;
-    options.comment_line = config.commentLine;
-    options.comments = config.comments;
-    options.compressed_css = config.compressedCss;
-    options.correct = config.correct;
-    options.cssInsertLines = config.cssInsertLines;
-    options.else_line = config.elseLine;
-    options.end_comma = config.endComma;
-    options.force_attribute = config.forceAttribute;
-    options.force_indent = config.forceIndent;
-    options.format_array = config.formatArray;
-    options.format_object = config.formatObject;
-    options.function_name = config.functionName;
-    options.indent_level = config.indentLevel;
-    options.indent_char = indentChar;
-    options.indent_size = tabSize;
-    options.method_chain = config.methodChain;
-    options.never_flatten = config.neverFlatten;
-    options.new_line = config.newLine;
-    options.no_case_indent = config.noCaseIndent;
-    options.no_lead_zero = config.noLeadZero;
-    options.object_sort = config.objectSort;
-    options.preserve = config.preserve;
-    options.preserve_comment = config.preserveComment;
-    options.quote_convert = config.quoteConvert;
-    options.space = config.space;
-    options.space_close = config.spaceClose;
-    options.tag_merge = config.tagMerge;
-    options.tag_sort = config.tagSort;
-    options.ternary_line = config.ternaryLine;
-    options.unformatted = config.unformatted;
-    options.variable_list = config.variableList;
-    options.vertical = config.vertical;
-    options.wrap = config.wrap;
-
-    output = prettydiff();
-
-    options.end = 0;
-    options.start = 0;
-
-    result.push(vscode.TextEdit.replace(range, output));
-    return result;
-};
+"use strict";
+const vscode = require("vscode");
+const path = require("node:path");
+const snippets = [
+  ...Object.values(require("./hover/filters.json")),
+  ...Object.values(require("./hover/functions.json")),
+  ...Object.values(require("./hover/twig.json")),
+];
+const { runFormatter } = require("./formatter/service");
+const { readOptions, matchesIgnore } = require("./formatter/settings");
 
 function activate(context) {
-    registerDocType('twig');
+  const pending = new Map();
+  const output = vscode.window.createOutputChannel("Twig Language 2");
+  context.subscriptions.push(output, {
+    dispose() {
+      for (const request of pending.values()) request.dispose();
+      pending.clear();
+    },
+  });
+  const configFor = (document) =>
+    vscode.workspace.getConfiguration("twig-language-2", {
+      uri: document.uri,
+      languageId: document.languageId,
+    });
 
-    function registerDocType(type) {
-        if (config.hover === true) {
-            context.subscriptions.push(vscode.languages.registerHoverProvider(type, {
-                provideHover(document, position) {
-                    const range = document.getWordRangeAtPosition(position);
-                    const word = document.getText(range);
-
-                    for (const snippet in snippetsArr) {
-                        if (snippetsArr[snippet].prefix == word || snippetsArr[snippet].hover == word) {
-                            return createHover(snippetsArr[snippet], type)
-                        }
-                    }
-
-                    for (const snippet in functionsArr) {
-                        if (functionsArr[snippet].prefix == word || functionsArr[snippet].hover == word) {
-                            return createHover(functionsArr[snippet], type)
-                        }
-                    }
-
-                    for (const snippet in twigArr) {
-                        if (twigArr[snippet].prefix == word || twigArr[snippet].hover == word) {
-                            return createHover(twigArr[snippet], type)
-                        }
-                    }
-                }
-            }));
-        }
-
-        if (config.formatting === true) {
-            context.subscriptions.push(vscode.languages.registerDocumentFormattingEditProvider(type, {
-                provideDocumentFormattingEdits: function (document) {
-                    const start = new vscode.Position(0, 0)
-
-                    const end = new vscode.Position(document.lineCount - 1, document.lineAt(document.lineCount - 1).text.length);
-
-                    const rng = new vscode.Range(start, end)
-                    return prettyDiff(document, rng);
-                }
-            }));
-
-            context.subscriptions.push(vscode.languages.registerDocumentRangeFormattingEditProvider(type, {
-                provideDocumentRangeFormattingEdits: function (document, range) {
-                    let end = range.end
-
-                    if (end.character === 0) {
-                        end = end.translate(-1, Number.MAX_VALUE);
-                    } else {
-                        end = end.translate(0, Number.MAX_VALUE);
-                    }
-
-                    const rng = new vscode.Range(new vscode.Position(range.start.line, 0), end)
-                    return prettyDiff(document, rng);
-                }
-            }));
-        }
+  async function provideEdits(document, options, cancellation, selection) {
+    const config = configFor(document);
+    if (!config.get("formatting", true) || cancellation.isCancellationRequested)
+      return [];
+    const filename = document.uri.fsPath;
+    if (
+      matchesIgnore(config.get("ignore", []), [
+        filename,
+        path.basename(filename),
+        vscode.workspace.asRelativePath(document.uri, false),
+      ])
+    )
+      return [];
+    const key = document.uri.toString();
+    pending.get(key)?.dispose();
+    const source = document.getText(),
+      version = document.version;
+    let range;
+    if (selection) {
+      if (selection.isEmpty) return [];
+      const lastLine =
+        selection.end.character === 0
+          ? Math.max(selection.start.line, selection.end.line - 1)
+          : selection.end.line;
+      range = {
+        start: document.offsetAt(new vscode.Position(selection.start.line, 0)),
+        end: document.offsetAt(document.lineAt(lastLine).range.end),
+      };
     }
-}
+    const timeout = Math.min(
+      30000,
+      Math.max(100, config.get("formatTimeout", 5000)),
+    );
+    let request;
+    try {
+      request = runFormatter(
+        context.asAbsolutePath("extension/formatter.js"),
+        source,
+        {
+          ...readOptions(config, options),
+          eol: document.eol === vscode.EndOfLine.CRLF ? "\r\n" : "\n",
+        },
+        range,
+        cancellation,
+        timeout,
+      );
+      pending.set(key, request);
+      const edits = await request.promise;
+      if (
+        document.version !== version ||
+        document.isClosed ||
+        cancellation.isCancellationRequested
+      )
+        return [];
+      return edits.map((edit) =>
+        vscode.TextEdit.replace(
+          new vscode.Range(
+            document.positionAt(edit.start),
+            document.positionAt(edit.end),
+          ),
+          edit.text,
+        ),
+      );
+    } catch (error) {
+      output.appendLine(
+        `Formatting skipped: ${error.message}. No edits applied.`,
+      );
+      vscode.window.setStatusBarMessage(
+        `Twig: formatting skipped (${error.message})`,
+        5000,
+      );
+      return [];
+    } finally {
+      if (pending.get(key) === request) pending.delete(key);
+    }
+  }
 
+  context.subscriptions.push(
+    vscode.languages.registerDocumentFormattingEditProvider("twig", {
+      provideDocumentFormattingEdits: (document, options, token) =>
+        provideEdits(document, options, token),
+    }),
+    vscode.languages.registerDocumentRangeFormattingEditProvider("twig", {
+      provideDocumentRangeFormattingEdits: (document, range, options, token) =>
+        provideEdits(document, options, token, range),
+    }),
+    vscode.languages.registerHoverProvider("twig", {
+      provideHover(document, position) {
+        if (!configFor(document).get("hover", true)) return;
+        const range = document.getWordRangeAtPosition(position);
+        if (!range) return;
+        const word = document.getText(range);
+        const snippet = snippets.find(
+          (item) => item.prefix === word || item.hover === word,
+        );
+        if (snippet)
+          return new vscode.Hover({
+            language: "twig",
+            value:
+              (snippet.description || "") + "\n\n" + (snippet.example || ""),
+          });
+      },
+    }),
+  );
+}
 exports.activate = activate;

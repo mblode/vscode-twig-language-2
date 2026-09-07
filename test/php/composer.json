@@ -1,0 +1,5 @@
+{
+  "description": "Official Twig oracle for formatter regression tests (development only)",
+  "require": {"twig/twig": "^3.0"},
+  "config": {"allow-plugins": false}
+}

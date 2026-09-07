@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.11.0] - 2026-09-08
+
+### Changed
+
+- Replace PrettyDiff with a source-preserving Twig/HTML formatter. Twig comparisons and nested quotes inside attributes no longer pass through an HTML-only parser.
+- Preserve attribute case/order, inline text, trim controls, raw regions and custom embedded blocks. Repeated formatting is stable across the regression corpus.
+- Format safely parseable JavaScript/CSS with bundled Prettier; preserve ambiguous Twig-generated bodies.
+- Follow current document indentation and apply settings changes immediately. Format selections with surrounding document context and return small edits.
+- Isolate formatting in a worker with cancellation, stale-result protection, a time limit and a 2 MiB input limit. Incomplete tokens return no edits.
+- Deprecate PrettyDiff-only transformations. Add file ignore globs, ignore regions, `embeddedFormatting` and `formatTimeout`. See README for migration details.
+- Require VS Code 1.85+. Keep existing syntax highlighting, snippets and hover assets.
+
+### Verification
+
+- Add issue/review-derived regressions, historical source fixtures, repeated-format and literal-preservation checks, official Twig PHP lexer/render checks, and real VS Code document/selection/save tests.
+- Add CI checks and verify the packaged extension independently of the development checkout.
+
 ## [0.10.0] - 2026-08-01
 
 ### Fixed
