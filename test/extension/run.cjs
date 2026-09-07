@@ -12,6 +12,8 @@ runTests({
   extensionTestsPath: path.resolve(__dirname, "suite.cjs"),
   launchArgs: [
     workspace,
+    `--user-data-dir=${path.join(workspace, ".profile")}`,
+    `--extensions-dir=${path.join(workspace, ".extensions")}`,
     "--disable-extensions",
     "--disable-workspace-trust",
     "--skip-welcome",

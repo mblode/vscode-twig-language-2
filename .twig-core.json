@@ -10,7 +10,7 @@
     "src/formatter/settings.js": "72b802871e487083439652e0a7842f32d573829a580f668c375c931c875c57c4",
     "src/formatter/worker.js": "05c9648e0f42c554fc366126d9a1458b9975442b4c09e6abee4b7dfc5539cd9d",
     "src/extension.js": "39427527e711823c8ca31cf7c72db2bee06159642b597058145e9a85fbdd6282",
-    "src/html.js": "cd4284b2d90475866d5ba72dd611f73867649b4f159c504b581d253c1a99490d",
+    "src/html.js": "e5e64bd8cc979b7895cb03cb56f2a42e2154b9b3742e9e723cc11a3333642b9b",
     "src/syntaxes/twig.tmLanguage": "4cc88a3eb19d949af86e25fb1c1327ba9777e260ea586c98faed6f3691fca6ef",
     "src/languages/twig.configuration.json": "8873c7003f803d3e143b9353d03bb1c2f8c04285b4063c83c66c61313803138b",
     "src/snippets/snippets.json": "4a7991e40b17c4bce212dd63915b8024ce4006cb78b9d98535bbeb31649b8942"

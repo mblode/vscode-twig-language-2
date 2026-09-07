@@ -152,7 +152,9 @@ exports.run = async () => {
   const closing = await open("closing.twig", "<section");
   vscode.window.activeTextEditor.selection = new vscode.Selection(0, 8, 0, 8);
   await vscode.commands.executeCommand("type", { text: ">" });
-  await new Promise((r) => setTimeout(r, 150));
+  const deadline = Date.now() + 2000;
+  while (closing.getText() === "<section>" && Date.now() < deadline)
+    await new Promise((resolve) => setTimeout(resolve, 20));
   assert.equal(
     closing.getText(),
     "<section></section>",

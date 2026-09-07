@@ -157,3 +157,73 @@ test("HTML completions retain source ranges after Twig expressions", () => {
   assert.equal(item.textEdit.range.start.character, 5);
   assert.equal(htmlDocument(document, { line: 0, character: 5 }), undefined);
 });
+
+test("closing tags wait for the cursor event and reject superseded changes", () => {
+  const { registerHTML } = require("../src/html");
+  let change,
+    selection,
+    inserted = [];
+  const d = TextDocument.create("file:///test.twig", "twig", 1, "<section>");
+  const document = {
+    uri: { toString: () => d.uri },
+    languageId: "twig",
+    version: 1,
+    getText: () => d.getText(),
+    offsetAt: (p) => d.offsetAt(p),
+    positionAt: (o) => d.positionAt(o),
+  };
+  const editor = {
+    document,
+    selections: [{}],
+    selection: { isEmpty: true, active: { isEqual: () => false } },
+    insertSnippet: (s) => inserted.push(s.value),
+  };
+  const disposable = { dispose() {} };
+  const vscode = {
+    languages: {
+      registerCompletionItemProvider: () => disposable,
+      registerHoverProvider: () => disposable,
+    },
+    window: {
+      activeTextEditor: editor,
+      onDidChangeTextEditorSelection: (fn) => {
+        selection = fn;
+        return disposable;
+      },
+    },
+    workspace: {
+      getConfiguration: () => ({ get: () => true }),
+      onDidChangeTextDocument: (fn) => {
+        change = fn;
+        return disposable;
+      },
+    },
+    SnippetString: class {
+      constructor(value) {
+        this.value = value;
+      }
+    },
+  };
+  const context = { subscriptions: [] };
+  registerHTML(vscode, context);
+  change({
+    document,
+    contentChanges: [{ rangeLength: 0, rangeOffset: 8, text: ">" }],
+  });
+  assert.deepEqual(inserted, []);
+  change({ document, contentChanges: [] });
+  editor.selection.active.isEqual = (p) => p.character === 9;
+  selection({ textEditor: editor });
+  assert.equal(inserted.length, 1);
+  assert(inserted[0].includes("</section>"));
+  editor.selection.active.isEqual = () => false;
+  change({
+    document,
+    contentChanges: [{ rangeLength: 0, rangeOffset: 8, text: ">" }],
+  });
+  document.version++;
+  editor.selection.active.isEqual = () => true;
+  selection({ textEditor: editor });
+  assert.equal(inserted.length, 1);
+  context.subscriptions.forEach((s) => s.dispose());
+});

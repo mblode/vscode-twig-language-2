@@ -129,9 +129,46 @@ function registerHTML(vscode, context) {
       },
     }),
   );
+  const pending = new Map();
+  const clear = (document) => {
+    const request = pending.get(document);
+    if (request) clearTimeout(request.timer);
+    pending.delete(document);
+  };
+  function closeTag(editor) {
+    const document = editor?.document;
+    const request = pending.get(document);
+    if (!request) return;
+    if (
+      document.version !== request.version ||
+      document.isClosed ||
+      vscode.window.activeTextEditor !== editor
+    ) {
+      clear(document);
+      return;
+    }
+    if (
+      editor.selections.length !== 1 ||
+      !editor.selection.isEmpty ||
+      !editor.selection.active.isEqual(request.position)
+    )
+      return;
+    clear(document);
+    void editor.insertSnippet(
+      new vscode.SnippetString(request.completion),
+      request.position,
+      { undoStopBefore: false, undoStopAfter: false },
+    );
+  }
   context.subscriptions.push(
+    vscode.window.onDidChangeTextEditorSelection((event) =>
+      closeTag(event.textEditor),
+    ),
     vscode.workspace.onDidChangeTextDocument((event) => {
       const document = event.document;
+      // Dirty-state notifications carry no content edits and must not cancel typing.
+      if (!event.contentChanges.length) return;
+      clear(document);
       if (document.languageId !== "twig" || event.contentChanges.length !== 1)
         return;
       const change = event.contentChanges[0];
@@ -158,34 +195,22 @@ function registerHTML(vscode, context) {
         html.parsed,
       );
       if (!completion) return;
-      const version = document.version;
-      // Cursor movement follows the document event. Recheck the live editor before inserting.
-      const timer = setTimeout(() => {
-        timers.delete(timer);
-        if (
-          document.version === version &&
-          !document.isClosed &&
-          vscode.window.activeTextEditor === editor &&
-          editor.selection.isEmpty &&
-          editor.selection.active.isEqual(position)
-        ) {
-          void editor.insertSnippet(
-            new vscode.SnippetString(completion),
-            position,
-            { undoStopBefore: false, undoStopAfter: false },
-          );
-        }
-      }, 0);
-      timers.add(timer);
+      const timer = setTimeout(() => clear(document), 1000);
       timer.unref?.();
+      pending.set(document, {
+        position,
+        completion,
+        version: document.version,
+        timer,
+      });
+      // Cursor and document events can arrive in either order across extension hosts.
+      closeTag(editor);
     }),
-  );
-  const timers = new Set();
-  context.subscriptions.push({
-    dispose() {
-      for (const timer of timers) clearTimeout(timer);
-      timers.clear();
+    {
+      dispose() {
+        for (const document of pending.keys()) clear(document);
+      },
     },
-  });
+  );
 }
 module.exports = { registerHTML, project, htmlDocument, service };

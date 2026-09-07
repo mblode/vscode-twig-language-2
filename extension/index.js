@@ -23708,9 +23708,37 @@ var require_html = __commonJS({
           }
         })
       );
+      const pending = /* @__PURE__ */ new Map();
+      const clear = (document) => {
+        const request = pending.get(document);
+        if (request) clearTimeout(request.timer);
+        pending.delete(document);
+      };
+      function closeTag(editor) {
+        const document = editor?.document;
+        const request = pending.get(document);
+        if (!request) return;
+        if (document.version !== request.version || document.isClosed || vscode2.window.activeTextEditor !== editor) {
+          clear(document);
+          return;
+        }
+        if (editor.selections.length !== 1 || !editor.selection.isEmpty || !editor.selection.active.isEqual(request.position))
+          return;
+        clear(document);
+        void editor.insertSnippet(
+          new vscode2.SnippetString(request.completion),
+          request.position,
+          { undoStopBefore: false, undoStopAfter: false }
+        );
+      }
       context.subscriptions.push(
+        vscode2.window.onDidChangeTextEditorSelection(
+          (event) => closeTag(event.textEditor)
+        ),
         vscode2.workspace.onDidChangeTextDocument((event) => {
           const document = event.document;
+          if (!event.contentChanges.length) return;
+          clear(document);
           if (document.languageId !== "twig" || event.contentChanges.length !== 1)
             return;
           const change = event.contentChanges[0];
@@ -23729,28 +23757,22 @@ var require_html = __commonJS({
             html.parsed
           );
           if (!completion) return;
-          const version = document.version;
-          const timer = setTimeout(() => {
-            timers.delete(timer);
-            if (document.version === version && !document.isClosed && vscode2.window.activeTextEditor === editor && editor.selection.isEmpty && editor.selection.active.isEqual(position)) {
-              void editor.insertSnippet(
-                new vscode2.SnippetString(completion),
-                position,
-                { undoStopBefore: false, undoStopAfter: false }
-              );
-            }
-          }, 0);
-          timers.add(timer);
+          const timer = setTimeout(() => clear(document), 1e3);
           timer.unref?.();
-        })
-      );
-      const timers = /* @__PURE__ */ new Set();
-      context.subscriptions.push({
-        dispose() {
-          for (const timer of timers) clearTimeout(timer);
-          timers.clear();
+          pending.set(document, {
+            position,
+            completion,
+            version: document.version,
+            timer
+          });
+          closeTag(editor);
+        }),
+        {
+          dispose() {
+            for (const document of pending.keys()) clear(document);
+          }
         }
-      });
+      );
     }
     module2.exports = { registerHTML, project, htmlDocument, service };
   }
