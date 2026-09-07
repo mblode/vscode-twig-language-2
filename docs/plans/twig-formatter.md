@@ -59,3 +59,13 @@ Both Twig distributions share identical formatter code, HTML service adapter, gr
 Acceptance: all formatter/oracle tests remain green; new TextMate tests use actual VS Code 1.85.2 embedded grammars; packaged extension tests cover HTML completion, closing tags, existing language identity, settings and format/save behavior. All published VSIX files must be tested in minimum and stable VS Code, built in CI and verified by public Marketplace download. Ambiguous reports without source and broader feature requests remain recorded as such in the audit. Browser-only hosting and arbitrary workspace plugins remain outside this release.
 
 Current VS Code references: https://code.visualstudio.com/api/working-with-extensions/publishing-extension#deprecating-extensions ; https://code.visualstudio.com/api/extension-guides/workspace-trust ; https://code.visualstudio.com/api/extension-guides/virtual-workspaces ; https://code.visualstudio.com/api/language-extensions/embedded-languages .
+
+## Release record, 8 September 2026
+
+Version 0.12.0 is published on [GitHub](https://github.com/mblode/vscode-twig-language-2/releases/tag/v0.12.0) at `c12b7cda17c4f347466b7343eec0a68a1c20d71a`. [Linux CI](https://github.com/mblode/vscode-twig-language-2/actions/runs/34167358166) passed the unit, official Twig oracle, build, packaging and extracted-extension integration gates. 301 tests passed with no skips. The packaged runtime also passed VS Code 1.85.2 and 1.136.1 on macOS using isolated test profiles. All CI-packaged file contents match the locally tested runtime/package.
+
+Production and development dependency audits report zero vulnerabilities. The GitHub VSIX download is byte-identical to the local release package. SHA-256: `86e5cb868721ae65b47f1cc3b9dfeb86dfd77ff6a725c3ad45df9bb2dedf5edc`.
+
+The public Marketplace VSIX download is byte-identical to the local package and GitHub asset. [Marketplace](https://marketplace.visualstudio.com/items?itemName=mblode.twig-language-2) reports version 0.12.0, last updated 2026-09-07T22:47:30.567Z. All release gates are complete.
+
+The final HTML closing-tag regression reproduces delayed cursor updates and an empty dirty-state change notification between typing and selection updates. The source waits for the matching cursor and document version; empty notifications do not cancel the pending insertion. `.twig-core.json` and its test enforce shared-file hashes. `scripts/sync-core.mjs` in Twig Language 2 is the source synchronization entry point.

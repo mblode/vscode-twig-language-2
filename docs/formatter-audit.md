@@ -352,3 +352,17 @@ The implementation at `3e8ce8881ac71c09c62919d0cecefe64dc46cfd7` passed 287 test
 Twig Language 2 0.12.0 and Twig Language 0.10.0 share the formatter and language assets. `test/language.test.js` adds executed TextMate regressions for Twig 1 #24/#26/#56 and Twig 2 #19/#44/#45/#53/#116, plus raw blocks and SCSS whitespace controls. Packaged Twig 2 tests cover HTML completion and #97 automatic closing tags. Snippet scopes and the malformed assets query are fixed; `<` is permitted after automatic Twig delimiter completion for Twig 1 #61.
 
 Pretty Formatter 0.3.0 replaces PrettyDiff with this Twig core and explicitly selected bundled parsers. Its `test/multiformat.test.js` covers #8/#9/#13/#14/#15/#18/#19/#22/#23/#24/#26; the packaged suite checks activation and live `disableLanguages`/formatting controls (#27). Worker limits address #21. Twig issue sources #12/#17 and inline HTML #3 are in the shared corpus. The old unverified claim of 38 fully formatted languages is removed; see Pretty Formatter README for current language-specific guarantees. Source-less or image-only reports still do not establish exact-case reproduction. No claim of every possible bug being eliminated is made.
+
+## Expanded release verification, 8 September 2026
+
+All three releases are published on GitHub and Marketplace. Each public Marketplace download is byte-identical to its tested local VSIX and GitHub release asset. All CI-built packaged file contents match the local packages. The tests below include shared cases executed in each distribution, not 908 distinct regressions.
+
+| Extension | Version | Passing tests | CI | VSIX SHA-256 |
+|---|---|---:|---|---|
+| twig-language-2 | [0.12.0](https://github.com/mblode/vscode-twig-language-2/releases/tag/v0.12.0) | 301 | [Passed](https://github.com/mblode/vscode-twig-language-2/actions/runs/34167358166) | `86e5cb868721ae65b47f1cc3b9dfeb86dfd77ff6a725c3ad45df9bb2dedf5edc` |
+| twig-language | [0.10.0](https://github.com/mblode/vscode-twig-language/releases/tag/v0.10.0) | 301 | [Passed](https://github.com/mblode/vscode-twig-language/actions/runs/34167526575) | `66e8b1f60bbe6fa3a313f0d2f8aae722a78c3c8e28bb58389b5fdcee84f6bffc` |
+| pretty-formatter | [0.3.0](https://github.com/mblode/vscode-pretty-formatter/releases/tag/v0.3.0) | 306 | [Passed](https://github.com/mblode/vscode-pretty-formatter/actions/runs/34167346063) | `2887270703883cbaa5460e7f6378564a476b1e50dec839e70be381490d8cfa07` |
+
+Each packaged runtime passed real VS Code 1.85.2 and 1.136.1 on macOS and stable VS Code on Linux. Test profiles are isolated. Official Twig lexer/render checks are required in CI and passed with no skips. Dependency audits report zero vulnerabilities in all three repositories. Shared source hashes are checked by `.twig-core.json` and `test/core-provenance.test.js`; the canonical synchronization script is `scripts/sync-core.mjs`. The language adapter also has a regression for delayed cursor updates and empty dirty-state notifications during automatic HTML closing.
+
+Both Twig listings retain their original IDs, language modes and settings namespaces. Twig Language 2 is the canonical source; Twig Language is the compatibility distribution. Unsupported Pretty Formatter dialects and reports without reproducible source retain the explicit limits described above and in each README.
