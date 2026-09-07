@@ -337,3 +337,11 @@ Ratings-only entries are included. Short descriptions below are dispositions, no
 | [pretty-formatter](https://marketplace.visualstudio.com/items?itemName=mblode.pretty-formatter&ssr=false#review-details) | 142121 | 5/5 | Positive feedback |
 | [pretty-formatter](https://marketplace.visualstudio.com/items?itemName=mblode.pretty-formatter&ssr=false#review-details) | 141841 | 1/5 | Needs source: reported HTML deletion |
 | [pretty-formatter](https://marketplace.visualstudio.com/items?itemName=mblode.pretty-formatter&ssr=false#review-details) | 141637 | 5/5 | Rating only |
+
+## Release verification
+
+The implementation at `3e8ce8881ac71c09c62919d0cecefe64dc46cfd7` passed 287 tests with no skipped tests, including the independent official Twig oracle. The real VS Code integration suite passed on macOS with VS Code 1.85.2 and 1.136.1, and on Linux in [CI](https://github.com/mblode/vscode-twig-language-2/actions/runs/34164220987). Both local and CI tests exercised the extracted release VSIX. Their 13 packaged files are byte-identical. Production and development npm audits report zero vulnerabilities.
+
+[Release and VSIX](https://github.com/mblode/vscode-twig-language-2/releases/tag/v0.11.0). SHA-256: `fdcfa3a5b5589752203727bae6b4805b8cd3521c8fa7ecad0ab51cc01cb6f12b`.
+
+[Marketplace](https://marketplace.visualstudio.com/items?itemName=mblode.twig-language-2) reports version 0.11.0, updated 2026-09-07T21:53:18.703Z. The publicly downloaded package, after HTTP gzip decompression, is byte-identical to the tested local VSIX and GitHub release asset. Its version manifest is 0.11.0 and its SHA-256 matches the value above.
