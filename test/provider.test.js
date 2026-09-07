@@ -65,13 +65,15 @@ test("provider discards stale results, cancels superseded requests and releases 
   vm.runInNewContext(fs.readFileSync(path.join(base, "extension.js"), "utf8"), {
     exports,
     require: (name) =>
-      name === "vscode"
-        ? vscode
-        : name === "./formatter/service"
-          ? service
-          : name.startsWith(".")
-            ? require(path.join(base, name))
-            : require(name),
+      name === "./html"
+        ? { registerHTML() {} }
+        : name === "vscode"
+          ? vscode
+          : name === "./formatter/service"
+            ? service
+            : name.startsWith(".")
+              ? require(path.join(base, name))
+              : require(name),
   });
   exports.activate(context);
   const document = {

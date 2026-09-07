@@ -1,0 +1,18 @@
+{
+  "source": "mblode/vscode-twig-language-2",
+  "version": "0.12.0",
+  "files": {
+    "src/formatter/embedded.js": "13c42c2f5a0b100ebdc9afe4b4ad87cb47d47e96397113e0b0f2bd3754648e56",
+    "src/formatter/format.js": "27e6d6d5f5e69bedd21251b3e1143d35655f808c3849752f3741400e9b558cd5",
+    "src/formatter/lexer.js": "2d6260344f609095edd4a17d021c254cbec90320f1139384147d97b2af7cdf75",
+    "src/formatter/preservation.js": "14d34cb7a0aecef3c66375166d199e52e468f92dfd540f73e90bf4a0658666ac",
+    "src/formatter/service.js": "02e5346302c2dbe83bb2cc34e326cc648e88b88edd3662fb5d15ba6367779192",
+    "src/formatter/settings.js": "72b802871e487083439652e0a7842f32d573829a580f668c375c931c875c57c4",
+    "src/formatter/worker.js": "05c9648e0f42c554fc366126d9a1458b9975442b4c09e6abee4b7dfc5539cd9d",
+    "src/extension.js": "39427527e711823c8ca31cf7c72db2bee06159642b597058145e9a85fbdd6282",
+    "src/html.js": "cd4284b2d90475866d5ba72dd611f73867649b4f159c504b581d253c1a99490d",
+    "src/syntaxes/twig.tmLanguage": "4cc88a3eb19d949af86e25fb1c1327ba9777e260ea586c98faed6f3691fca6ef",
+    "src/languages/twig.configuration.json": "8873c7003f803d3e143b9353d03bb1c2f8c04285b4063c83c66c61313803138b",
+    "src/snippets/snippets.json": "4a7991e40b17c4bce212dd63915b8024ce4006cb78b9d98535bbeb31649b8942"
+  }
+}

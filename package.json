@@ -2,7 +2,7 @@
   "name": "twig-language-2",
   "displayName": "Twig Language 2",
   "description": "Snippets, Syntax Highlighting, Hover, and Formatting for Twig",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "publisher": "mblode",
   "license": "MIT",
   "author": {
@@ -410,7 +410,10 @@
     }
   },
   "capabilities": {
-    "hoverProvider": "true"
+    "untrustedWorkspaces": {
+      "supported": true
+    },
+    "virtualWorkspaces": true
   },
   "scripts": {
     "start": "npm run build",
@@ -423,11 +426,15 @@
     "test:oracle": "TWIG_ORACLE_REQUIRED=1 node --test test/oracle.test.js"
   },
   "devDependencies": {
-    "esbuild": "0.28.2",
     "@vscode/test-electron": "3.1.0",
-    "@vscode/vsce": "3.9.2"
+    "@vscode/vsce": "3.9.2",
+    "esbuild": "0.28.2",
+    "vscode-oniguruma": "2.0.1",
+    "vscode-textmate": "9.3.2"
   },
   "dependencies": {
-    "prettier": "3.9.6"
+    "prettier": "3.9.6",
+    "vscode-html-languageservice": "5.6.2",
+    "vscode-languageserver-textdocument": "1.0.14"
   }
 }

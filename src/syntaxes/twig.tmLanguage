@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
     <key>fileTypes</key>
@@ -30,8 +30,135 @@
     <key>patterns</key>
     <array>
         <dict>
+            <key>include</key>
+            <string>#twig-verbatim</string>
+        </dict>
+        <dict>
             <key>begin</key>
-            <string>(&lt;)([a-zA-Z0-9:]++)(?=[^&gt;]*&gt;&lt;/\2&gt;)</string>
+            <string>(\{%[-~]?)\s*(js|includejs|javascript)\s*([-~]?%\})</string>
+            <key>beginCaptures</key>
+            <dict>
+                <key>1</key>
+                <dict>
+                    <key>name</key>
+                    <string>punctuation.section.tag.twig</string>
+                </dict>
+                <key>2</key>
+                <dict>
+                    <key>name</key>
+                    <string>keyword.control.twig</string>
+                </dict>
+                <key>3</key>
+                <dict>
+                    <key>name</key>
+                    <string>punctuation.section.tag.twig</string>
+                </dict>
+            </dict>
+            <key>end</key>
+            <string>(\{%[-~]?)\s*end\2\s*([-~]?%\})</string>
+            <key>endCaptures</key>
+            <dict>
+                <key>0</key>
+                <dict>
+                    <key>name</key>
+                    <string>keyword.control.twig</string>
+                </dict>
+            </dict>
+            <key>contentName</key>
+            <string>source.js.embedded.twig</string>
+            <key>patterns</key>
+            <array>
+                <dict>
+                    <key>include</key>
+                    <string>source.js</string>
+                </dict>
+            </array>
+        </dict>
+        <dict>
+            <key>begin</key>
+            <string>(\{%[-~]?)\s*(css|includecss|includehirescss)\s*([-~]?%\})</string>
+            <key>beginCaptures</key>
+            <dict>
+                <key>1</key>
+                <dict>
+                    <key>name</key>
+                    <string>punctuation.section.tag.twig</string>
+                </dict>
+                <key>2</key>
+                <dict>
+                    <key>name</key>
+                    <string>keyword.control.twig</string>
+                </dict>
+                <key>3</key>
+                <dict>
+                    <key>name</key>
+                    <string>punctuation.section.tag.twig</string>
+                </dict>
+            </dict>
+            <key>end</key>
+            <string>(\{%[-~]?)\s*end\2\s*([-~]?%\})</string>
+            <key>endCaptures</key>
+            <dict>
+                <key>0</key>
+                <dict>
+                    <key>name</key>
+                    <string>keyword.control.twig</string>
+                </dict>
+            </dict>
+            <key>contentName</key>
+            <string>source.css.embedded.twig</string>
+            <key>patterns</key>
+            <array>
+                <dict>
+                    <key>include</key>
+                    <string>source.css</string>
+                </dict>
+            </array>
+        </dict>
+        <dict>
+            <key>begin</key>
+            <string>(\{%[-~]?)\s*(scss|includescss|includehiresscss)\s*([-~]?%\})</string>
+            <key>beginCaptures</key>
+            <dict>
+                <key>1</key>
+                <dict>
+                    <key>name</key>
+                    <string>punctuation.section.tag.twig</string>
+                </dict>
+                <key>2</key>
+                <dict>
+                    <key>name</key>
+                    <string>keyword.control.twig</string>
+                </dict>
+                <key>3</key>
+                <dict>
+                    <key>name</key>
+                    <string>punctuation.section.tag.twig</string>
+                </dict>
+            </dict>
+            <key>end</key>
+            <string>(\{%[-~]?)\s*end\2\s*([-~]?%\})</string>
+            <key>endCaptures</key>
+            <dict>
+                <key>0</key>
+                <dict>
+                    <key>name</key>
+                    <string>keyword.control.twig</string>
+                </dict>
+            </dict>
+            <key>contentName</key>
+            <string>source.css.scss.embedded.twig</string>
+            <key>patterns</key>
+            <array>
+                <dict>
+                    <key>include</key>
+                    <string>source.css.scss</string>
+                </dict>
+            </array>
+        </dict>
+        <dict>
+            <key>begin</key>
+            <string>(&lt;)([a-zA-Z0-9:.-]++)(?=[^&gt;]*&gt;&lt;/\2&gt;)</string>
             <key>beginCaptures</key>
             <dict>
                 <key>1</key>
@@ -353,8 +480,6 @@
                             <key>include</key>
                             <string>#php</string>
                         </dict>
-
-                        <!-- TWIG START -->
                         <dict>
                             <key>include</key>
                             <string>#twig-print-tag</string>
@@ -367,71 +492,11 @@
                             <key>include</key>
                             <string>#twig-comment-tag</string>
                         </dict>
-                        <!-- TWIG END -->
-
                         <dict>
                             <key>include</key>
                             <string>source.js</string>
                         </dict>
                     </array>
-                </dict>
-            </array>
-        </dict>
-        <dict>
-            <key>begin</key>
-            <string>(?ix)   # Enable free spacing mode, case insensitive
-                        # Make sure our opening js tag has word boundaries
-                        (?&lt;=\{\%\sjs\s\%\}|\{\%\sincludejs\s\%\})
-                    </string>
-            <key>comment</key>
-            <string>Add JS support to set tags that use the pattern "css" in their name</string>
-            <key>end</key>
-            <string>(?ix)(?=\{\%\sendjs\s\%\}|\{\%\sendincludejs\s\%\})</string>
-            <key>name</key>
-            <string>source.js.embedded.twig</string>
-            <key>patterns</key>
-            <array>
-                <dict>
-                <key>include</key>
-                <string>source.js</string>
-                </dict>
-            </array>
-        </dict>
-        <dict>
-            <key>begin</key>
-            <string>(?ix)   # Enable free spacing mode, case insensitive
-                        (?&lt;=\{\%\scss\s\%\}|\{\%\sincludecss\s\%\}|\{\%\sincludehirescss\s\%\})
-                        </string>
-            <key>comment</key>
-            <string>Add CSS support to set tags that use the pattern "css" in their name</string>
-            <key>end</key>
-            <string>(?ix)(?=\{\%\sendcss\s\%\}|\{\%\sendincludecss\s\%\}|\{\%\sendincludehirescss\s\%\})</string>
-            <key>name</key>
-            <string>source.css.embedded.twig</string>
-            <key>patterns</key>
-            <array>
-                <dict>
-                    <key>include</key>
-                    <string>source.css</string>
-                </dict>
-            </array>
-        </dict>
-        <dict>
-            <key>begin</key>
-            <string>(?ix)   # Enable free spacing mode, case insensitive
-                        (?&lt;=\{\%\sscss\s\%\}|\{\%\sincludescss\s\%\}|\{\%\sincludehiresscss\s\%\})
-                        </string>
-            <key>comment</key>
-            <string>Add SCSS support to set tags that use the pattern "scss" in their name</string>
-            <key>end</key>
-            <string>(?ix)(?=\{\%\sendscss\s\%\}|\{\%\sendincludescss\s\%\}|\{\%\sendincludehiresscss\s\%\})</string>
-            <key>name</key>
-            <string>source.css.scss.embedded.twig</string>
-            <key>patterns</key>
-            <array>
-                <dict>
-                    <key>include</key>
-                    <string>source.css.scss</string>
                 </dict>
             </array>
         </dict>
@@ -537,7 +602,7 @@
         </dict>
         <dict>
             <key>begin</key>
-            <string>(&lt;/?)([a-zA-Z0-9:]+)</string>
+            <string>(&lt;/?)([a-zA-Z0-9:.-]+)</string>
             <key>beginCaptures</key>
             <dict>
                 <key>1</key>
@@ -587,8 +652,6 @@
             <key>name</key>
             <string>invalid.illegal.bad-angle-bracket.html</string>
         </dict>
-
-        <!-- TWIG START -->
         <dict>
             <key>include</key>
             <string>#twig-verbatim</string>
@@ -605,7 +668,6 @@
             <key>include</key>
             <string>#twig-comment-tag</string>
         </dict>
-        <!-- TWIG END -->
     </array>
     <key>repository</key>
     <dict>
@@ -615,14 +677,16 @@
             <array>
                 <dict>
                     <key>include</key>
+                    <string>#twig-verbatim</string>
+                </dict>
+                <dict>
+                    <key>include</key>
                     <string>#ruby</string>
                 </dict>
                 <dict>
                     <key>include</key>
                     <string>#php</string>
                 </dict>
-
-                <!-- TWIG START -->
                 <dict>
                     <key>include</key>
                     <string>#twig-print-tag</string>
@@ -635,8 +699,6 @@
                     <key>include</key>
                     <string>#twig-comment-tag</string>
                 </dict>
-                <!-- TWIG END -->
-
                 <dict>
                     <key>include</key>
                     <string>#python</string>
@@ -674,14 +736,10 @@
                 </dict>
             </array>
         </dict>
-
-        <!-- TWIG START -->
-
-        <!-- PRINT TAG -->
         <key>twig-print-tag</key>
         <dict>
             <key>begin</key>
-            <string>\{\{-?</string>
+            <string>\{\{[-~]?</string>
             <key>beginCaptures</key>
             <dict>
                 <key>0</key>
@@ -691,7 +749,7 @@
                 </dict>
             </dict>
             <key>end</key>
-            <string>-?\}\}</string>
+            <string>[-~]?\}\}</string>
             <key>endCaptures</key>
             <dict>
                 <key>0</key>
@@ -762,12 +820,10 @@
                 </dict>
             </array>
         </dict>
-
-        <!-- STATEMENT TAG -->
         <key>twig-statement-tag</key>
         <dict>
             <key>begin</key>
-            <string>\{%-?</string>
+            <string>\{%[-~]?</string>
             <key>beginCaptures</key>
             <dict>
                 <key>0</key>
@@ -777,7 +833,7 @@
                 </dict>
             </dict>
             <key>end</key>
-            <string>-?%\}</string>
+            <string>[-~]?%\}</string>
             <key>endCaptures</key>
             <dict>
                 <key>0</key>
@@ -852,12 +908,10 @@
                 </dict>
             </array>
         </dict>
-
-        <!-- COMMENT TAG -->
         <key>twig-comment-tag</key>
         <dict>
             <key>begin</key>
-            <string>\{#-?</string>
+            <string>\{#[-~]?</string>
             <key>beginCaptures</key>
             <dict>
                 <key>0</key>
@@ -867,7 +921,7 @@
                 </dict>
             </dict>
             <key>end</key>
-            <string>-?#\}</string>
+            <string>[-~]?#\}</string>
             <key>endCaptures</key>
             <dict>
                 <key>0</key>
@@ -879,12 +933,10 @@
             <key>name</key>
             <string>comment.block.twig</string>
         </dict>
-
-        <!-- VERBATIM -->
         <key>twig-verbatim</key>
         <dict>
             <key>begin</key>
-            <string>(\{%-?)\s*(verbatim)\s*(-?%\})</string>
+            <string>(\{%[-~]?)\s*(verbatim)\s*([-~]?%\})</string>
             <key>beginCaptures</key>
             <dict>
                 <key>1</key>
@@ -904,7 +956,7 @@
                 </dict>
             </dict>
             <key>end</key>
-            <string>(\{%-?)\s*(endverbatim)\s*(-?%\})</string>
+            <string>(\{%[-~]?)\s*(endverbatim)\s*([-~]?%\})</string>
             <key>endCaptures</key>
             <dict>
                 <key>1</key>
@@ -928,20 +980,16 @@
             <key>contentName</key>
             <string>string.unquoted.verbatim.twig</string>
         </dict>
-
-        <!-- CONSTANTS -->
         <key>twig-constants</key>
         <dict>
             <key>patterns</key>
             <array>
-                <!-- LANGUAGE -->
                 <dict>
                     <key>match</key>
                     <string>(?i)(?&lt;=[\s\[\(\{:,])(?:true|false|null|none)(?=[\s\)\]\}\,])</string>
                     <key>name</key>
                     <string>constant.language.twig</string>
                 </dict>
-                <!-- NUMERIC -->
                 <dict>
                     <key>match</key>
                     <string>(?&lt;=[\s\[\(\{:,]|\.\.|\*\*)[0-9]+(?:\.[0-9]+)?(?=[\s\)\]\}\,]|\.\.|\*\*)</string>
@@ -950,13 +998,16 @@
                 </dict>
             </array>
         </dict>
-
-        <!-- OPERATORS -->
         <key>twig-operators</key>
         <dict>
             <key>patterns</key>
             <array>
-                <!-- ARITHMETIC -->
+                <dict>
+                    <key>match</key>
+                    <string>\?\?|\?:|\?\.|&lt;=&gt;|=&gt;|===|!==</string>
+                    <key>name</key>
+                    <string>keyword.operator.twig</string>
+                </dict>
                 <dict>
                     <key>captures</key>
                     <dict>
@@ -969,8 +1020,6 @@
                     <key>match</key>
                     <string>(?&lt;=\s)(\+|-|//?|%|\*\*?)(?=\s)</string>
                 </dict>
-
-                <!-- ASSIGNMENT -->
                 <dict>
                     <key>captures</key>
                     <dict>
@@ -983,8 +1032,6 @@
                     <key>match</key>
                     <string>(?&lt;=\s)(=|~)(?=\s)</string>
                 </dict>
-
-                <!-- BITWISE -->
                 <dict>
                     <key>captures</key>
                     <dict>
@@ -997,8 +1044,6 @@
                     <key>match</key>
                     <string>(?&lt;=\s)(b-(?:and|or|xor))(?=\s)</string>
                 </dict>
-
-                <!-- COMPARISON -->
                 <dict>
                     <key>captures</key>
                     <dict>
@@ -1011,8 +1056,6 @@
                     <key>match</key>
                     <string>(?&lt;=\s)((?:!|=)=|&lt;=?|&gt;=?|(?:not )?in|is(?: not)?|(?:ends|starts) with|matches)(?=\s)</string>
                 </dict>
-
-                <!-- LOGICAL -->
                 <dict>
                     <key>captures</key>
                     <dict>
@@ -1025,8 +1068,6 @@
                     <key>match</key>
                     <string>(?&lt;=\s)(\?|:|\?:|\?\?|and|not|or)(?=\s)</string>
                 </dict>
-
-                <!-- RANGE -->
                 <dict>
                     <key>captures</key>
                     <dict>
@@ -1039,8 +1080,6 @@
                     <key>match</key>
                     <string>(?&lt;=[a-zA-Z0-9_\x{7f}-\x{ff}\]\)'"])\.\.(?=[a-zA-Z0-9_\x{7f}-\x{ff}'"])</string>
                 </dict>
-
-                <!-- FILTER -->
                 <dict>
                     <key>captures</key>
                     <dict>
@@ -1055,8 +1094,6 @@
                 </dict>
             </array>
         </dict>
-
-        <!-- OBJECTS -->
         <key>twig-objects</key>
         <dict>
             <key>captures</key>
@@ -1070,13 +1107,10 @@
             <key>match</key>
             <string>(?&lt;=[\s\{\[\(:,])([a-zA-Z_\x{7f}-\x{ff}][a-zA-Z0-9_\x{7f}-\x{ff}]*)(?=[\s\}\[\]\(\)\.\|,:])</string>
         </dict>
-
-        <!-- PROPERTIES -->
         <key>twig-properties</key>
         <dict>
             <key>patterns</key>
             <array>
-                <!-- DOT NOTATION (properties) -->
                 <dict>
                     <key>captures</key>
                     <dict>
@@ -1098,8 +1132,6 @@
                         (?=[\.\s\|\[\)\]\}:,])
                     </string>
                 </dict>
-
-                <!-- DOT NOTATION (methods) -->
                 <dict>
                     <key>begin</key>
                     <string>(?x)
@@ -1189,8 +1221,6 @@
                     <key>contentName</key>
                     <string>meta.function.arguments.twig</string>
                 </dict>
-
-                <!-- ARRAY NOTATION -->
                 <dict>
                     <key>captures</key>
                     <dict>
@@ -1252,16 +1282,13 @@
                 </dict>
             </array>
         </dict>
-
-        <!-- STRINGS -->
         <key>twig-strings</key>
         <dict>
             <key>patterns</key>
             <array>
-                <!-- SINGLE QUOTED STRINGS -->
                 <dict>
                     <key>begin</key>
-                    <string>(?:(?&lt;!\\)|(?&lt;=\\\\))'</string>
+                    <string>'</string>
                     <key>beginCaptures</key>
                     <dict>
                         <key>0</key>
@@ -1271,7 +1298,7 @@
                         </dict>
                     </dict>
                     <key>end</key>
-                    <string>(?:(?&lt;!\\)|(?&lt;=\\\\))'</string>
+                    <string>'</string>
                     <key>endCaptures</key>
                     <dict>
                         <key>0</key>
@@ -1282,12 +1309,19 @@
                     </dict>
                     <key>name</key>
                     <string>string.quoted.single.twig</string>
+                    <key>patterns</key>
+                    <array>
+                        <dict>
+                            <key>match</key>
+                            <string>\\.</string>
+                            <key>name</key>
+                            <string>constant.character.escape.twig</string>
+                        </dict>
+                    </array>
                 </dict>
-
-                <!-- DOUBLE QUOTED STRINGS -->
                 <dict>
                     <key>begin</key>
-                    <string>(?:(?&lt;!\\)|(?&lt;=\\\\))"</string>
+                    <string>"</string>
                     <key>beginCaptures</key>
                     <dict>
                         <key>0</key>
@@ -1297,7 +1331,7 @@
                         </dict>
                     </dict>
                     <key>end</key>
-                    <string>(?:(?&lt;!\\)|(?&lt;=\\\\))"</string>
+                    <string>"</string>
                     <key>endCaptures</key>
                     <dict>
                         <key>0</key>
@@ -1308,11 +1342,18 @@
                     </dict>
                     <key>name</key>
                     <string>string.quoted.double.twig</string>
+                    <key>patterns</key>
+                    <array>
+                        <dict>
+                            <key>match</key>
+                            <string>\\.</string>
+                            <key>name</key>
+                            <string>constant.character.escape.twig</string>
+                        </dict>
+                    </array>
                 </dict>
             </array>
         </dict>
-
-        <!-- ARRAYS -->
         <key>twig-arrays</key>
         <dict>
             <key>begin</key>
@@ -1403,8 +1444,6 @@
             <key>name</key>
             <string>meta.array.twig</string>
         </dict>
-
-        <!-- HASHES -->
         <key>twig-hashes</key>
         <dict>
             <key>begin</key>
@@ -1501,17 +1540,13 @@
             <key>name</key>
             <string>meta.hash.twig</string>
         </dict>
-
-        <!-- KEYWORDS -->
         <key>twig-keywords</key>
         <dict>
             <key>match</key>
-            <string>(?&lt;=\s)((?:end)?(?:autoescape|block|embed|filter|for|if|macro|raw|sandbox|set|spaceless|trans|verbatim)|as|do|else|elseif|extends|flush|from|ignore missing|import|include|only|types|use|with)(?=\s)</string>
+            <string>\b(?:(?:end)?(?:apply|autoescape|block|cache|deprecated|embed|filter|for|if|macro|raw|sandbox|set|spaceless|trans|verbatim|with)|as|do|else|elseif|extends|flush|from|import|include|only|types|use)\b</string>
             <key>name</key>
             <string>keyword.control.twig</string>
         </dict>
-
-        <!-- FUNCTIONS (w/ arguments) -->
         <key>twig-functions-warg</key>
         <dict>
             <key>begin</key>
@@ -1593,8 +1628,6 @@
             <key>contentName</key>
             <string>meta.function.arguments.twig</string>
         </dict>
-
-        <!-- FUNCTIONS -->
         <key>twig-functions</key>
         <dict>
             <key>captures</key>
@@ -1613,8 +1646,6 @@
             <key>match</key>
             <string>(?&lt;=is\s)(?:(not)\s+)?(defined|empty|even|iterable|odd|null|same\s+as)</string>
         </dict>
-
-        <!-- MACROS -->
         <key>twig-macros</key>
         <dict>
             <key>begin</key>
@@ -1720,10 +1751,7 @@
             </array>
             <key>contentName</key>
             <string>meta.function.arguments.twig</string>
-
         </dict>
-
-        <!-- FILTERS (w/ arguments) -->
         <key>twig-filters-warg</key>
         <dict>
             <key>begin</key>
@@ -1813,8 +1841,6 @@
             <key>contentName</key>
             <string>meta.function.arguments.twig</string>
         </dict>
-
-        <!-- FILTERS -->
         <key>twig-filters</key>
         <dict>
             <key>captures</key>
@@ -1826,10 +1852,8 @@
                 </dict>
             </dict>
             <key>match</key>
-            <string>(?&lt;=(?:[a-zA-Z0-9_\x{7f}-\x{ff}\]\)\'\"]\|)|\{%\sfilter\s)(abs|capitalize|e(?:scape)?|first|join|(?:json|url)_encode|keys|last|length|lower|nl2br|number_format|raw|reverse|round|sort|striptags|title|trim|upper)(?=[\s\|\]\}\):,]|\.\.|\*\*)</string>
+            <string>(?&lt;=(?:[a-zA-Z0-9_\x{7f}-\x{ff}\]\)\'\"]\|)|\{%\sfilter\s)(default|abs|capitalize|e(?:scape)?|first|join|(?:json|url)_encode|keys|last|length|lower|nl2br|number_format|raw|reverse|round|sort|striptags|title|trim|upper)(?=[\s\|\]\}\):,]|\.\.|\*\*)</string>
         </dict>
-
-        <!-- FILTERS (w/ arguments & user-defined) -->
         <key>twig-filters-warg-ud</key>
         <dict>
             <key>begin</key>
@@ -1915,8 +1939,6 @@
             <key>contentName</key>
             <string>meta.function.arguments.twig</string>
         </dict>
-
-        <!-- FILTERS (user-defined) -->
         <key>twig-filters-ud</key>
         <dict>
             <key>captures</key>
@@ -1930,9 +1952,6 @@
             <key>match</key>
             <string>(?&lt;=(?:[a-zA-Z0-9_\x{7f}-\x{ff}\]\)\'\"]\|)|\{%\sfilter\s)([a-zA-Z_\x{7f}-\x{ff}][a-zA-Z0-9_\x{7f}-\x{ff}]*)</string>
         </dict>
-
-        <!-- TWIG END -->
-
         <key>php</key>
         <dict>
             <key>begin</key>
@@ -2242,6 +2261,29 @@
             <key>patterns</key>
             <array>
                 <dict>
+                    <key>begin</key>
+                    <string>(=)\s*(?=[^\s\'"=&lt;&gt;`])</string>
+                    <key>beginCaptures</key>
+                    <dict>
+                        <key>1</key>
+                        <dict>
+                            <key>name</key>
+                            <string>punctuation.separator.key-value.html</string>
+                        </dict>
+                    </dict>
+                    <key>end</key>
+                    <string>(?=[\s&gt;])</string>
+                    <key>contentName</key>
+                    <string>string.unquoted.html</string>
+                    <key>patterns</key>
+                    <array>
+                        <dict>
+                            <key>include</key>
+                            <string>#embedded-code</string>
+                        </dict>
+                    </array>
+                </dict>
+                <dict>
                     <key>include</key>
                     <string>#tag-id-attribute</string>
                 </dict>
@@ -2263,10 +2305,256 @@
                 </dict>
             </array>
         </dict>
+        <key>twig-embedded-blocks</key>
+        <dict>
+            <key>patterns</key>
+            <array>
+                <dict>
+                    <key>begin</key>
+                    <string>(\{%[-~]?)\s*(js|includejs|javascript)\s*([-~]?%\})</string>
+                    <key>beginCaptures</key>
+                    <dict>
+                        <key>1</key>
+                        <dict>
+                            <key>name</key>
+                            <string>punctuation.section.tag.twig</string>
+                        </dict>
+                        <key>2</key>
+                        <dict>
+                            <key>name</key>
+                            <string>keyword.control.twig</string>
+                        </dict>
+                        <key>3</key>
+                        <dict>
+                            <key>name</key>
+                            <string>punctuation.section.tag.twig</string>
+                        </dict>
+                    </dict>
+                    <key>end</key>
+                    <string>(\{%[-~]?)\s*end\2\s*([-~]?%\})</string>
+                    <key>endCaptures</key>
+                    <dict>
+                        <key>0</key>
+                        <dict>
+                            <key>name</key>
+                            <string>keyword.control.twig</string>
+                        </dict>
+                    </dict>
+                    <key>contentName</key>
+                    <string>source.js.embedded.twig</string>
+                    <key>patterns</key>
+                    <array>
+                        <dict>
+                            <key>include</key>
+                            <string>source.js</string>
+                        </dict>
+                    </array>
+                </dict>
+                <dict>
+                    <key>begin</key>
+                    <string>(\{%[-~]?)\s*(css|includecss|includehirescss)\s*([-~]?%\})</string>
+                    <key>beginCaptures</key>
+                    <dict>
+                        <key>1</key>
+                        <dict>
+                            <key>name</key>
+                            <string>punctuation.section.tag.twig</string>
+                        </dict>
+                        <key>2</key>
+                        <dict>
+                            <key>name</key>
+                            <string>keyword.control.twig</string>
+                        </dict>
+                        <key>3</key>
+                        <dict>
+                            <key>name</key>
+                            <string>punctuation.section.tag.twig</string>
+                        </dict>
+                    </dict>
+                    <key>end</key>
+                    <string>(\{%[-~]?)\s*end\2\s*([-~]?%\})</string>
+                    <key>endCaptures</key>
+                    <dict>
+                        <key>0</key>
+                        <dict>
+                            <key>name</key>
+                            <string>keyword.control.twig</string>
+                        </dict>
+                    </dict>
+                    <key>contentName</key>
+                    <string>source.css.embedded.twig</string>
+                    <key>patterns</key>
+                    <array>
+                        <dict>
+                            <key>include</key>
+                            <string>source.css</string>
+                        </dict>
+                    </array>
+                </dict>
+                <dict>
+                    <key>begin</key>
+                    <string>(\{%[-~]?)\s*(scss|includescss|includehiresscss)\s*([-~]?%\})</string>
+                    <key>beginCaptures</key>
+                    <dict>
+                        <key>1</key>
+                        <dict>
+                            <key>name</key>
+                            <string>punctuation.section.tag.twig</string>
+                        </dict>
+                        <key>2</key>
+                        <dict>
+                            <key>name</key>
+                            <string>keyword.control.twig</string>
+                        </dict>
+                        <key>3</key>
+                        <dict>
+                            <key>name</key>
+                            <string>punctuation.section.tag.twig</string>
+                        </dict>
+                    </dict>
+                    <key>end</key>
+                    <string>(\{%[-~]?)\s*end\2\s*([-~]?%\})</string>
+                    <key>endCaptures</key>
+                    <dict>
+                        <key>0</key>
+                        <dict>
+                            <key>name</key>
+                            <string>keyword.control.twig</string>
+                        </dict>
+                    </dict>
+                    <key>contentName</key>
+                    <string>source.css.scss.embedded.twig</string>
+                    <key>patterns</key>
+                    <array>
+                        <dict>
+                            <key>include</key>
+                            <string>source.css.scss</string>
+                        </dict>
+                    </array>
+                </dict>
+            </array>
+        </dict>
+        <key>twig-injected-statement</key>
+        <dict>
+            <key>begin</key>
+            <string>\{%(?![-~]?\s*end(?:js|javascript|includejs|css|includecss|includehirescss|scss|includescss|includehiresscss)\b)[-~]?</string>
+            <key>beginCaptures</key>
+            <dict>
+                <key>0</key>
+                <dict>
+                    <key>name</key>
+                    <string>punctuation.section.tag.twig</string>
+                </dict>
+            </dict>
+            <key>end</key>
+            <string>[-~]?%\}</string>
+            <key>endCaptures</key>
+            <dict>
+                <key>0</key>
+                <dict>
+                    <key>name</key>
+                    <string>punctuation.section.tag.twig</string>
+                </dict>
+            </dict>
+            <key>name</key>
+            <string>meta.tag.template.block.twig</string>
+            <key>patterns</key>
+            <array>
+                <dict>
+                    <key>include</key>
+                    <string>#twig-constants</string>
+                </dict>
+                <dict>
+                    <key>include</key>
+                    <string>#twig-keywords</string>
+                </dict>
+                <dict>
+                    <key>include</key>
+                    <string>#twig-operators</string>
+                </dict>
+                <dict>
+                    <key>include</key>
+                    <string>#twig-functions-warg</string>
+                </dict>
+                <dict>
+                    <key>include</key>
+                    <string>#twig-functions</string>
+                </dict>
+                <dict>
+                    <key>include</key>
+                    <string>#twig-macros</string>
+                </dict>
+                <dict>
+                    <key>include</key>
+                    <string>#twig-filters-warg</string>
+                </dict>
+                <dict>
+                    <key>include</key>
+                    <string>#twig-filters</string>
+                </dict>
+                <dict>
+                    <key>include</key>
+                    <string>#twig-filters-warg-ud</string>
+                </dict>
+                <dict>
+                    <key>include</key>
+                    <string>#twig-filters-ud</string>
+                </dict>
+                <dict>
+                    <key>include</key>
+                    <string>#twig-objects</string>
+                </dict>
+                <dict>
+                    <key>include</key>
+                    <string>#twig-properties</string>
+                </dict>
+                <dict>
+                    <key>include</key>
+                    <string>#twig-strings</string>
+                </dict>
+                <dict>
+                    <key>include</key>
+                    <string>#twig-arrays</string>
+                </dict>
+                <dict>
+                    <key>include</key>
+                    <string>#twig-hashes</string>
+                </dict>
+            </array>
+        </dict>
     </dict>
     <key>scopeName</key>
     <string>text.html.twig</string>
     <key>uuid</key>
     <string>C220B028-86FF-44CB-8A59-27937FC83730</string>
+    <key>injections</key>
+    <dict>
+        <key>L:text.html.twig -meta.tag.template -comment.block.twig -string.unquoted.verbatim.twig</key>
+        <dict>
+            <key>patterns</key>
+            <array>
+                <dict>
+                    <key>include</key>
+                    <string>#twig-verbatim</string>
+                </dict>
+                <dict>
+                    <key>include</key>
+                    <string>#twig-embedded-blocks</string>
+                </dict>
+                <dict>
+                    <key>include</key>
+                    <string>#twig-comment-tag</string>
+                </dict>
+                <dict>
+                    <key>include</key>
+                    <string>#twig-print-tag</string>
+                </dict>
+                <dict>
+                    <key>include</key>
+                    <string>#twig-injected-statement</string>
+                </dict>
+            </array>
+        </dict>
+    </dict>
 </dict>
 </plist>

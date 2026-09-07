@@ -1,6 +1,6 @@
 # Twig formatter audit
 
-Evidence read on 8 September 2026. Implementation target: **mblode.twig-language-2 0.11.0**. The original Twig extension and Pretty Formatter were reviewed as evidence; this release does not update their listings.
+Evidence read on 8 September 2026. Implementation target: **mblode.twig-language-2 0.11.0**. This section records the initial 0.11.0 release. The follow-up releases below extend implementation to Twig Language 1 and Pretty Formatter.
 
 ## Decision
 
@@ -345,3 +345,10 @@ The implementation at `3e8ce8881ac71c09c62919d0cecefe64dc46cfd7` passed 287 test
 [Release and VSIX](https://github.com/mblode/vscode-twig-language-2/releases/tag/v0.11.0). SHA-256: `fdcfa3a5b5589752203727bae6b4805b8cd3521c8fa7ecad0ab51cc01cb6f12b`.
 
 [Marketplace](https://marketplace.visualstudio.com/items?itemName=mblode.twig-language-2) reports version 0.11.0, updated 2026-09-07T21:53:18.703Z. The publicly downloaded package, after HTTP gzip decompression, is byte-identical to the tested local VSIX and GitHub release asset. Its version manifest is 0.11.0 and its SHA-256 matches the value above.
+
+
+## Follow-up release coverage
+
+Twig Language 2 0.12.0 and Twig Language 0.10.0 share the formatter and language assets. `test/language.test.js` adds executed TextMate regressions for Twig 1 #24/#26/#56 and Twig 2 #19/#44/#45/#53/#116, plus raw blocks and SCSS whitespace controls. Packaged Twig 2 tests cover HTML completion and #97 automatic closing tags. Snippet scopes and the malformed assets query are fixed; `<` is permitted after automatic Twig delimiter completion for Twig 1 #61.
+
+Pretty Formatter 0.3.0 replaces PrettyDiff with this Twig core and explicitly selected bundled parsers. Its `test/multiformat.test.js` covers #8/#9/#13/#14/#15/#18/#19/#22/#23/#24/#26; the packaged suite checks activation and live `disableLanguages`/formatting controls (#27). Worker limits address #21. Twig issue sources #12/#17 and inline HTML #3 are in the shared corpus. The old unverified claim of 38 fully formatted languages is removed; see Pretty Formatter README for current language-specific guarantees. Source-less or image-only reports still do not establish exact-case reproduction. No claim of every possible bug being eliminated is made.

@@ -139,6 +139,25 @@ exports.run = async () => {
     new vscode.Position(0, 10),
   );
   assert(hovers.length, "hover hints must remain available");
+  const htmlCompletion = await open("completion.twig", "{{ value }}\n<div cl");
+  const completions = await vscode.commands.executeCommand(
+    "vscode.executeCompletionItemProvider",
+    htmlCompletion.uri,
+    new vscode.Position(1, 7),
+  );
+  assert(
+    completions.items.some((i) => i.label === "class"),
+    "HTML attribute completion is available in Twig mode",
+  );
+  const closing = await open("closing.twig", "<section");
+  vscode.window.activeTextEditor.selection = new vscode.Selection(0, 8, 0, 8);
+  await vscode.commands.executeCommand("type", { text: ">" });
+  await new Promise((r) => setTimeout(r, 150));
+  assert.equal(
+    closing.getText(),
+    "<section></section>",
+    "HTML auto closing works in Twig mode",
+  );
   console.log(
     "VS Code integration: activation, document/range/save formatting, live settings, indentation, ignore, errors, CRLF and hover passed.",
   );

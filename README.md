@@ -156,3 +156,13 @@ MIT
 ---
 
 Crafted by [<img src="https://blode.co/avatar-circle.png" width="20" align="top" />](https://blode.co) [Matthew Blode](https://blode.co)
+
+## Language compatibility
+
+Both Twig extensions now use the same formatter, grammar, language configuration and snippets. Twig Language 2 keeps the dedicated `twig` language ID and adds bundled Microsoft HTML completion, hover and automatic closing tags. Twig Language keeps the `html` language ID and native VS Code HTML IntelliSense. The extension IDs and setting namespaces remain compatible with existing installations. Choose one Twig extension as the default formatter for its language mode.
+
+Highlighting regressions cover escaped quotes, compact `?:` operators, `default` without arguments, custom HTML elements, verbatim content, and embedded CSS/JS/SCSS boundaries. Invalid snippet language scopes and the malformed Craft assets query were corrected.
+
+The extensions run in desktop and remote Node extension hosts (VS Code 1.85 or newer). They support untrusted and virtual workspaces without executing workspace code or loading project formatter plugins. A browser-only extension host is not currently provided.
+
+The canonical shared implementation lives in this repository. `node scripts/sync-core.mjs ../vscode-twig-language` or `../vscode-pretty-formatter` copies an explicit source-file list and records hashes in `.twig-core.json`. Each distribution's tests reject local drift from that pinned source. Package identity, settings and release versions stay in their own repositories.

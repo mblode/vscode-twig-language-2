@@ -1,3 +1,11 @@
+## 0.12.0
+
+- Share the Twig formatter and language assets across both extension IDs while preserving their existing settings and language modes.
+- Fix embedded CSS/JavaScript/SCSS scope leakage, escaped strings, compact operators, custom element names, unquoted attributes, verbatim priority and argument-free default filters.
+- Fix snippet scopes and the malformed Craft assets query; allow Twig delimiter completion immediately before HTML closing tags.
+- Declare untrusted and virtual workspace support and use URI-aware ignore matching.
+- Add HTML attribute/tag completion, hover and automatic closing tags through the bundled Microsoft HTML language service.
+
 # Changelog
 
 All notable changes to this project will be documented in this file.

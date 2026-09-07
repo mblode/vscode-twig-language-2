@@ -7,6 +7,7 @@ const options = {
   outdir: "extension",
   bundle: true,
   platform: "node",
+  mainFields: ["module", "main"],
   format: "cjs",
   target: "node18",
   external: ["vscode"],
