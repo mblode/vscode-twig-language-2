@@ -366,3 +366,7 @@ All three releases are published on GitHub and Marketplace. Each public Marketpl
 Each packaged runtime passed real VS Code 1.85.2 and 1.136.1 on macOS and stable VS Code on Linux. Test profiles are isolated. Official Twig lexer/render checks are required in CI and passed with no skips. Dependency audits report zero vulnerabilities in all three repositories. Shared source hashes are checked by `.twig-core.json` and `test/core-provenance.test.js`; the canonical synchronization script is `scripts/sync-core.mjs`. The language adapter also has a regression for delayed cursor updates and empty dirty-state notifications during automatic HTML closing.
 
 Both Twig listings retain their original IDs, language modes and settings namespaces. Twig Language 2 is the canonical source; Twig Language is the compatibility distribution. Unsupported Pretty Formatter dialects and reports without reproducible source retain the explicit limits described above and in each README.
+
+## Open VSX publication verification
+
+On 2026-09-08, Twig Language 2 0.12.0, Twig Language 0.10.0 and Pretty Formatter 0.3.0 were published using the existing publisher account. Each public Open VSX VSIX download exactly matches its tested Marketplace/GitHub package by SHA-256.

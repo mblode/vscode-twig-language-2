@@ -129,8 +129,8 @@ To treat plain `.html` files as Twig and get Emmet inside them:
 
 ## Notes
 
-- HTML Intellisense is not included. If you need it, use
-  [Twig Language](https://github.com/mblode/vscode-twig-language) instead.
+- HTML completion, hover and closing tags are included.
+  [Twig Language](https://github.com/mblode/vscode-twig-language) keeps native HTML mode for compatibility.
 - [CHANGELOG.md](CHANGELOG.md) records what changed in each release.
 
 ## Development
