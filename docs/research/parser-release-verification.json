@@ -1,0 +1,90 @@
+{
+  "verifiedAt": "2026-09-08T02:28:56.902181+00:00",
+  "artifacts": [
+    {
+      "name": "twig-language-2",
+      "version": "0.12.1",
+      "registry": "Marketplace",
+      "url": "https://marketplace.visualstudio.com/_apis/public/gallery/publishers/mblode/vsextensions/twig-language-2/0.12.1/vspackage",
+      "sha256": "4226d97dc0db64f6774ee9299f6b0716e9fc61133ac47f996ea6efdf077519cc",
+      "match": true
+    },
+    {
+      "name": "twig-language-2",
+      "version": "0.12.1",
+      "registry": "Open VSX",
+      "url": "https://open-vsx.org/api/mblode/twig-language-2/0.12.1/file/mblode.twig-language-2-0.12.1.vsix",
+      "sha256": "4226d97dc0db64f6774ee9299f6b0716e9fc61133ac47f996ea6efdf077519cc",
+      "match": true
+    },
+    {
+      "name": "twig-language-2",
+      "version": "0.12.1",
+      "registry": "GitHub",
+      "url": "https://github.com/mblode/vscode-twig-language-2/releases/download/v0.12.1/twig-language-2-0.12.1.vsix",
+      "sha256": "4226d97dc0db64f6774ee9299f6b0716e9fc61133ac47f996ea6efdf077519cc",
+      "match": true
+    },
+    {
+      "name": "twig-language",
+      "version": "0.10.1",
+      "registry": "Marketplace",
+      "url": "https://marketplace.visualstudio.com/_apis/public/gallery/publishers/mblode/vsextensions/twig-language/0.10.1/vspackage",
+      "sha256": "679c3d8e7057d5a33969caaba84ba8fa2eea2c9df5f92fdc0b4957ba0c167da2",
+      "match": true
+    },
+    {
+      "name": "twig-language",
+      "version": "0.10.1",
+      "registry": "Open VSX",
+      "url": "https://open-vsx.org/api/mblode/twig-language/0.10.1/file/mblode.twig-language-0.10.1.vsix",
+      "sha256": "679c3d8e7057d5a33969caaba84ba8fa2eea2c9df5f92fdc0b4957ba0c167da2",
+      "match": true
+    },
+    {
+      "name": "twig-language",
+      "version": "0.10.1",
+      "registry": "GitHub",
+      "url": "https://github.com/mblode/vscode-twig-language/releases/download/v0.10.1/twig-language-0.10.1.vsix",
+      "sha256": "679c3d8e7057d5a33969caaba84ba8fa2eea2c9df5f92fdc0b4957ba0c167da2",
+      "match": true
+    },
+    {
+      "name": "pretty-formatter",
+      "version": "0.3.1",
+      "registry": "Marketplace",
+      "url": "https://marketplace.visualstudio.com/_apis/public/gallery/publishers/mblode/vsextensions/pretty-formatter/0.3.1/vspackage",
+      "sha256": "c591d4170780902b9b9febf46f53cef875d2b6dcb428520ef075165e099c35ef",
+      "match": true
+    },
+    {
+      "name": "pretty-formatter",
+      "version": "0.3.1",
+      "registry": "Open VSX",
+      "url": "https://open-vsx.org/api/mblode/pretty-formatter/0.3.1/file/mblode.pretty-formatter-0.3.1.vsix",
+      "sha256": "c591d4170780902b9b9febf46f53cef875d2b6dcb428520ef075165e099c35ef",
+      "match": true
+    },
+    {
+      "name": "pretty-formatter",
+      "version": "0.3.1",
+      "registry": "GitHub",
+      "url": "https://github.com/mblode/vscode-pretty-formatter/releases/download/v0.3.1/pretty-formatter-0.3.1.vsix",
+      "sha256": "c591d4170780902b9b9febf46f53cef875d2b6dcb428520ef075165e099c35ef",
+      "match": true
+    }
+  ],
+  "currentVersionsVerifiedAt": "2026-09-08T02:36:50.783612+00:00",
+  "currentVersions": {
+    "Marketplace": {
+      "twig-language-2": "0.12.1",
+      "twig-language": "0.10.1",
+      "pretty-formatter": "0.3.1"
+    },
+    "Open VSX": {
+      "twig-language-2": "0.12.1",
+      "twig-language": "0.10.1",
+      "pretty-formatter": "0.3.1"
+    }
+  }
+}
