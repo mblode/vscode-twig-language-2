@@ -32,3 +32,9 @@ This is a lossless structural parser, not a complete Twig expression compiler or
 - Package each VSIX and run `test:extension` against the extracted artifact on the minimum supported VS Code and current stable.
 - Confirm CI and registry artifact hashes before reporting a release complete. Do not resume bulk issue/review replies.
 - If a regression appears, publish a corrective patch; never replace a published version or rewrite release history.
+
+## Release status, 8 September 2026
+
+Version 0.12.1 is published on [GitHub](https://github.com/mblode/vscode-twig-language-2/releases/tag/v0.12.1). [Linux CI](https://github.com/mblode/vscode-twig-language-2/actions/runs/34177694981) passed. Across the three distributions, 962 unit/regression tests passed with no skips; the native Twig checks passed and all six extracted-package runs passed on VS Code 1.85.2 and stable 1.136.1. Every CI-packaged file matches the locally tested artifact. Local VSIX SHA-256: `4226d97dc0db64f6774ee9299f6b0716e9fc61133ac47f996ea6efdf077519cc`.
+
+Marketplace and Open VSX publication of this patch remain pending. Chrome rejected the package picker because file URL access is disabled for its browser extension. No Marketplace upload was submitted. The previous Marketplace/Open VSX release remains live. Bulk issue and review replies remain stopped.
