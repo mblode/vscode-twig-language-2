@@ -1,10 +1,11 @@
 {
   "source": "mblode/vscode-twig-language-2",
-  "version": "0.12.0",
+  "version": "0.12.1",
   "files": {
     "src/formatter/embedded.js": "13c42c2f5a0b100ebdc9afe4b4ad87cb47d47e96397113e0b0f2bd3754648e56",
-    "src/formatter/format.js": "27e6d6d5f5e69bedd21251b3e1143d35655f808c3849752f3741400e9b558cd5",
+    "src/formatter/format.js": "d08228bcaa928f275e033103054cd5b1368ffba139be241dd1551154821e404e",
     "src/formatter/lexer.js": "2d6260344f609095edd4a17d021c254cbec90320f1139384147d97b2af7cdf75",
+    "src/formatter/parser.js": "633214a9e7079a14d41e339b133fe7e0afe029a7a8e234d806758302c2b5abd4",
     "src/formatter/preservation.js": "14d34cb7a0aecef3c66375166d199e52e468f92dfd540f73e90bf4a0658666ac",
     "src/formatter/service.js": "02e5346302c2dbe83bb2cc34e326cc648e88b88edd3662fb5d15ba6367779192",
     "src/formatter/settings.js": "72b802871e487083439652e0a7842f32d573829a580f668c375c931c875c57c4",

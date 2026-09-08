@@ -19,5 +19,6 @@ for (const relative of shared) {
 }
 const version = JSON.parse(fs.readFileSync(path.join(source, 'package.json'))).version;
 fs.writeFileSync(path.join(destination, '.twig-core.json'), JSON.stringify({ source: 'mblode/vscode-twig-language-2', version, files: hashes }, null, 2) + '\n');
-fs.copyFileSync(path.join(source, 'test/core-provenance.test.js'), path.join(destination, 'test/core-provenance.test.js'));
+for (const test of ['core-provenance.test.js', 'parser.test.js'])
+  if (destination !== source) fs.copyFileSync(path.join(source, 'test', test), path.join(destination, 'test', test));
 console.log(`Synchronized ${shared.length} files from Twig Language 2 ${version} to ${manifest.name}`);

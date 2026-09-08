@@ -1,23 +1,12 @@
 "use strict";
 
-const {
-  scan,
-  twigStart,
-  twigEnd,
-  twigInfo,
-  expressionParts,
-} = require("./lexer");
+const { twigStart, twigEnd, twigInfo } = require("./lexer");
 const VOID = new Set(
   "area base br col embed hr img input link meta param source track wbr".split(
     " ",
   ),
 );
-const BLOCKS = new Set(
-  "if for block macro set apply filter autoescape with embed sandbox spaceless trans cache switch nav ifchildren component capture".split(
-    " ",
-  ),
-);
-const BRANCHES = new Set(["else", "elseif", "case", "default"]);
+const { parse, isOpaque } = require("./parser");
 
 function optionsFor(input = {}) {
   const integer = (value, fallback, min, max) =>
@@ -194,14 +183,6 @@ const indentation = (depth, options) =>
     Math.max(0, Math.min(256, depth)),
   );
 
-function isOpening(info, paired) {
-  if (!BLOCKS.has(info.name) && !paired.has(info.name)) return false;
-  if (info.name === "set" && info.atoms.some((a) => a.text === "="))
-    return false;
-  if (info.name === "block" && info.atoms.length > 2) return false;
-  return true;
-}
-
 function mergeBranches(branches) {
   const result = [];
   const length = Math.min(...branches.map((b) => b.length));
@@ -210,21 +191,17 @@ function mergeBranches(branches) {
   return result;
 }
 
-function layout(tokens) {
+function layout(tokens, opaque = []) {
   let html = [];
   const twig = [];
-  const paired = new Set(
-    tokens
-      .filter((t) => t.type === "tag" && t.info.name.startsWith("end"))
-      .map((t) => t.info.name.slice(3)),
-  );
   const depth = () =>
     html.length + twig.length + twig.filter((x) => x.inCase).length;
   return tokens.map((token) => {
     let indent = depth();
+    if (isOpaque(opaque, token.start)) return { ...token, depth: indent };
     if (token.type === "tag") {
       const info = token.info;
-      if (info.name.startsWith("end")) {
+      if (token.role === "close") {
         const name = info.name.slice(3);
         const index = twig.findLastIndex((x) => x.name === name);
         if (index >= 0) {
@@ -237,14 +214,14 @@ function layout(tokens) {
             twig.length +
             twig.filter((x) => x.inCase).length;
         }
-      } else if (BRANCHES.has(info.name) && twig.length) {
+      } else if (token.role === "branch" && twig.length) {
         const frame = twig[twig.length - 1];
         frame.branches.push(html);
         html = frame.html.slice();
         frame.inCase = false;
         indent = depth() - (["case", "default"].includes(info.name) ? 0 : 1);
         frame.inCase = ["case", "default"].includes(info.name);
-      } else if (isOpening(info, paired)) {
+      } else if (token.role === "open") {
         if (twig.length >= 256)
           throw new Error("Twig nesting exceeds 256 levels");
         twig.push({
@@ -323,16 +300,21 @@ async function formatEdits(source, input = {}, range) {
   if (Buffer.byteLength(source, "utf8") > 2 * 1024 * 1024)
     throw new Error("Twig formatting is limited to 2 MiB per document");
   const options = optionsFor(input);
-  const tokens = layout(scan(source));
+  const tree = parse(source);
+  if (tree.lexicalError) throw tree.lexicalError;
+  if (tree.diagnostics.length) return [];
+  const tokens = layout(tree.tokens, tree.opaque);
   const eol = options.eol || (source.includes("\r\n") ? "\r\n" : "\n");
   options.eol = eol;
   const edits = [];
   const add = (start, end, text) => {
     if (range && (start < range.start || end > range.end)) return;
+    if (isOpaque(tree.opaque, start, end)) return;
     const edit = minimalEdit(source, start, end, text);
     if (edit) edits.push(edit);
   };
   for (const token of tokens) {
+    if (isOpaque(tree.opaque, token.start)) continue;
     let formatted = token.raw;
     if (token.type === "tag" || token.type === "output")
       formatted = formatTwig(token.raw);
@@ -362,13 +344,19 @@ async function formatEdits(source, input = {}, range) {
     while (owner < tokens.length && tokens[owner].end <= content) owner++;
     const token = tokens[owner];
     if (!token || token.kind === "ignore") continue;
+    if (isOpaque(tree.opaque, content)) continue;
     if (token.type !== "text" && token.start !== content) continue;
     add(start, content, indentation(token.depth, options));
   }
   if (!range && options.newLine && source.length && !source.endsWith("\n")) {
     const last = tokens[tokens.length - 1];
     // A newline after a literal text tail is rendered content. Preserve that boundary.
-    if (last && last.type !== "text" && last.kind !== "ignore")
+    if (
+      last &&
+      last.type !== "text" &&
+      last.kind !== "ignore" &&
+      !isOpaque(tree.opaque, source.length - 1)
+    )
       add(source.length, source.length, eol);
   }
   edits.sort((a, b) => a.start - b.start || a.end - b.end);

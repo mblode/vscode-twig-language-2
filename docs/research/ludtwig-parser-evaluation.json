@@ -1,0 +1,1595 @@
+{
+  "upstreamCommit": "d845944ae4e327da8f06522b5a60a5bbfc7c0398",
+  "cases": [
+    {
+      "id": "comparison-in-attribute",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "literal-less-than",
+      "group": "regressions",
+      "diagnostics": 6,
+      "lossless": true
+    },
+    {
+      "id": "nested-quotes",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "svg-case",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "component-case",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "list-href",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "nested-block-in-attribute",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "generated-attribute",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "no-infinite-equals",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "inline-text",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "inline-boundary",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "literal-spaces",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "for-array",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "and-parentheses",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "filters",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "do-tag",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "block-shorthand",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "set-assignment-capture",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "void-tags",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "conditional-wrapper",
+      "group": "regressions",
+      "diagnostics": 6,
+      "lossless": true
+    },
+    {
+      "id": "alternative-wrappers",
+      "group": "regressions",
+      "diagnostics": 9,
+      "lossless": true
+    },
+    {
+      "id": "switch-cases",
+      "group": "regressions",
+      "diagnostics": 5,
+      "lossless": true
+    },
+    {
+      "id": "custom-paired-tags",
+      "group": "regressions",
+      "diagnostics": 4,
+      "lossless": true
+    },
+    {
+      "id": "custom-standalone",
+      "group": "regressions",
+      "diagnostics": 1,
+      "lossless": true
+    },
+    {
+      "id": "comment-first",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "comment-stability",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "paragraph-stability",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "first-child-block",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "multiline-attributes",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "attribute-comment",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "multiline-value",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "empty-script",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "script-indent",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "script-string-spaces",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "script-generated-code",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "script-twig-quote",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "script-multiline-literal",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "css-media",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "css-twig-root",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "javascript-attribute",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "raw-verbatim",
+      "group": "regressions",
+      "diagnostics": 1,
+      "lossless": true
+    },
+    {
+      "id": "pre-textarea",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "trim-markers",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "named-endblock",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "twig3-modern",
+      "group": "regressions",
+      "diagnostics": 2,
+      "lossless": true
+    },
+    {
+      "id": "twig-string-interpolation",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "twig-line-comment",
+      "group": "regressions",
+      "diagnostics": 6,
+      "lossless": true
+    },
+    {
+      "id": "twig-bitwise",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "twig-delimiters-in-strings",
+      "group": "regressions",
+      "diagnostics": 10,
+      "lossless": true
+    },
+    {
+      "id": "conditional-html-comment",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "ignore-region",
+      "group": "regressions",
+      "diagnostics": 3,
+      "lossless": true
+    },
+    {
+      "id": "legacy-ignore-region",
+      "group": "regressions",
+      "diagnostics": 2,
+      "lossless": true
+    },
+    {
+      "id": "unclosed-twig",
+      "group": "regressions",
+      "diagnostics": 2,
+      "lossless": true
+    },
+    {
+      "id": "unclosed-comment",
+      "group": "regressions",
+      "diagnostics": 2,
+      "lossless": true
+    },
+    {
+      "id": "unclosed-attribute",
+      "group": "regressions",
+      "diagnostics": 2,
+      "lossless": true
+    },
+    {
+      "id": "unclosed-verbatim",
+      "group": "regressions",
+      "diagnostics": 3,
+      "lossless": true
+    },
+    {
+      "id": "unclosed-script",
+      "group": "regressions",
+      "diagnostics": 1,
+      "lossless": true
+    },
+    {
+      "id": "mismatched-expression",
+      "group": "regressions",
+      "diagnostics": 2,
+      "lossless": true
+    },
+    {
+      "id": "custom-embedded-literal",
+      "group": "regressions",
+      "diagnostics": 4,
+      "lossless": true
+    },
+    {
+      "id": "marketplace-342988-conditional-wrapper",
+      "group": "regressions",
+      "diagnostics": 6,
+      "lossless": true
+    },
+    {
+      "id": "marketplace-option-duplication",
+      "group": "regressions",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-4018305923-0",
+      "group": "history",
+      "diagnostics": 1,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-2953564639-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-2398315068-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-2150954400-0",
+      "group": "history",
+      "diagnostics": 5,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-2150954400-1",
+      "group": "history",
+      "diagnostics": 5,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-2150954400-2",
+      "group": "history",
+      "diagnostics": 5,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-1771320435-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-1771320435-1",
+      "group": "history",
+      "diagnostics": 7,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-1625797493-0",
+      "group": "history",
+      "diagnostics": 2,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-1625797493-1",
+      "group": "history",
+      "diagnostics": 2,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-901831252-1",
+      "group": "history",
+      "diagnostics": 3,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-901821810-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-744908438-0",
+      "group": "history",
+      "diagnostics": 6,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-744908438-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-707947104-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-707947104-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-548051911-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-527913619-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-527913619-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-498946218-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-452093269-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-452093269-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-448484180-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-448484180-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-446691660-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-446691660-1",
+      "group": "history",
+      "diagnostics": 3,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-446688822-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-446688822-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-445700228-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-445700228-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-431431451-0",
+      "group": "history",
+      "diagnostics": 1,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-431038551-0",
+      "group": "history",
+      "diagnostics": 2,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-429485442-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-429485442-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-371996368-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-371996368-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-371996368-2",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-348795662-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-348795662-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-336177524-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-336177524-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-330572876-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-330572876-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-317467711-0",
+      "group": "history",
+      "diagnostics": 6,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-317467711-1",
+      "group": "history",
+      "diagnostics": 6,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-301011567-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-301011567-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-296083847-0",
+      "group": "history",
+      "diagnostics": 3,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-296083847-1",
+      "group": "history",
+      "diagnostics": 3,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-481747841-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-481747841-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-482348223-0",
+      "group": "history",
+      "diagnostics": 1,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-494448192-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-494448192-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-494448192-2",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-494448192-3",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-525046402-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-525046402-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-572924023-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-572924023-1",
+      "group": "history",
+      "diagnostics": 4,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-722441443-0",
+      "group": "history",
+      "diagnostics": 1,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-726969920-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-754650219-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-754650219-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-1761168856-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-1761168856-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-1797943892-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-1803747444-0",
+      "group": "history",
+      "diagnostics": 133,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-1803747444-1",
+      "group": "history",
+      "diagnostics": 133,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-2672449950-0",
+      "group": "history",
+      "diagnostics": 2,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-2672449950-1",
+      "group": "history",
+      "diagnostics": 1,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-1195718372-0",
+      "group": "history",
+      "diagnostics": 1,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-1163845385-0",
+      "group": "history",
+      "diagnostics": 3,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-915168260-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-915168260-1",
+      "group": "history",
+      "diagnostics": 4,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-915168260-2",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-669036660-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-669036660-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-567643523-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-567643523-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-567365977-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-567365977-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-566121413-0",
+      "group": "history",
+      "diagnostics": 6,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-566050339-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-483603029-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-449082315-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-449082315-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-432674716-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-432668899-0",
+      "group": "history",
+      "diagnostics": 2,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-427265788-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-298228060-0",
+      "group": "history",
+      "diagnostics": 3,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-298228060-1",
+      "group": "history",
+      "diagnostics": 3,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-282167340-0",
+      "group": "history",
+      "diagnostics": 2,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-274794265-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-274794265-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-345455314-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-345455314-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-345455504-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-345455504-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-350501180-0",
+      "group": "history",
+      "diagnostics": 1,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-350501180-1",
+      "group": "history",
+      "diagnostics": 2,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-385388236-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-385388236-3",
+      "group": "history",
+      "diagnostics": 6,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-385388236-4",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-385388236-5",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-493737248-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-499489887-0",
+      "group": "history",
+      "diagnostics": 2,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-499489887-1",
+      "group": "history",
+      "diagnostics": 3,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-499489887-2",
+      "group": "history",
+      "diagnostics": 2,
+      "lossless": true
+    },
+    {
+      "id": "vscode-pretty-formatter-1339790202-0",
+      "group": "history",
+      "diagnostics": 2,
+      "lossless": true
+    },
+    {
+      "id": "vscode-pretty-formatter-950473489-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-pretty-formatter-950473489-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-pretty-formatter-711051997-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-pretty-formatter-711051997-1",
+      "group": "history",
+      "diagnostics": 5,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-2398315068-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-2150954400-0",
+      "group": "history",
+      "diagnostics": 5,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-2150954400-1",
+      "group": "history",
+      "diagnostics": 5,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-2150954400-2",
+      "group": "history",
+      "diagnostics": 5,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-1771320435-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-1771320435-1",
+      "group": "history",
+      "diagnostics": 7,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-1625797493-0",
+      "group": "history",
+      "diagnostics": 2,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-1625797493-1",
+      "group": "history",
+      "diagnostics": 2,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-901821810-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-707947104-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-707947104-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-548051911-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-527913619-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-527913619-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-470993893-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-452093269-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-448484180-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-448484180-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-446688822-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-445700228-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-431735188-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-431431451-0",
+      "group": "history",
+      "diagnostics": 1,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-431038551-0",
+      "group": "history",
+      "diagnostics": 2,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-429485442-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-409212935-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-409212935-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-390604972-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-371996368-2",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-348795662-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-348795662-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-336177524-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-336177524-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-330572876-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-317467711-0",
+      "group": "history",
+      "diagnostics": 6,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-317467711-1",
+      "group": "history",
+      "diagnostics": 6,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-481747841-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-482427181-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-494448192-2",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-494448192-3",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-505022255-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-572924023-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-572924023-1",
+      "group": "history",
+      "diagnostics": 4,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-722441443-0",
+      "group": "history",
+      "diagnostics": 1,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-726969920-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-754650219-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-754650219-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-1761168856-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-1761168856-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-1797943892-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-1803747444-0",
+      "group": "history",
+      "diagnostics": 133,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-2-1803747444-1",
+      "group": "history",
+      "diagnostics": 133,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-1195718372-0",
+      "group": "history",
+      "diagnostics": 1,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-1163845385-0",
+      "group": "history",
+      "diagnostics": 3,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-915168260-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-915168260-1",
+      "group": "history",
+      "diagnostics": 4,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-915168260-2",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-669036660-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-669036660-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-567643523-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-567643523-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-567365977-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-567365977-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-566121413-0",
+      "group": "history",
+      "diagnostics": 6,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-566050339-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-483603029-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-449082315-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-449082315-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-432674716-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-432668899-0",
+      "group": "history",
+      "diagnostics": 2,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-427265788-0",
+      "group": "history",
+      "diagnostics": 66,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-427265788-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-282167340-0",
+      "group": "history",
+      "diagnostics": 2,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-274794265-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-345455314-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-385388236-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-385388236-3",
+      "group": "history",
+      "diagnostics": 6,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-385388236-4",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-385388236-5",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-493737248-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-499489887-0",
+      "group": "history",
+      "diagnostics": 2,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-499489887-1",
+      "group": "history",
+      "diagnostics": 3,
+      "lossless": true
+    },
+    {
+      "id": "vscode-twig-language-499489887-2",
+      "group": "history",
+      "diagnostics": 2,
+      "lossless": true
+    },
+    {
+      "id": "vscode-pretty-formatter-1339790202-0",
+      "group": "history",
+      "diagnostics": 2,
+      "lossless": true
+    },
+    {
+      "id": "vscode-pretty-formatter-950473489-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-pretty-formatter-950473489-1",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-pretty-formatter-711051997-0",
+      "group": "history",
+      "diagnostics": 0,
+      "lossless": true
+    },
+    {
+      "id": "vscode-pretty-formatter-711051997-1",
+      "group": "history",
+      "diagnostics": 5,
+      "lossless": true
+    },
+    {
+      "id": "vscode-pretty-formatter-1042687354-0",
+      "group": "history",
+      "diagnostics": 5,
+      "lossless": true
+    },
+    {
+      "id": "vscode-pretty-formatter-1042687354-1",
+      "group": "history",
+      "diagnostics": 5,
+      "lossless": true
+    },
+    {
+      "id": "valid-conditional-wrapper",
+      "group": "curated",
+      "diagnostics": 6,
+      "lossless": true
+    }
+  ]
+}

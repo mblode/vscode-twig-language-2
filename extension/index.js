@@ -49,7 +49,7 @@ var require_package = __commonJS({
       name: "twig-language-2",
       displayName: "Twig Language 2",
       description: "Snippets, Syntax Highlighting, Hover, and Formatting for Twig",
-      version: "0.12.0",
+      version: "0.12.1",
       publisher: "mblode",
       license: "MIT",
       author: {

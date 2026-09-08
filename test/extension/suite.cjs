@@ -96,6 +96,15 @@ exports.run = async () => {
   const broken = await open("broken.twig", '<p title="{{ unfinished');
   assert.deepEqual(await edits(broken), []);
   assert.equal(broken.getText(), '<p title="{{ unfinished');
+  const malformed = await open(
+    "malformed.twig",
+    "{% if x %}\n{{a+b}}\n{% endfor %}",
+  );
+  assert.deepEqual(await edits(malformed), []);
+  const customSource = "   {% custom %}\n{{a+b}}\n{% endcustom %}";
+  const custom = await open("custom.twig", customSource);
+  assert.deepEqual(await edits(custom), []);
+  assert.equal(custom.getText(), customSource);
   const crlf = await open("windows.twig", "<script>const x=1;</script>\r\n");
   await apply(crlf, await edits(crlf));
   assert.equal(crlf.eol, vscode.EndOfLine.CRLF);
