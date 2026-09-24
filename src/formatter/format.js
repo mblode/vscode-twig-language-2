@@ -48,6 +48,23 @@ function formatTwig(raw) {
     "b-or",
     "b-xor",
   ]);
+  // Hash braces keep the author's padding: `{ a: 1 }` and `{a: 1}` are both
+  // common Twig styles, so a brace pair is padded when either side was.
+  const spaced = new Set();
+  info.parts.forEach((part, index) => {
+    if (part.kind === "space") return;
+    if (info.parts[index - 1]?.kind === "space") spaced.add(part);
+  });
+  const padded = new Set(),
+    open = [];
+  atoms.forEach((atom, i) => {
+    if (atom.text === "{") open.push(i);
+    else if (atom.text === "}" && open.length) {
+      const start = open.pop();
+      if (start < i - 1 && (spaced.has(atoms[start + 1]) || spaced.has(atom)))
+        padded.add(start).add(i);
+    }
+  });
   for (let i = 0; i < atoms.length; i++) {
     const atom = atoms[i],
       prev = atoms[i - 1];
@@ -94,6 +111,8 @@ function formatTwig(raw) {
           ))
       )
         space = false;
+      if (padded.has(i - 1) && a === "{") space = true;
+      if (padded.has(i) && b === "}") space = true;
     }
     if (space) output.push(" ");
     output.push(atom.text);

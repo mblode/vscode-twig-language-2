@@ -23872,7 +23872,48 @@ function activate(context) {
       if (pending.get(key) === request) pending.delete(key);
     }
   }
+  const closers = { "{": "}}", "%": "%}", "#": "#}" };
+  let armed;
+  function padDelimiters(editor) {
+    if (!armed || editor?.document !== armed.document) return;
+    const { document, version, offsets } = armed;
+    if (document.version !== version) return armed = void 0;
+    const cursors = editor.selections.map(
+      (s2) => s2.isEmpty ? document.offsetAt(s2.active) : -1
+    );
+    if (!offsets.every((offset) => cursors.includes(offset))) return;
+    armed = void 0;
+    editor.edit(
+      (builder) => offsets.forEach(
+        (offset) => builder.insert(document.positionAt(offset), " ")
+      ),
+      { undoStopBefore: false, undoStopAfter: false }
+    );
+  }
+  function armDelimiters(event) {
+    armed = void 0;
+    const { document, contentChanges: changes } = event;
+    if (document.languageId !== language || event.reason || !changes.length || !changes.every((c2) => /^[{%#]? [}%#]}?$/.test(c2.text)))
+      return;
+    const text = document.getText();
+    let shift = 0;
+    const offsets = [...changes].sort((a2, b2) => a2.rangeOffset - b2.rangeOffset).map((change) => {
+      const offset = change.rangeOffset + shift + change.text.indexOf(" ");
+      shift += change.text.length - change.rangeLength;
+      return offset;
+    });
+    if (offsets.every(
+      (offset) => text[offset - 2] === "{" && text.startsWith(" " + closers[text[offset - 1]], offset)
+    )) {
+      armed = { document, version: document.version, offsets };
+      setTimeout(() => padDelimiters(vscode.window.activeTextEditor));
+    }
+  }
   context.subscriptions.push(
+    vscode.workspace.onDidChangeTextDocument(armDelimiters),
+    vscode.window.onDidChangeTextEditorSelection(
+      (event) => padDelimiters(event.textEditor)
+    ),
     vscode.languages.registerDocumentFormattingEditProvider(language, {
       provideDocumentFormattingEdits: (document, options, token) => provideEdits(document, options, token)
     }),

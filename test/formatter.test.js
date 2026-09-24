@@ -172,3 +172,23 @@ test("HTML wrapping counts the visual width of tabs", async () => {
   });
   assert(result.includes('<input\n\t\ttitle="abcd"'));
 });
+
+test("Twig 2 #124 hash braces keep the author's padding", async () => {
+  for (const [source, expected] of [
+    [
+      `{% include 'tooltip.twig' with { "content": "my tooltip" } %}`,
+      `{% include 'tooltip.twig' with { "content": "my tooltip" } %}`,
+    ],
+    [
+      `{% include 'tooltip.twig' with {"content":"my tooltip"} %}`,
+      `{% include 'tooltip.twig' with {"content": "my tooltip"} %}`,
+    ],
+    ["{{ {  a: 1} }}", "{{ { a: 1 } }}"],
+    ["{% set x = {'a': { b: 1 }} %}", "{% set x = {'a': { b: 1 }} %}"],
+    ["{% set x = { } %}", "{% set x = {} %}"],
+  ]) {
+    const result = await format(source, { newLine: false });
+    assert.equal(result, expected);
+    assert.equal(await format(result, { newLine: false }), result);
+  }
+});

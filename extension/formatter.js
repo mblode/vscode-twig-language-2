@@ -20239,6 +20239,20 @@ var require_format = __commonJS({
         "b-or",
         "b-xor"
       ]);
+      const spaced = /* @__PURE__ */ new Set();
+      info.parts.forEach((part, index) => {
+        if (part.kind === "space") return;
+        if (info.parts[index - 1]?.kind === "space") spaced.add(part);
+      });
+      const padded = /* @__PURE__ */ new Set(), open = [];
+      atoms.forEach((atom, i) => {
+        if (atom.text === "{") open.push(i);
+        else if (atom.text === "}" && open.length) {
+          const start = open.pop();
+          if (start < i - 1 && (spaced.has(atoms[start + 1]) || spaced.has(atom)))
+            padded.add(start).add(i);
+        }
+      });
       for (let i = 0; i < atoms.length; i++) {
         const atom = atoms[i], prev = atoms[i - 1];
         let space = i > 0;
@@ -20265,6 +20279,8 @@ var require_format = __commonJS({
             atoms[i - 2]?.text
           )))
             space = false;
+          if (padded.has(i - 1) && a === "{") space = true;
+          if (padded.has(i) && b === "}") space = true;
         }
         if (space) output.push(" ");
         output.push(atom.text);

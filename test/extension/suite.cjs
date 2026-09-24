@@ -169,6 +169,33 @@ exports.run = async () => {
     "<section></section>",
     "HTML auto closing works in Twig mode",
   );
+  for (const [start, end] of [
+    ["{{", "}}"],
+    ["{%", "%}"],
+    ["{#", "#}"],
+  ]) {
+    const typed = await open("delimiters.twig", "");
+    for (const text of start)
+      await vscode.commands.executeCommand("type", { text });
+    const expected = `${start}  ${end}`;
+    const until = Date.now() + 2000;
+    while (typed.getText() !== expected && Date.now() < until)
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    assert.equal(
+      typed.getText(),
+      expected,
+      `${start} auto closes padded: ${JSON.stringify(typed.getText())}`,
+    );
+    await vscode.commands.executeCommand("type", { text: "x" });
+    assert.equal(
+      typed.getText(),
+      `${start} x ${end}`,
+      `${start} leaves the cursor inside the padding`,
+    );
+    await vscode.commands.executeCommand(
+      "workbench.action.revertAndCloseActiveEditor",
+    );
+  }
   console.log(
     "VS Code integration: activation, document/range/save formatting, live settings, indentation, ignore, errors, CRLF and hover passed.",
   );
