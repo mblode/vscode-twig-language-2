@@ -1,4 +1,4 @@
-## Unreleased
+## 0.12.2
 
 - Keep the author's padding inside hash braces, so `with { "content": "x" }` is no longer tightened to `{"content": "x"}` (#124).
 - Place the cursor inside the padding after auto-closing `{{`, `{%` and `{#`: `{{ | }}` instead of `{{| }}` (#123).
