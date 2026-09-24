@@ -110,7 +110,64 @@ function activate(context) {
     }
   }
 
+  // Auto-closing "{{", "{%" and "{#" leaves the cursor as "{{| }}". Pad the
+  // opening delimiter so typing continues inside the tag: "{{ | }}".
+  const closers = { "{": "}}", "%": "%}", "#": "#}" };
+  let armed;
+  function padDelimiters(editor) {
+    if (!armed || editor?.document !== armed.document) return;
+    const { document, version, offsets } = armed;
+    if (document.version !== version) return (armed = undefined);
+    const cursors = editor.selections.map((s) =>
+      s.isEmpty ? document.offsetAt(s.active) : -1,
+    );
+    // The typing command moves the cursor after the change event fires.
+    if (!offsets.every((offset) => cursors.includes(offset))) return;
+    armed = undefined;
+    editor.edit(
+      (builder) =>
+        offsets.forEach((offset) =>
+          builder.insert(document.positionAt(offset), " "),
+        ),
+      { undoStopBefore: false, undoStopAfter: false },
+    );
+  }
+  function armDelimiters(event) {
+    armed = undefined;
+    const { document, contentChanges: changes } = event;
+    if (
+      document.languageId !== language ||
+      event.reason ||
+      !changes.length ||
+      !changes.every((c) => /^[{%#]? [}%#]}?$/.test(c.text))
+    )
+      return;
+    const text = document.getText();
+    let shift = 0;
+    const offsets = [...changes]
+      .sort((a, b) => a.rangeOffset - b.rangeOffset)
+      .map((change) => {
+        const offset = change.rangeOffset + shift + change.text.indexOf(" ");
+        shift += change.text.length - change.rangeLength;
+        return offset;
+      });
+    if (
+      offsets.every(
+        (offset) =>
+          text[offset - 2] === "{" &&
+          text.startsWith(" " + closers[text[offset - 1]], offset),
+      )
+    ) {
+      armed = { document, version: document.version, offsets };
+      setTimeout(() => padDelimiters(vscode.window.activeTextEditor));
+    }
+  }
+
   context.subscriptions.push(
+    vscode.workspace.onDidChangeTextDocument(armDelimiters),
+    vscode.window.onDidChangeTextEditorSelection((event) =>
+      padDelimiters(event.textEditor),
+    ),
     vscode.languages.registerDocumentFormattingEditProvider(language, {
       provideDocumentFormattingEdits: (document, options, token) =>
         provideEdits(document, options, token),

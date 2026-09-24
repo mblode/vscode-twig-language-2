@@ -14,10 +14,12 @@ test("provider discards stale results, cancels superseded requests and releases 
         get: (key, fallback) => settings[key] ?? fallback,
       }),
       asRelativePath: () => "test.twig",
+      onDidChangeTextDocument: () => ({ dispose() {} }),
     },
     window: {
       createOutputChannel: () => ({ appendLine() {}, dispose() {} }),
       setStatusBarMessage() {},
+      onDidChangeTextEditorSelection: () => ({ dispose() {} }),
     },
     languages: {
       registerDocumentFormattingEditProvider: (_, p) => {
