@@ -75,11 +75,11 @@ and hover. Any name after `is` or `is not` is highlighted as a test.
 "twig-language-2.customTests": { "numeric": "True when the value is numeric." }
 ```
 
-## Template links
+## Go to template
 
-Ctrl/Cmd-click or **Go to Definition** on a template name opens it. This works for `include`, `extends`,
-`embed`, `import`, `from` and `use` tags, `include()` and `source()` calls, and arrays of names. Names
-resolve against `twig-language-2.templatePaths` in the workspace folder (`templates`, `views`,
+Ctrl/Cmd-click, **Go to Definition** (F12) or **Peek Definition** on a template name opens it. This works
+for `include`, `extends`, `embed`, `import`, `from` and `use` tags, `include()` and `source()` calls,
+and arrays of names. Names resolve against `twig-language-2.templatePaths` in the workspace folder (`templates`, `views`,
 `src/templates`, then the folder itself), then the current file's folder. Names without an extension
 also try `.twig`, `.html.twig`, `.html` and `index` files, as in Craft. `@Namespace/` names use
 `twig-language-2.templateNamespaces`:
@@ -88,7 +88,7 @@ also try `.twig`, `.html.twig`, `.html` and `index` files, as in Craft. `@Namesp
 "twig-language-2.templateNamespaces": { "App": "src/App/templates" }
 ```
 
-Names built at runtime, and names that do not match a file, get no link.
+Names built at runtime, and names that do not match a file, have no definition.
 
 ## Formatting
 
@@ -136,7 +136,7 @@ Settings apply immediately and support workspace, folder, and `[twig]` overrides
 | `twig-language-2.formatTimeout` | `5000` | Maximum worker time in milliseconds, from 100 to 30000. |
 | `twig-language-2.craftSnippets` | `true` | Include Craft CMS snippets. |
 | `twig-language-2.snippetQuotes` | `double` | Quote style for Twig strings in snippets: `double` or `single`. |
-| `twig-language-2.templatePaths` | `["templates", "views", "src/templates", "."]` | Template roots for links, relative to the workspace folder or absolute. |
+| `twig-language-2.templatePaths` | `["templates", "views", "src/templates", "."]` | Template roots for Go to Definition, relative to the workspace folder or absolute. |
 | `twig-language-2.templateNamespaces` | `{}` | Roots for `@Namespace/` template names. |
 | `twig-language-2.customTests` | `{}` | Custom test names mapped to hover descriptions. |
 | `twig-language-2.customFilters` | `{}` | Custom filter names mapped to hover descriptions. |
@@ -153,24 +153,20 @@ PrettyDiff-only settings remain recognized as deprecated configuration keys but 
 
 Formatting never sorts attributes or tags, converts Twig quotes, merges HTML elements, or repairs missing syntax. Supported embedded languages use Prettier defaults. Use `formatting: false`, file globs, or paired ignore regions to opt out.
 
-To treat plain `.html` files as Twig and get Emmet inside them:
+To treat plain `.html` files as Twig:
 
 ```json
 "files.associations": {
 	"*.html": "twig"
-},
-"emmet.includeLanguages": {
-	"twig": "html"
 }
 ```
-
-With Emmet enabled, Tab inside a Twig tag moves to the next snippet placeholder instead of accepting an
-Emmet suggestion, so `{% if event.show_thumb %}` is not expanded to HTML. Press Enter to accept a
-suggestion there.
 
 ## Notes
 
 - HTML completion, hover, closing tags and attribute quotes are included.
+- Emmet works in Twig files outside Twig tags with no setup, with CSS abbreviations in `<style>` and
+  `style=""`, and follows the `emmet.*` settings. Remove any `"twig": "html"` entry from
+  `emmet.includeLanguages`: it makes VS Code's own Emmet expand text inside `{% %}` and `{{ }}`.
 - MJML `<mj-style>` bodies are highlighted and formatted as CSS in `.mjml.twig` files.
   [Twig Language](https://github.com/mblode/vscode-twig-language) keeps native HTML mode for compatibility.
 - [CHANGELOG.md](CHANGELOG.md) records what changed in each release.

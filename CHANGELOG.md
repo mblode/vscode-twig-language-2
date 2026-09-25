@@ -1,3 +1,10 @@
+## 0.13.1
+
+- Emmet works in Twig files with no setup and never expands text inside `{{ }}`, `{% %}` or `{# #}`, HTML tags, attribute values or comments. `<style>` bodies and `style=""` values use CSS abbreviations. The `emmet.*` settings apply (#85).
+- If `emmet.includeLanguages` still maps `twig`, a one-time message offers to remove only that entry, since it turns on VS Code's own Emmet, which expands inside Twig tags.
+- Tab is no longer remapped inside Twig tags, so it accepts suggestions again.
+- Template names open through Go to Definition only (Ctrl/Cmd-click, F12 and Peek), no longer also as document links, so Ctrl/Cmd-click triggers one action.
+
 ## 0.13.0
 
 - Ctrl/Cmd-click and Go to Definition on template names in `include`, `extends`, `embed`, `import`, `from`, `use`, `include()` and `source()`, resolved through the new `templatePaths` and `templateNamespaces` settings (#108).

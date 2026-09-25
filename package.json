@@ -2,7 +2,7 @@
   "name": "twig-language-2",
   "displayName": "Twig Language 2",
   "description": "Snippets, Syntax Highlighting, Hover, and Formatting for Twig",
-  "version": "0.13.0",
+  "version": "0.13.1",
   "publisher": "mblode",
   "license": "MIT",
   "author": {
@@ -473,14 +473,7 @@
           "scope": "language-overridable"
         }
       }
-    },
-    "keybindings": [
-      {
-        "key": "tab",
-        "command": "jumpToNextSnippetPlaceholder",
-        "when": "editorTextFocus && editorLangId == twig && inSnippetMode && hasNextTabstop && suggestWidgetVisible && twig.inTag"
-      }
-    ]
+    }
   },
   "capabilities": {
     "untrustedWorkspaces": {
@@ -506,6 +499,7 @@
     "vscode-textmate": "9.3.2"
   },
   "dependencies": {
+    "@vscode/emmet-helper": "2.11.0",
     "prettier": "3.9.6",
     "vscode-html-languageservice": "5.6.2",
     "vscode-languageserver-textdocument": "1.0.14"

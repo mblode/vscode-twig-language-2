@@ -29,7 +29,6 @@ test("provider discards stale results, cancels superseded requests and releases 
       registerDocumentRangeFormattingEditProvider: () => ({ dispose() {} }),
       registerHoverProvider: () => ({ dispose() {} }),
       registerCompletionItemProvider: () => ({ dispose() {} }),
-      registerDocumentLinkProvider: () => ({ dispose() {} }),
       registerDefinitionProvider: () => ({ dispose() {} }),
     },
     EndOfLine: { CRLF: 2 },
@@ -72,13 +71,15 @@ test("provider discards stale results, cancels superseded requests and releases 
     require: (name) =>
       name === "./html"
         ? { registerHTML() {} }
-        : name === "vscode"
-          ? vscode
-          : name === "./formatter/service"
-            ? service
-            : name.startsWith(".")
-              ? require(path.join(base, name))
-              : require(name),
+        : name === "./emmet"
+          ? { registerEmmet() {} }
+          : name === "vscode"
+            ? vscode
+            : name === "./formatter/service"
+              ? service
+              : name.startsWith(".")
+                ? require(path.join(base, name))
+                : require(name),
   });
   exports.activate(context);
   const document = {

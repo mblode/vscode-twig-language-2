@@ -49,7 +49,7 @@ var require_package = __commonJS({
       name: "twig-language-2",
       displayName: "Twig Language 2",
       description: "Snippets, Syntax Highlighting, Hover, and Formatting for Twig",
-      version: "0.13.0",
+      version: "0.13.1",
       publisher: "mblode",
       license: "MIT",
       author: {
@@ -520,14 +520,7 @@ var require_package = __commonJS({
               scope: "language-overridable"
             }
           }
-        },
-        keybindings: [
-          {
-            key: "tab",
-            command: "jumpToNextSnippetPlaceholder",
-            when: "editorTextFocus && editorLangId == twig && inSnippetMode && hasNextTabstop && suggestWidgetVisible && twig.inTag"
-          }
-        ]
+        }
       },
       capabilities: {
         untrustedWorkspaces: {
@@ -553,6 +546,7 @@ var require_package = __commonJS({
         "vscode-textmate": "9.3.2"
       },
       dependencies: {
+        "@vscode/emmet-helper": "2.11.0",
         prettier: "3.9.6",
         "vscode-html-languageservice": "5.6.2",
         "vscode-languageserver-textdocument": "1.0.14"
@@ -1045,24 +1039,24 @@ var require_service = __commonJS({
       });
       let settled = false, timer, subscription, finish;
       const promise = new Promise((resolve, reject) => {
-        finish = (error, edits = []) => {
+        finish = (error2, edits = []) => {
           if (settled) return;
           settled = true;
           clearTimeout(timer);
           subscription?.dispose();
           void worker.terminate();
-          if (error) reject(error);
+          if (error2) reject(error2);
           else resolve(edits);
         };
         worker.once(
           "message",
           (result) => finish(result.error ? new Error(result.error) : null, result.edits)
         );
-        worker.once("error", (error) => finish(error));
-        worker.once("exit", (code) => {
+        worker.once("error", (error2) => finish(error2));
+        worker.once("exit", (code2) => {
           if (!settled)
             finish(
-              new Error(`Formatter worker exited before returning edits (${code})`)
+              new Error(`Formatter worker exited before returning edits (${code2})`)
             );
         });
         timer = setTimeout(
@@ -1789,8 +1783,8 @@ var require_completions = __commonJS({
       customFilters: "filter",
       customFunctions: "function"
     };
-    var swap = (text) => text.replace(/"([^"']*)"/g, "'$1'");
-    var singleQuotes = (text) => /\{[{%]/.test(text) ? text.replace(/\{[{%][\s\S]*?[%}]\}/g, swap) : swap(text);
+    var swap = (text2) => text2.replace(/"([^"']*)"/g, "'$1'");
+    var singleQuotes = (text2) => /\{[{%]/.test(text2) ? text2.replace(/\{[{%][\s\S]*?[%}]\}/g, swap) : swap(text2);
     var cache = /* @__PURE__ */ new Map();
     function snippetList(craft = true, quotes = "double") {
       const key = `${craft}|${quotes}`;
@@ -1819,12 +1813,12 @@ var require_completions = __commonJS({
       );
     }
     function preview(body) {
-      let text = body.replace(/\$\d+/g, "");
-      while (/\$\{\d+:([^{}]*)\}/.test(text))
-        text = text.replace(/\$\{\d+:([^{}]*)\}/g, "$1");
-      return text;
+      let text2 = body.replace(/\$\d+/g, "");
+      while (/\$\{\d+:([^{}]*)\}/.test(text2))
+        text2 = text2.replace(/\$\{\d+:([^{}]*)\}/g, "$1");
+      return text2;
     }
-    function insideTwig2(before) {
+    function insideTwig(before) {
       const open = Math.max(
         ...["{{", "{%", "{#"].map((d2) => before.lastIndexOf(d2))
       );
@@ -1858,7 +1852,7 @@ var require_completions = __commonJS({
                 position
               )
             );
-            if (insideTwig2(before))
+            if (insideTwig(before))
               for (const { name, kind, description } of customDefinitions2(config)) {
                 const item = new vscode2.CompletionItem(
                   { label: name, description: `custom ${kind}` },
@@ -1875,7 +1869,7 @@ var require_completions = __commonJS({
     module2.exports = {
       snippetList,
       customDefinitions: customDefinitions2,
-      insideTwig: insideTwig2,
+      insideTwig,
       registerCompletions: registerCompletions2
     };
   }
@@ -1895,15 +1889,15 @@ var require_lexer = __commonJS({
     var twigStart = (source, i2) => source[i2] === "{" && ["{", "%", "#"].includes(source[i2 + 1]);
     var word = /^[\p{L}_][\p{L}\p{N}_]*/u;
     function quotedEnd(source, start) {
-      const quote = source[start];
+      const quote2 = source[start];
       let i2 = start + 1;
       while (i2 < source.length) {
         if (source[i2] === "\\") {
           i2 += 2;
           continue;
         }
-        if (source[i2] === quote) return i2 + 1;
-        if (quote === '"' && source.startsWith("#{", i2)) {
+        if (source[i2] === quote2) return i2 + 1;
+        if (quote2 === '"' && source.startsWith("#{", i2)) {
           let depth = 1;
           i2 += 2;
           while (i2 < source.length && depth) {
@@ -2008,23 +2002,23 @@ var require_lexer = __commonJS({
     }
     function htmlEnd(source, start) {
       let i2 = start + 1;
-      let quote = null;
+      let quote2 = null;
       while (i2 < source.length) {
         if (twigStart(source, i2)) {
           i2 = twigEnd(source, i2);
           continue;
         }
         const c2 = source[i2++];
-        if (quote) {
-          if (c2 === quote) quote = null;
-        } else if (c2 === '"' || c2 === "'") quote = c2;
+        if (quote2) {
+          if (c2 === quote2) quote2 = null;
+        } else if (c2 === '"' || c2 === "'") quote2 = c2;
         else if (c2 === ">") return i2;
       }
       throw new SyntaxError("Unclosed HTML tag", start);
     }
     function scan(source) {
       const tokens = [];
-      const push = (type, start, end, extra = {}) => tokens.push({ type, start, end, raw: source.slice(start, end), ...extra });
+      const push2 = (type, start, end, extra = {}) => tokens.push({ type, start, end, raw: source.slice(start, end), ...extra });
       let i2 = 0;
       let textStart = 0;
       while (i2 < source.length) {
@@ -2034,7 +2028,7 @@ var require_lexer = __commonJS({
           type = source[i2 + 1] === "#" ? "comment" : source[i2 + 1] === "%" ? "tag" : "output";
           if (type === "tag") {
             extra.info = twigInfo(source.slice(i2, end));
-            const literal = ["verbatim", "raw"].includes(extra.info.name);
+            const literal2 = ["verbatim", "raw"].includes(extra.info.name);
             const customEmbedded = [
               "js",
               "css",
@@ -2043,19 +2037,19 @@ var require_lexer = __commonJS({
               "includejs",
               "includecss"
             ].includes(extra.info.name);
-            if (literal || customEmbedded) {
+            if (literal2 || customEmbedded) {
               const re = new RegExp(
                 "\\{%[-~]?\\s*end" + extra.info.name + "\\s*[-~]?%\\}",
                 "g"
               );
               re.lastIndex = end;
               const close = re.exec(source);
-              if (!close && literal)
+              if (!close && literal2)
                 throw new SyntaxError("Unclosed raw Twig block", i2);
               if (close) {
                 end = re.lastIndex;
                 type = "raw";
-                extra.kind = literal ? "verbatim" : "twig-embedded";
+                extra.kind = literal2 ? "verbatim" : "twig-embedded";
               }
             }
           }
@@ -2116,13 +2110,13 @@ var require_lexer = __commonJS({
           extra.kind = "ignore";
         }
         if (type) {
-          if (textStart < i2) push("text", textStart, i2);
-          push(type, i2, end, extra);
+          if (textStart < i2) push2("text", textStart, i2);
+          push2(type, i2, end, extra);
           i2 = end;
           textStart = i2;
         } else i2++;
       }
-      if (textStart < source.length) push("text", textStart, source.length);
+      if (textStart < source.length) push2("text", textStart, source.length);
       return tokens;
     }
     module2.exports = {
@@ -2244,22 +2238,6 @@ var require_templates = __commonJS({
         document.positionAt(ref.end)
       );
       context.subscriptions.push(
-        vscode2.languages.registerDocumentLinkProvider(language2, {
-          async provideDocumentLinks(document, token) {
-            const cache = /* @__PURE__ */ new Map();
-            const links = [];
-            for (const ref of templateReferences(document.getText())) {
-              if (token.isCancellationRequested) return;
-              const target = await resolve(document, ref.name, cache);
-              if (target) {
-                const link = new vscode2.DocumentLink(range(document, ref), target);
-                link.tooltip = "Open template";
-                links.push(link);
-              }
-            }
-            return links;
-          }
-        }),
         vscode2.languages.registerDefinitionProvider(language2, {
           async provideDefinition(document, position) {
             const offset = document.offsetAt(position);
@@ -2304,12 +2282,12 @@ var require_main = __commonJS({
       return to;
     };
     var __toCommonJS2 = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
-    var main_exports2 = {};
-    __export2(main_exports2, {
+    var main_exports3 = {};
+    __export2(main_exports3, {
       config: () => config,
       t: () => t5
     });
-    module2.exports = __toCommonJS2(main_exports2);
+    module2.exports = __toCommonJS2(main_exports3);
     var import_fs = require("fs");
     var import_promises = require("fs/promises");
     async function readFileFromUri(uri) {
@@ -2325,12 +2303,12 @@ var require_main = __commonJS({
           redirect: "follow"
         });
         if (!res.ok) {
-          let error = `Unexpected ${res.status} response while trying to read ${uri}`;
+          let error2 = `Unexpected ${res.status} response while trying to read ${uri}`;
           try {
-            error += `: ${await res.text()}`;
+            error2 += `: ${await res.text()}`;
           } catch {
           }
-          throw new Error(error);
+          throw new Error(error2);
         }
         const decoded = await res.text();
         return decoded;
@@ -2406,22 +2384,22 @@ var require_main = __commonJS({
       }
       const messageFromBundle = bundle?.[key];
       if (!messageFromBundle) {
-        return format2(message, formatArgs);
+        return format3(message, formatArgs);
       }
       if (typeof messageFromBundle === "string") {
-        return format2(messageFromBundle, formatArgs);
+        return format3(messageFromBundle, formatArgs);
       }
       if (messageFromBundle.comment) {
-        return format2(messageFromBundle.message, formatArgs);
+        return format3(messageFromBundle.message, formatArgs);
       }
-      return format2(message, formatArgs);
+      return format3(message, formatArgs);
     }
     var _format2Regexp = /{([^}]+)}/g;
-    function format2(template, values) {
+    function format3(template2, values) {
       if (Object.keys(values).length === 0) {
-        return template;
+        return template2;
       }
-      return template.replace(_format2Regexp, (match, group) => values[group] ?? match);
+      return template2.replace(_format2Regexp, (match, group2) => values[group2] ?? match);
     }
     function isBuiltinExtension(json) {
       return !!(typeof json?.contents?.bundle === "object" && typeof json?.version === "string");
@@ -2535,10 +2513,10 @@ var init_main = __esm({
       Color2.is = is;
     })(Color || (Color = {}));
     (function(ColorInformation2) {
-      function create(range, color) {
+      function create(range, color2) {
         return {
           range,
-          color
+          color: color2
         };
       }
       ColorInformation2.create = create;
@@ -2549,9 +2527,9 @@ var init_main = __esm({
       ColorInformation2.is = is;
     })(ColorInformation || (ColorInformation = {}));
     (function(ColorPresentation2) {
-      function create(label2, textEdit, additionalTextEdits) {
+      function create(label3, textEdit, additionalTextEdits) {
         return {
-          label: label2,
+          label: label3,
           textEdit,
           additionalTextEdits
         };
@@ -2627,13 +2605,13 @@ var init_main = __esm({
       CodeDescription2.is = is;
     })(CodeDescription || (CodeDescription = {}));
     (function(Diagnostic2) {
-      function create(range, message, severity, code, source, relatedInformation) {
+      function create(range, message, severity, code2, source, relatedInformation) {
         const result = { range, message };
         if (Is.defined(severity)) {
           result.severity = severity;
         }
-        if (Is.defined(code)) {
-          result.code = code;
+        if (Is.defined(code2)) {
+          result.code = code2;
         }
         if (Is.defined(source)) {
           result.source = source;
@@ -2700,8 +2678,8 @@ var init_main = __esm({
       TextEdit2.is = is;
     })(TextEdit || (TextEdit = {}));
     (function(ChangeAnnotation2) {
-      function create(label2, needsConfirmation, description) {
-        const result = { label: label2 };
+      function create(label3, needsConfirmation, description) {
+        const result = { label: label3 };
         if (needsConfirmation !== void 0) {
           result.needsConfirmation = needsConfirmation;
         }
@@ -2936,8 +2914,8 @@ var init_main = __esm({
       LanguageKind2.YAML = "yaml";
     })(LanguageKind || (LanguageKind = {}));
     (function(TextDocumentItem2) {
-      function create(uri, languageId, version, text) {
-        return { uri, languageId, version, text };
+      function create(uri, languageId, version, text2) {
+        return { uri, languageId, version, text: text2 };
       }
       TextDocumentItem2.create = create;
       function is(value) {
@@ -3023,8 +3001,8 @@ var init_main = __esm({
       CompletionItemLabelDetails2.is = is;
     })(CompletionItemLabelDetails || (CompletionItemLabelDetails = {}));
     (function(CompletionItem2) {
-      function create(label2) {
-        return { label: label2 };
+      function create(label3) {
+        return { label: label3 };
       }
       CompletionItem2.create = create;
     })(CompletionItem || (CompletionItem = {}));
@@ -3053,14 +3031,14 @@ var init_main = __esm({
       Hover2.is = is;
     })(Hover || (Hover = {}));
     (function(ParameterInformation2) {
-      function create(label2, documentation) {
-        return documentation ? { label: label2, documentation } : { label: label2 };
+      function create(label3, documentation) {
+        return documentation ? { label: label3, documentation } : { label: label3 };
       }
       ParameterInformation2.create = create;
     })(ParameterInformation || (ParameterInformation = {}));
     (function(SignatureInformation2) {
-      function create(label2, documentation, ...parameters) {
-        const result = { label: label2 };
+      function create(label3, documentation, ...parameters) {
+        const result = { label: label3 };
         if (Is.defined(documentation)) {
           result.documentation = documentation;
         }
@@ -3320,8 +3298,8 @@ var init_main = __esm({
       SemanticTokens2.is = is;
     })(SemanticTokens || (SemanticTokens = {}));
     (function(InlineValueText2) {
-      function create(range, text) {
-        return { range, text };
+      function create(range, text2) {
+        return { range, text: text2 };
       }
       InlineValueText2.create = create;
       function is(value) {
@@ -3383,8 +3361,8 @@ var init_main = __esm({
       InlayHintLabelPart2.is = is;
     })(InlayHintLabelPart || (InlayHintLabelPart = {}));
     (function(InlayHint2) {
-      function create(position, label2, kind) {
-        const result = { position, label: label2 };
+      function create(position, label3, kind) {
+        const result = { position, label: label3 };
         if (kind !== void 0) {
           result.kind = kind;
         }
@@ -3398,19 +3376,19 @@ var init_main = __esm({
       InlayHint2.is = is;
     })(InlayHint || (InlayHint = {}));
     (function(StringValue2) {
-      function createSnippet(value) {
+      function createSnippet2(value) {
         return { kind: "snippet", value };
       }
-      StringValue2.createSnippet = createSnippet;
-      function isSnippet(value) {
+      StringValue2.createSnippet = createSnippet2;
+      function isSnippet2(value) {
         const candidate = value;
         return Is.objectLiteral(candidate) && candidate.kind === "snippet" && Is.string(candidate.value);
       }
-      StringValue2.isSnippet = isSnippet;
+      StringValue2.isSnippet = isSnippet2;
     })(StringValue || (StringValue = {}));
     (function(InlineCompletionItem2) {
-      function create(insertText, filterText, range, command) {
-        return { insertText, filterText, range, command };
+      function create(insertText2, filterText, range, command) {
+        return { insertText: insertText2, filterText, range, command };
       }
       InlineCompletionItem2.create = create;
     })(InlineCompletionItem || (InlineCompletionItem = {}));
@@ -3425,8 +3403,8 @@ var init_main = __esm({
       InlineCompletionTriggerKind2.Automatic = 2;
     })(InlineCompletionTriggerKind || (InlineCompletionTriggerKind = {}));
     (function(SelectedCompletionInfo2) {
-      function create(range, text) {
-        return { range, text };
+      function create(range, text2) {
+        return { range, text: text2 };
       }
       SelectedCompletionInfo2.create = create;
     })(SelectedCompletionInfo || (SelectedCompletionInfo = {}));
@@ -3454,7 +3432,7 @@ var init_main = __esm({
       }
       TextDocument3.is = is;
       function applyEdits(document, edits) {
-        let text = document.getText();
+        let text2 = document.getText();
         const sortedEdits = mergeSort2(edits, (a2, b2) => {
           const diff = a2.range.start.line - b2.range.start.line;
           if (diff === 0) {
@@ -3462,19 +3440,19 @@ var init_main = __esm({
           }
           return diff;
         });
-        let lastModifiedOffset = text.length;
+        let lastModifiedOffset = text2.length;
         for (let i2 = sortedEdits.length - 1; i2 >= 0; i2--) {
           const e2 = sortedEdits[i2];
           const startOffset = document.offsetAt(e2.range.start);
           const endOffset = document.offsetAt(e2.range.end);
           if (endOffset <= lastModifiedOffset) {
-            text = text.substring(0, startOffset) + e2.newText + text.substring(endOffset, text.length);
+            text2 = text2.substring(0, startOffset) + e2.newText + text2.substring(endOffset, text2.length);
           } else {
             throw new Error("Overlapping edit");
           }
           lastModifiedOffset = startOffset;
         }
-        return text;
+        return text2;
       }
       TextDocument3.applyEdits = applyEdits;
       function mergeSort2(data, compare) {
@@ -3539,21 +3517,21 @@ var init_main = __esm({
       getLineOffsets() {
         if (this._lineOffsets === void 0) {
           const lineOffsets = [];
-          const text = this._content;
+          const text2 = this._content;
           let isLineStart = true;
-          for (let i2 = 0; i2 < text.length; i2++) {
+          for (let i2 = 0; i2 < text2.length; i2++) {
             if (isLineStart) {
               lineOffsets.push(i2);
               isLineStart = false;
             }
-            const ch = text.charAt(i2);
+            const ch = text2.charAt(i2);
             isLineStart = ch === "\r" || ch === "\n";
-            if (ch === "\r" && i2 + 1 < text.length && text.charAt(i2 + 1) === "\n") {
+            if (ch === "\r" && i2 + 1 < text2.length && text2.charAt(i2 + 1) === "\n") {
               i2++;
             }
           }
-          if (isLineStart && text.length > 0) {
-            lineOffsets.push(text.length);
+          if (isLineStart && text2.length > 0) {
+            lineOffsets.push(text2.length);
           }
           this._lineOffsets = lineOffsets;
         }
@@ -3675,12 +3653,12 @@ function mergeSort(data, compare) {
   }
   return data;
 }
-function computeLineOffsets(text, isAtLineStart, textOffset = 0) {
+function computeLineOffsets(text2, isAtLineStart, textOffset = 0) {
   const result = isAtLineStart ? [textOffset] : [];
-  for (let i2 = 0; i2 < text.length; i2++) {
-    const ch = text.charCodeAt(i2);
+  for (let i2 = 0; i2 < text2.length; i2++) {
+    const ch = text2.charCodeAt(i2);
     if (isEOL(ch)) {
-      if (ch === 13 && i2 + 1 < text.length && text.charCodeAt(i2 + 1) === 10) {
+      if (ch === 13 && i2 + 1 < text2.length && text2.charCodeAt(i2 + 1) === 10) {
         i2++;
       }
       result.push(textOffset + i2 + 1);
@@ -3869,7 +3847,7 @@ var init_main2 = __esm({
       }
       TextDocument3.update = update;
       function applyEdits(document, edits) {
-        const text = document.getText();
+        const text2 = document.getText();
         const sortedEdits = mergeSort(edits.map(getWellformedEdit), (a2, b2) => {
           const diff = a2.range.start.line - b2.range.start.line;
           if (diff === 0) {
@@ -3884,14 +3862,14 @@ var init_main2 = __esm({
           if (startOffset < lastModifiedOffset) {
             throw new Error("Overlapping edit");
           } else if (startOffset > lastModifiedOffset) {
-            spans.push(text.substring(lastModifiedOffset, startOffset));
+            spans.push(text2.substring(lastModifiedOffset, startOffset));
           }
           if (e2.newText.length) {
             spans.push(e2.newText);
           }
           lastModifiedOffset = document.offsetAt(e2.range.end);
         }
-        spans.push(text.substr(lastModifiedOffset));
+        spans.push(text2.substr(lastModifiedOffset));
         return spans.join("");
       }
       TextDocument3.applyEdits = applyEdits;
@@ -3956,11 +3934,11 @@ var init_htmlLanguageTypes = __esm({
         }
       };
     })(ClientCapabilities || (ClientCapabilities = {}));
-    (function(FileType2) {
-      FileType2[FileType2["Unknown"] = 0] = "Unknown";
-      FileType2[FileType2["File"] = 1] = "File";
-      FileType2[FileType2["Directory"] = 2] = "Directory";
-      FileType2[FileType2["SymbolicLink"] = 64] = "SymbolicLink";
+    (function(FileType3) {
+      FileType3[FileType3["Unknown"] = 0] = "Unknown";
+      FileType3[FileType3["File"] = 1] = "File";
+      FileType3[FileType3["Directory"] = 2] = "Directory";
+      FileType3[FileType3["SymbolicLink"] = 64] = "SymbolicLink";
     })(FileType || (FileType = {}));
   }
 });
@@ -4042,8 +4020,8 @@ function createScanner(input, initialOffset = 0, initialState = ScannerState.Wit
         stream.advanceUntilChar(_LAN);
         return finishToken(offset, TokenType.Content);
       case ScannerState.AfterOpeningEndTag:
-        const tagName = nextElementName();
-        if (tagName.length > 0) {
+        const tagName2 = nextElementName();
+        if (tagName2.length > 0) {
           state = ScannerState.WithinEndTag;
           return finishToken(offset, TokenType.EndTag);
         }
@@ -4465,9 +4443,9 @@ var init_htmlParser = __esm({
       parseDocument(document) {
         return this.parse(document.getText(), this.dataManager.getVoidElements(document.languageId));
       }
-      parse(text, voidElements) {
-        const scanner = createScanner(text, void 0, void 0, true);
-        const htmlDocument = new Node(0, text.length, [], void 0);
+      parse(text2, voidElements) {
+        const scanner = createScanner(text2, void 0, void 0, true);
+        const htmlDocument = new Node(0, text2.length, [], void 0);
         let curr = htmlDocument;
         let endTagStart = -1;
         let endTagName = void 0;
@@ -4476,7 +4454,7 @@ var init_htmlParser = __esm({
         while (token !== TokenType.EOS) {
           switch (token) {
             case TokenType.StartTagOpen:
-              const child = new Node(scanner.getTokenOffset(), text.length, [], curr);
+              const child = new Node(scanner.getTokenOffset(), text2.length, [], curr);
               curr.children.push(child);
               curr = child;
               break;
@@ -4551,7 +4529,7 @@ var init_htmlParser = __esm({
           token = scanner.scan();
         }
         while (curr.parent) {
-          curr.end = text.length;
+          curr.end = text2.length;
           curr.closed = false;
           curr = curr.parent;
         }
@@ -6838,8 +6816,8 @@ function repeat(value, count) {
   }
   return s2;
 }
-function isLetterOrDigit(text, index) {
-  const c2 = text.charCodeAt(index);
+function isLetterOrDigit(text2, index) {
+  const c2 = text2.charCodeAt(index);
   return _a <= c2 && c2 <= _z || _A <= c2 && c2 <= _Z || _0 <= c2 && c2 <= _9;
 }
 var _a, _z, _A, _Z, _0, _9;
@@ -7071,12 +7049,12 @@ var init_dataProvider = __esm({
         this._globalAttributes.forEach(processAttribute);
         return attributes;
       }
-      provideValues(tag, attribute) {
+      provideValues(tag, attribute2) {
         const values = [];
-        attribute = attribute.toLowerCase();
+        attribute2 = attribute2.toLowerCase();
         const processAttributes = (attributes) => {
           attributes.forEach((a2) => {
-            if (a2.name.toLowerCase() === attribute) {
+            if (a2.name.toLowerCase() === attribute2) {
               if (a2.values) {
                 a2.values.forEach((v2) => {
                   values.push(v2);
@@ -7345,13 +7323,13 @@ var init_htmlCompletion = __esm({
         const completionParticipants = this.completionParticipants;
         const dataProviders = this.dataManager.getDataProviders().filter((p2) => p2.isApplicable(document.languageId) && (!settings || settings[p2.getId()] !== false));
         const doesSupportMarkdown = this.doesSupportMarkdown();
-        const text = document.getText();
+        const text2 = document.getText();
         const offset = document.offsetAt(position);
         const node = htmlDocument.findNodeBefore(offset);
         if (!node) {
           return result;
         }
-        const scanner = createScanner(text, node.start);
+        const scanner = createScanner(text2, node.start);
         let currentTag = "";
         let currentAttributeName;
         let voidElements;
@@ -7379,23 +7357,23 @@ var init_htmlCompletion = __esm({
         function getLineIndent(offset2) {
           let start = offset2;
           while (start > 0) {
-            const ch = text.charAt(start - 1);
+            const ch = text2.charAt(start - 1);
             if ("\n\r".indexOf(ch) >= 0) {
-              return text.substring(start, offset2);
+              return text2.substring(start, offset2);
             }
             if (!isWhiteSpace(ch)) {
               return null;
             }
             start--;
           }
-          return text.substring(0, offset2);
+          return text2.substring(0, offset2);
         }
         function collectCloseTagSuggestions(afterOpenBracket, inOpenTag, tagNameEnd = offset) {
           if (settings && settings.hideEndTagSuggestions) {
             return result;
           }
           const range = getReplaceRange(afterOpenBracket, tagNameEnd);
-          const closeTag = isFollowedBy(text, tagNameEnd, ScannerState.WithinEndTag, TokenType.EndTagClose) ? "" : ">";
+          const closeTag = isFollowedBy(text2, tagNameEnd, ScannerState.WithinEndTag, TokenType.EndTagClose) ? "" : ">";
           let curr = node;
           if (inOpenTag) {
             curr = curr.parent;
@@ -7413,8 +7391,8 @@ var init_htmlCompletion = __esm({
               const startIndent = getLineIndent(curr.start);
               const endIndent = getLineIndent(afterOpenBracket - 1);
               if (startIndent !== null && endIndent !== null && startIndent !== endIndent) {
-                const insertText = startIndent + "</" + tag + closeTag;
-                item.textEdit = TextEdit.replace(getReplaceRange(afterOpenBracket - 1 - endIndent.length), insertText);
+                const insertText2 = startIndent + "</" + tag + closeTag;
+                item.textEdit = TextEdit.replace(getReplaceRange(afterOpenBracket - 1 - endIndent.length), insertText2);
                 item.filterText = endIndent + "</" + tag;
               }
               result.items.push(item);
@@ -7463,20 +7441,20 @@ var init_htmlCompletion = __esm({
         }
         function getExistingAttributes() {
           const existingAttributes = /* @__PURE__ */ Object.create(null);
-          node.attributeNames.forEach((attribute) => {
-            existingAttributes[attribute] = true;
+          node.attributeNames.forEach((attribute2) => {
+            existingAttributes[attribute2] = true;
           });
           return existingAttributes;
         }
         function collectAttributeNameSuggestions(nameStart, nameEnd = offset) {
           let replaceEnd = offset;
-          while (replaceEnd < nameEnd && text[replaceEnd] !== "<") {
+          while (replaceEnd < nameEnd && text2[replaceEnd] !== "<") {
             replaceEnd++;
           }
-          const currentAttribute = text.substring(nameStart, nameEnd);
+          const currentAttribute = text2.substring(nameStart, nameEnd);
           const range = getReplaceRange(nameStart, replaceEnd);
           let value = "";
-          if (!isFollowedBy(text, nameEnd, ScannerState.AfterAttributeName, TokenType.DelimiterAssign)) {
+          if (!isFollowedBy(text2, nameEnd, ScannerState.AfterAttributeName, TokenType.DelimiterAssign)) {
             const defaultValue = settings?.attributeDefaultValue ?? "doublequotes";
             if (defaultValue === "empty") {
               value = "=$1";
@@ -7544,41 +7522,41 @@ var init_htmlCompletion = __esm({
           let range;
           let addQuotes;
           let valuePrefix;
-          if (offset > valueStart && offset <= valueEnd && isQuote(text[valueStart])) {
+          if (offset > valueStart && offset <= valueEnd && isQuote(text2[valueStart])) {
             const valueContentStart = valueStart + 1;
             let valueContentEnd = valueEnd;
-            if (valueEnd > valueStart && text[valueEnd - 1] === text[valueStart]) {
+            if (valueEnd > valueStart && text2[valueEnd - 1] === text2[valueStart]) {
               valueContentEnd--;
             }
-            const wsBefore = getWordStart(text, offset, valueContentStart);
-            const wsAfter = getWordEnd(text, offset, valueContentEnd);
+            const wsBefore = getWordStart(text2, offset, valueContentStart);
+            const wsAfter = getWordEnd(text2, offset, valueContentEnd);
             range = getReplaceRange(wsBefore, wsAfter);
-            valuePrefix = offset >= valueContentStart && offset <= valueContentEnd ? text.substring(valueContentStart, offset) : "";
+            valuePrefix = offset >= valueContentStart && offset <= valueContentEnd ? text2.substring(valueContentStart, offset) : "";
             addQuotes = false;
           } else {
             range = getReplaceRange(valueStart, valueEnd);
-            valuePrefix = text.substring(valueStart, offset);
+            valuePrefix = text2.substring(valueStart, offset);
             addQuotes = true;
           }
           if (completionParticipants.length > 0) {
             const tag = currentTag.toLowerCase();
-            const attribute = currentAttributeName.toLowerCase();
+            const attribute2 = currentAttributeName.toLowerCase();
             const fullRange = getReplaceRange(valueStart, valueEnd);
             for (const participant of completionParticipants) {
               if (participant.onHtmlAttributeValue) {
-                participant.onHtmlAttributeValue({ document, position, tag, attribute, value: valuePrefix, range: fullRange, attributes: node.attributes });
+                participant.onHtmlAttributeValue({ document, position, tag, attribute: attribute2, value: valuePrefix, range: fullRange, attributes: node.attributes });
               }
             }
           }
           dataProviders.forEach((provider) => {
             provider.provideValues(currentTag, currentAttributeName).forEach((value) => {
-              const insertText = addQuotes ? '"' + value.name + '"' : value.name;
+              const insertText2 = addQuotes ? '"' + value.name + '"' : value.name;
               result.items.push({
                 label: value.name,
-                filterText: insertText,
+                filterText: insertText2,
                 kind: CompletionItemKind.Unit,
                 documentation: generateDocumentation(value, void 0, doesSupportMarkdown),
-                textEdit: TextEdit.replace(range, insertText),
+                textEdit: TextEdit.replace(range, insertText2),
                 insertTextFormat: InsertTextFormat.PlainText
               });
             });
@@ -7606,20 +7584,20 @@ var init_htmlCompletion = __esm({
         function collectCharacterEntityProposals() {
           let k = offset - 1;
           let characterStart = position.character;
-          while (k >= 0 && isLetterOrDigit(text, k)) {
+          while (k >= 0 && isLetterOrDigit(text2, k)) {
             k--;
             characterStart--;
           }
-          if (k >= 0 && text[k] === "&") {
+          if (k >= 0 && text2[k] === "&") {
             const range = Range.create(Position.create(position.line, characterStart - 1), position);
             for (const entity in entities) {
               if (endsWith(entity, ";")) {
-                const label2 = "&" + entity;
+                const label3 = "&" + entity;
                 result.items.push({
-                  label: label2,
+                  label: label3,
                   kind: CompletionItemKind.Keyword,
                   documentation: l10n2.t("Character entity representing '{0}'", entities[entity]),
-                  textEdit: TextEdit.replace(range, label2),
+                  textEdit: TextEdit.replace(range, label3),
                   insertTextFormat: InsertTextFormat.PlainText
                 });
               }
@@ -7702,7 +7680,7 @@ var init_htmlCompletion = __esm({
               if (offset <= scanner.getTokenEnd()) {
                 let start = scanner.getTokenOffset() - 1;
                 while (start >= 0) {
-                  const ch = text.charAt(start);
+                  const ch = text2.charAt(start);
                   if (ch === "/") {
                     return collectCloseTagSuggestions(start, false, scanner.getTokenEnd());
                   } else if (!isWhiteSpace(ch)) {
@@ -7873,7 +7851,7 @@ var init_htmlHover = __esm({
         const doesSupportMarkdown = this.doesSupportMarkdown();
         const offset = document.offsetAt(position);
         const node = htmlDocument.findNodeAt(offset);
-        const text = document.getText();
+        const text2 = document.getText();
         if (!node || !node.tag) {
           return null;
         }
@@ -7940,23 +7918,23 @@ var init_htmlHover = __esm({
           }
           return null;
         }
-        function getEntityHover(text2, range) {
-          let currEntity = filterEntity(text2);
+        function getEntityHover(text3, range) {
+          let currEntity = filterEntity(text3);
           for (const entity in entities) {
             let hover = null;
-            const label2 = "&" + entity;
-            if (currEntity === label2) {
-              let code = entities[entity].charCodeAt(0).toString(16).toUpperCase();
+            const label3 = "&" + entity;
+            if (currEntity === label3) {
+              let code2 = entities[entity].charCodeAt(0).toString(16).toUpperCase();
               let hex = "U+";
-              if (code.length < 4) {
-                const zeroes = 4 - code.length;
+              if (code2.length < 4) {
+                const zeroes = 4 - code2.length;
                 let k = 0;
                 while (k < zeroes) {
                   hex += "0";
                   k += 1;
                 }
               }
-              hex += code;
+              hex += code2;
               const contentsDoc = l10n3.t("Character entity representing '{0}', unicode equivalent '{1}'", entities[entity], hex);
               if (contentsDoc) {
                 hover = { contents: contentsDoc, range };
@@ -7985,19 +7963,19 @@ var init_htmlHover = __esm({
         function getEntityRange() {
           let k = offset - 1;
           let characterStart = position.character;
-          while (k >= 0 && isLetterOrDigit(text, k)) {
+          while (k >= 0 && isLetterOrDigit(text2, k)) {
             k--;
             characterStart--;
           }
           let n2 = k + 1;
           let characterEnd = characterStart;
-          while (isLetterOrDigit(text, n2)) {
+          while (isLetterOrDigit(text2, n2)) {
             n2++;
             characterEnd++;
           }
-          if (k >= 0 && text[k] === "&") {
+          if (k >= 0 && text2[k] === "&") {
             let range = null;
-            if (text[n2] === ";") {
+            if (text2[n2] === ";") {
               range = Range.create(Position.create(position.line, characterStart), Position.create(position.line, characterEnd + 1));
             } else {
               range = Range.create(Position.create(position.line, characterStart), Position.create(position.line, characterEnd));
@@ -8006,15 +7984,15 @@ var init_htmlHover = __esm({
           }
           return null;
         }
-        function filterEntity(text2) {
+        function filterEntity(text3) {
           let k = offset - 1;
           let newText = "&";
-          while (k >= 0 && isLetterOrDigit(text2, k)) {
+          while (k >= 0 && isLetterOrDigit(text3, k)) {
             k--;
           }
           k = k + 1;
-          while (isLetterOrDigit(text2, k)) {
-            newText += text2[k];
+          while (isLetterOrDigit(text3, k)) {
+            newText += text3[k];
             k += 1;
           }
           newText += ";";
@@ -8039,7 +8017,7 @@ var init_htmlHover = __esm({
         }
         const entityRange = getEntityRange();
         if (entityRange) {
-          return getEntityHover(text, entityRange);
+          return getEntityHover(text2, entityRange);
         }
         function scanAttrAndAttrValue(nodeStart, attrValueStart) {
           const scanner = createScanner(document.getText(), nodeStart);
@@ -8171,15 +8149,15 @@ var init_beautify_css = __esm({
           OutputLine.prototype._allow_wrap = function() {
             if (this._should_wrap()) {
               this.__parent.add_new_line();
-              var next = this.__parent.current_line;
-              next.set_indent(this.__wrap_point_indent_count, this.__wrap_point_alignment_count);
-              next.__items = this.__items.slice(this.__wrap_point_index);
+              var next2 = this.__parent.current_line;
+              next2.set_indent(this.__wrap_point_indent_count, this.__wrap_point_alignment_count);
+              next2.__items = this.__items.slice(this.__wrap_point_index);
               this.__items = this.__items.slice(0, this.__wrap_point_index);
-              next.__character_count += this.__character_count - this.__wrap_point_character_count;
+              next2.__character_count += this.__character_count - this.__wrap_point_character_count;
               this.__character_count = this.__wrap_point_character_count;
-              if (next.__items[0] === " ") {
-                next.__items.splice(0, 1);
-                next.__character_count -= 1;
+              if (next2.__items[0] === " ") {
+                next2.__items.splice(0, 1);
+                next2.__character_count -= 1;
               }
               return true;
             }
@@ -8709,16 +8687,16 @@ var init_beautify_css = __esm({
             this.__directive_pattern = / (\w+)[:](\w+)/g;
             this.__directives_end_ignore_pattern = new RegExp(start_block_pattern + /\sbeautify\signore:end\s/.source + end_block_pattern, "g");
           }
-          Directives.prototype.get_directives = function(text) {
-            if (!text.match(this.__directives_block_pattern)) {
+          Directives.prototype.get_directives = function(text2) {
+            if (!text2.match(this.__directives_block_pattern)) {
               return null;
             }
             var directives = {};
             this.__directive_pattern.lastIndex = 0;
-            var directive_match = this.__directive_pattern.exec(text);
+            var directive_match = this.__directive_pattern.exec(text2);
             while (directive_match) {
               directives[directive_match[1]] = directive_match[2];
-              directive_match = this.__directive_pattern.exec(text);
+              directive_match = this.__directive_pattern.exec(text2);
             }
             return directives;
           };
@@ -9264,15 +9242,15 @@ var init_beautify_html = __esm({
           OutputLine.prototype._allow_wrap = function() {
             if (this._should_wrap()) {
               this.__parent.add_new_line();
-              var next = this.__parent.current_line;
-              next.set_indent(this.__wrap_point_indent_count, this.__wrap_point_alignment_count);
-              next.__items = this.__items.slice(this.__wrap_point_index);
+              var next2 = this.__parent.current_line;
+              next2.set_indent(this.__wrap_point_indent_count, this.__wrap_point_alignment_count);
+              next2.__items = this.__items.slice(this.__wrap_point_index);
               this.__items = this.__items.slice(0, this.__wrap_point_index);
-              next.__character_count += this.__character_count - this.__wrap_point_character_count;
+              next2.__character_count += this.__character_count - this.__wrap_point_character_count;
               this.__character_count = this.__wrap_point_character_count;
-              if (next.__items[0] === " ") {
-                next.__items.splice(0, 1);
-                next.__character_count -= 1;
+              if (next2.__items[0] === " ") {
+                next2.__items.splice(0, 1);
+                next2.__character_count -= 1;
               }
               return true;
             }
@@ -9532,9 +9510,9 @@ var init_beautify_html = __esm({
         /* 3 */
         /***/
         (function(module2) {
-          function Token(type, text, newlines, whitespace_before) {
+          function Token(type, text2, newlines, whitespace_before) {
             this.type = type;
-            this.text = text;
+            this.text = text2;
             this.comments_before = null;
             this.newlines = newlines || 0;
             this.whitespace_before = whitespace_before || "";
@@ -9829,15 +9807,15 @@ var init_beautify_html = __esm({
             this.__tokens = new TokenStream();
             this._reset();
             var current;
-            var previous = new Token(TOKEN.START, "");
+            var previous2 = new Token(TOKEN.START, "");
             var open_token = null;
             var open_stack = [];
             var comments = new TokenStream();
-            while (previous.type !== TOKEN.EOF) {
-              current = this._get_next_token(previous, open_token);
+            while (previous2.type !== TOKEN.EOF) {
+              current = this._get_next_token(previous2, open_token);
               while (this._is_comment(current)) {
                 comments.add(current);
-                current = this._get_next_token(previous, open_token);
+                current = this._get_next_token(previous2, open_token);
               }
               if (!comments.isEmpty()) {
                 current.comments_before = comments;
@@ -9853,10 +9831,10 @@ var init_beautify_html = __esm({
                 open_token = open_stack.pop();
                 current.parent = open_token;
               }
-              current.previous = previous;
-              previous.next = current;
+              current.previous = previous2;
+              previous2.next = current;
               this.__tokens.add(current);
-              previous = current;
+              previous2 = current;
             }
             return this.__tokens;
           };
@@ -9883,10 +9861,10 @@ var init_beautify_html = __esm({
           Tokenizer.prototype._is_closing = function(current_token, open_token) {
             return false;
           };
-          Tokenizer.prototype._create_token = function(type, text) {
+          Tokenizer.prototype._create_token = function(type, text2) {
             var token = new Token(
               type,
-              text,
+              text2,
               this._patterns.whitespace.newline_count,
               this._patterns.whitespace.whitespace_before_token
             );
@@ -10078,16 +10056,16 @@ var init_beautify_html = __esm({
             this.__directive_pattern = / (\w+)[:](\w+)/g;
             this.__directives_end_ignore_pattern = new RegExp(start_block_pattern + /\sbeautify\signore:end\s/.source + end_block_pattern, "g");
           }
-          Directives.prototype.get_directives = function(text) {
-            if (!text.match(this.__directives_block_pattern)) {
+          Directives.prototype.get_directives = function(text2) {
+            if (!text2.match(this.__directives_block_pattern)) {
               return null;
             }
             var directives = {};
             this.__directive_pattern.lastIndex = 0;
-            var directive_match = this.__directive_pattern.exec(text);
+            var directive_match = this.__directive_pattern.exec(text2);
             while (directive_match) {
               directives[directive_match[1]] = directive_match[2];
-              directive_match = this.__directive_pattern.exec(text);
+              directive_match = this.__directive_pattern.exec(text2);
             }
             return directives;
           };
@@ -10168,15 +10146,15 @@ var init_beautify_html = __esm({
             } else {
               result = this._input.read(this._starting_pattern, this.__template_pattern);
             }
-            var next = this._read_template();
-            while (next) {
+            var next2 = this._read_template();
+            while (next2) {
               if (this._match_pattern) {
-                next += this._input.read(this._match_pattern);
+                next2 += this._input.read(this._match_pattern);
               } else {
-                next += this._input.readUntil(this.__template_pattern);
+                next2 += this._input.readUntil(this.__template_pattern);
               }
-              result += next;
-              next = this._read_template();
+              result += next2;
+              next2 = this._read_template();
             }
             if (this._until_after) {
               result += this._input.readUntilAfter(this._until_pattern);
@@ -10611,7 +10589,7 @@ var init_beautify_html = __esm({
           Beautifier.prototype._print_custom_beatifier_text = function(printer, raw_token, last_tag_token) {
             var local = this;
             if (raw_token.text !== "") {
-              var text = raw_token.text, _beautifier, script_indent_level = 1, pre = "", post = "";
+              var text2 = raw_token.text, _beautifier, script_indent_level = 1, pre = "", post = "";
               if (last_tag_token.custom_beautifier_name === "javascript" && typeof this._js_beautify === "function") {
                 _beautifier = this._js_beautify;
               } else if (last_tag_token.custom_beautifier_name === "css" && typeof this._css_beautify === "function") {
@@ -10628,19 +10606,19 @@ var init_beautify_html = __esm({
                 script_indent_level = -printer.indent_level;
               }
               var indentation = printer.get_full_indent(script_indent_level);
-              text = text.replace(/\n[ \t]*$/, "");
-              if (last_tag_token.custom_beautifier_name !== "html" && text[0] === "<" && text.match(/^(<!--|<!\[CDATA\[)/)) {
-                var matched = /^(<!--[^\n]*|<!\[CDATA\[)(\n?)([ \t\n]*)([\s\S]*)(-->|]]>)$/.exec(text);
+              text2 = text2.replace(/\n[ \t]*$/, "");
+              if (last_tag_token.custom_beautifier_name !== "html" && text2[0] === "<" && text2.match(/^(<!--|<!\[CDATA\[)/)) {
+                var matched = /^(<!--[^\n]*|<!\[CDATA\[)(\n?)([ \t\n]*)([\s\S]*)(-->|]]>)$/.exec(text2);
                 if (!matched) {
                   printer.add_raw_token(raw_token);
                   return;
                 }
                 pre = indentation + matched[1] + "\n";
-                text = matched[4];
+                text2 = matched[4];
                 if (matched[5]) {
                   post = indentation + matched[5];
                 }
-                text = text.replace(/\n[ \t]*$/, "");
+                text2 = text2.replace(/\n[ \t]*$/, "");
                 if (matched[2] || matched[3].indexOf("\n") !== -1) {
                   matched = matched[3].match(/[ \t]+$/);
                   if (matched) {
@@ -10648,32 +10626,32 @@ var init_beautify_html = __esm({
                   }
                 }
               }
-              if (text) {
+              if (text2) {
                 if (_beautifier) {
                   var Child_options = function() {
                     this.eol = "\n";
                   };
                   Child_options.prototype = this._options.raw_options;
                   var child_options = new Child_options();
-                  text = _beautifier(indentation + text, child_options);
+                  text2 = _beautifier(indentation + text2, child_options);
                 } else {
                   var white = raw_token.whitespace_before;
                   if (white) {
-                    text = text.replace(new RegExp("\n(" + white + ")?", "g"), "\n");
+                    text2 = text2.replace(new RegExp("\n(" + white + ")?", "g"), "\n");
                   }
-                  text = indentation + text.replace(/\n/g, "\n" + indentation);
+                  text2 = indentation + text2.replace(/\n/g, "\n" + indentation);
                 }
               }
               if (pre) {
-                if (!text) {
-                  text = pre + post;
+                if (!text2) {
+                  text2 = pre + post;
                 } else {
-                  text = pre + text + "\n" + post;
+                  text2 = pre + text2 + "\n" + post;
                 }
               }
               printer.print_newline(false);
-              if (text) {
-                raw_token.text = text;
+              if (text2) {
+                raw_token.text = text2;
                 raw_token.whitespace_before = "";
                 raw_token.newlines = 0;
                 printer.add_raw_token(raw_token);
@@ -11467,11 +11445,11 @@ function computeIndentLevel(content, offset, options) {
   }
   return Math.floor(nChars / tabSize);
 }
-function isEOL2(text, offset) {
-  return "\r\n".indexOf(text.charAt(offset)) !== -1;
+function isEOL2(text2, offset) {
+  return "\r\n".indexOf(text2.charAt(offset)) !== -1;
 }
-function isWhitespace(text, offset) {
-  return " 	".indexOf(text.charAt(offset)) !== -1;
+function isWhitespace(text2, offset) {
+  return " 	".indexOf(text2.charAt(offset)) !== -1;
 }
 var init_htmlFormatter = __esm({
   "node_modules/vscode-html-languageservice/lib/esm/services/htmlFormatter.js"() {
@@ -11819,8 +11797,8 @@ var init_esm = __esm({
 // node_modules/vscode-html-languageservice/lib/esm/services/htmlLinks.js
 function normalizeRef(url) {
   const first = url[0];
-  const last = url[url.length - 1];
-  if (first === last && (first === "'" || first === '"')) {
+  const last2 = url[url.length - 1];
+  if (first === last2 && (first === "'" || first === '"')) {
     url = url.substring(1, url.length - 1);
   }
   return url;
@@ -12024,16 +12002,16 @@ function findDocumentSymbols(document, htmlDocument) {
   const symbols = [];
   const symbols2 = findDocumentSymbols2(document, htmlDocument);
   for (const symbol of symbols2) {
-    walk(symbol, void 0);
+    walk2(symbol, void 0);
   }
   return symbols;
-  function walk(node, parent) {
+  function walk2(node, parent) {
     const symbol = SymbolInformation.create(node.name, node.kind, node.range, document.uri, parent?.name);
     symbol.containerName ?? (symbol.containerName = "");
     symbols.push(symbol);
     if (node.children) {
       for (const child of node.children) {
-        walk(child, node);
+        walk2(child, node);
       }
     }
   }
@@ -12194,7 +12172,7 @@ var init_htmlFolding = __esm({
           return diff;
         });
         let top = void 0;
-        const previous = [];
+        const previous2 = [];
         const nestingLevels = [];
         const nestingLevelCounts = [];
         const setNestingLevel = (index, level) => {
@@ -12211,18 +12189,18 @@ var init_htmlFolding = __esm({
           } else {
             if (entry.startLine > top.startLine) {
               if (entry.endLine <= top.endLine) {
-                previous.push(top);
+                previous2.push(top);
                 top = entry;
-                setNestingLevel(i2, previous.length);
+                setNestingLevel(i2, previous2.length);
               } else if (entry.startLine > top.endLine) {
                 do {
-                  top = previous.pop();
+                  top = previous2.pop();
                 } while (top && entry.startLine > top.endLine);
                 if (top) {
-                  previous.push(top);
+                  previous2.push(top);
                 }
                 top = entry;
-                setNestingLevel(i2, previous.length);
+                setNestingLevel(i2, previous2.length);
               }
             }
           }
@@ -12265,10 +12243,10 @@ var init_htmlFolding = __esm({
         while (token !== TokenType.EOS) {
           switch (token) {
             case TokenType.StartTag: {
-              const tagName = scanner.getTokenText();
+              const tagName2 = scanner.getTokenText();
               const startLine = document.positionAt(scanner.getTokenOffset()).line;
-              stack.push({ startLine, tagName });
-              lastTagName = tagName;
+              stack.push({ startLine, tagName: tagName2 });
+              lastTagName = tagName2;
               break;
             }
             case TokenType.EndTag: {
@@ -12304,8 +12282,8 @@ var init_htmlFolding = __esm({
             }
             case TokenType.Comment: {
               let startLine = document.positionAt(scanner.getTokenOffset()).line;
-              const text = scanner.getTokenText();
-              const m2 = text.match(/^\s*#(region\b)|(endregion\b)/);
+              const text2 = scanner.getTokenText();
+              const m2 = text2.match(/^\s*#(region\b)|(endregion\b)/);
               if (m2) {
                 if (m2[1]) {
                   stack.push({ startLine, tagName: "" });
@@ -24577,7 +24555,7 @@ var require_html = __commonJS({
     var service = getLanguageService2();
     function project(source) {
       const ranges = [];
-      let text = "", last = 0;
+      let text2 = "", last2 = 0;
       for (let i2 = 0; i2 < source.length; i2++) {
         if (!twigStart(source, i2)) continue;
         let end;
@@ -24587,21 +24565,21 @@ var require_html = __commonJS({
           end = source.length;
         }
         const raw = source.slice(i2, end);
-        const literal = /^\{%[-~]?\s*(verbatim|raw)\b/.exec(raw);
-        if (literal) {
+        const literal2 = /^\{%[-~]?\s*(verbatim|raw)\b/.exec(raw);
+        if (literal2) {
           const close = new RegExp(
-            "\\{%[-~]?\\s*end" + literal[1] + "\\s*[-~]?%\\}",
+            "\\{%[-~]?\\s*end" + literal2[1] + "\\s*[-~]?%\\}",
             "g"
           );
           close.lastIndex = end;
           end = close.exec(source) ? close.lastIndex : source.length;
         }
-        text += source.slice(last, i2) + source.slice(i2, end).replace(/[^\r\n]/g, " ");
+        text2 += source.slice(last2, i2) + source.slice(i2, end).replace(/[^\r\n]/g, " ");
         ranges.push([i2, end]);
-        last = end;
+        last2 = end;
         i2 = end - 1;
       }
-      return { text: text + source.slice(last), ranges };
+      return { text: text2 + source.slice(last2), ranges };
     }
     function htmlDocument(document, position) {
       const source = document.getText();
@@ -24635,12 +24613,12 @@ var require_html = __commonJS({
           {
             provideCompletionItems(document, position, token) {
               if (token.isCancellationRequested) return;
-              const html = htmlDocument(document, position);
-              if (!html) return;
+              const html2 = htmlDocument(document, position);
+              if (!html2) return;
               const result = service.doComplete(
-                html.virtual,
+                html2.virtual,
                 position,
-                html.parsed,
+                html2.parsed,
                 { attributeDefaultValue: attributeValue(document) }
               );
               return new vscode2.CompletionList(
@@ -24649,8 +24627,8 @@ var require_html = __commonJS({
                     item.label,
                     item.kind === void 0 ? void 0 : item.kind - 1
                   );
-                  const text = item.textEdit?.newText ?? item.insertText ?? item.label;
-                  completion.insertText = item.insertTextFormat === 2 ? new vscode2.SnippetString(text) : text;
+                  const text2 = item.textEdit?.newText ?? item.insertText ?? item.label;
+                  completion.insertText = item.insertTextFormat === 2 ? new vscode2.SnippetString(text2) : text2;
                   if (item.textEdit?.range)
                     completion.range = range(item.textEdit.range);
                   completion.filterText = item.filterText;
@@ -24677,9 +24655,9 @@ var require_html = __commonJS({
       context.subscriptions.push(
         vscode2.languages.registerHoverProvider("twig", {
           provideHover(document, position) {
-            const html = htmlDocument(document, position);
-            if (!html) return;
-            const hover = service.doHover(html.virtual, position, html.parsed);
+            const html2 = htmlDocument(document, position);
+            if (!html2) return;
+            const hover = service.doHover(html2.virtual, position, html2.parsed);
             if (hover && !Array.isArray(hover.contents))
               return new vscode2.Hover(
                 new vscode2.MarkdownString(
@@ -24725,21 +24703,21 @@ var require_html = __commonJS({
             return;
           const change = event.contentChanges[0];
           if (change.rangeLength || ![">", "/", "="].includes(change.text)) return;
-          const quote = change.text === "=";
+          const quote2 = change.text === "=";
           const editor = vscode2.window.activeTextEditor;
           if (!editor || editor.document !== document || editor.selections.length !== 1)
             return;
-          if (!vscode2.workspace.getConfiguration("html", document).get(quote ? "autoCreateQuotes" : "autoClosingTags", true))
+          if (!vscode2.workspace.getConfiguration("html", document).get(quote2 ? "autoCreateQuotes" : "autoClosingTags", true))
             return;
           const position = document.positionAt(change.rangeOffset + 1);
-          const html = htmlDocument(document, position);
-          if (!html || quote && /^\s*\{[{%#]/.test(
+          const html2 = htmlDocument(document, position);
+          if (!html2 || quote2 && /^\s*\{[{%#]/.test(
             document.getText().slice(change.rangeOffset + 1, change.rangeOffset + 200)
           ))
             return;
-          const completion = quote ? service.doQuoteComplete(html.virtual, position, html.parsed, {
+          const completion = quote2 ? service.doQuoteComplete(html2.virtual, position, html2.parsed, {
             attributeDefaultValue: attributeValue(document)
-          }) : service.doTagComplete(html.virtual, position, html.parsed);
+          }) : service.doTagComplete(html2.virtual, position, html2.parsed);
           if (!completion) return;
           const timer = setTimeout(() => clear(document), 1e3);
           timer.unref?.();
@@ -24762,12 +24740,6953 @@ var require_html = __commonJS({
   }
 });
 
+// node_modules/@vscode/emmet-helper/node_modules/jsonc-parser/lib/esm/impl/scanner.js
+function createScanner2(text2, ignoreTrivia) {
+  if (ignoreTrivia === void 0) {
+    ignoreTrivia = false;
+  }
+  var len = text2.length;
+  var pos = 0, value = "", tokenOffset = 0, token = 16, lineNumber = 0, lineStartOffset = 0, tokenLineStartOffset = 0, prevTokenLineStartOffset = 0, scanError = 0;
+  function scanHexDigits(count, exact) {
+    var digits = 0;
+    var value2 = 0;
+    while (digits < count || !exact) {
+      var ch = text2.charCodeAt(pos);
+      if (ch >= 48 && ch <= 57) {
+        value2 = value2 * 16 + ch - 48;
+      } else if (ch >= 65 && ch <= 70) {
+        value2 = value2 * 16 + ch - 65 + 10;
+      } else if (ch >= 97 && ch <= 102) {
+        value2 = value2 * 16 + ch - 97 + 10;
+      } else {
+        break;
+      }
+      pos++;
+      digits++;
+    }
+    if (digits < count) {
+      value2 = -1;
+    }
+    return value2;
+  }
+  function setPosition(newPosition) {
+    pos = newPosition;
+    value = "";
+    tokenOffset = 0;
+    token = 16;
+    scanError = 0;
+  }
+  function scanNumber() {
+    var start = pos;
+    if (text2.charCodeAt(pos) === 48) {
+      pos++;
+    } else {
+      pos++;
+      while (pos < text2.length && isDigit(text2.charCodeAt(pos))) {
+        pos++;
+      }
+    }
+    if (pos < text2.length && text2.charCodeAt(pos) === 46) {
+      pos++;
+      if (pos < text2.length && isDigit(text2.charCodeAt(pos))) {
+        pos++;
+        while (pos < text2.length && isDigit(text2.charCodeAt(pos))) {
+          pos++;
+        }
+      } else {
+        scanError = 3;
+        return text2.substring(start, pos);
+      }
+    }
+    var end = pos;
+    if (pos < text2.length && (text2.charCodeAt(pos) === 69 || text2.charCodeAt(pos) === 101)) {
+      pos++;
+      if (pos < text2.length && text2.charCodeAt(pos) === 43 || text2.charCodeAt(pos) === 45) {
+        pos++;
+      }
+      if (pos < text2.length && isDigit(text2.charCodeAt(pos))) {
+        pos++;
+        while (pos < text2.length && isDigit(text2.charCodeAt(pos))) {
+          pos++;
+        }
+        end = pos;
+      } else {
+        scanError = 3;
+      }
+    }
+    return text2.substring(start, end);
+  }
+  function scanString() {
+    var result = "", start = pos;
+    while (true) {
+      if (pos >= len) {
+        result += text2.substring(start, pos);
+        scanError = 2;
+        break;
+      }
+      var ch = text2.charCodeAt(pos);
+      if (ch === 34) {
+        result += text2.substring(start, pos);
+        pos++;
+        break;
+      }
+      if (ch === 92) {
+        result += text2.substring(start, pos);
+        pos++;
+        if (pos >= len) {
+          scanError = 2;
+          break;
+        }
+        var ch2 = text2.charCodeAt(pos++);
+        switch (ch2) {
+          case 34:
+            result += '"';
+            break;
+          case 92:
+            result += "\\";
+            break;
+          case 47:
+            result += "/";
+            break;
+          case 98:
+            result += "\b";
+            break;
+          case 102:
+            result += "\f";
+            break;
+          case 110:
+            result += "\n";
+            break;
+          case 114:
+            result += "\r";
+            break;
+          case 116:
+            result += "	";
+            break;
+          case 117:
+            var ch3 = scanHexDigits(4, true);
+            if (ch3 >= 0) {
+              result += String.fromCharCode(ch3);
+            } else {
+              scanError = 4;
+            }
+            break;
+          default:
+            scanError = 5;
+        }
+        start = pos;
+        continue;
+      }
+      if (ch >= 0 && ch <= 31) {
+        if (isLineBreak(ch)) {
+          result += text2.substring(start, pos);
+          scanError = 2;
+          break;
+        } else {
+          scanError = 6;
+        }
+      }
+      pos++;
+    }
+    return result;
+  }
+  function scanNext() {
+    value = "";
+    scanError = 0;
+    tokenOffset = pos;
+    lineStartOffset = lineNumber;
+    prevTokenLineStartOffset = tokenLineStartOffset;
+    if (pos >= len) {
+      tokenOffset = len;
+      return token = 17;
+    }
+    var code2 = text2.charCodeAt(pos);
+    if (isWhiteSpace2(code2)) {
+      do {
+        pos++;
+        value += String.fromCharCode(code2);
+        code2 = text2.charCodeAt(pos);
+      } while (isWhiteSpace2(code2));
+      return token = 15;
+    }
+    if (isLineBreak(code2)) {
+      pos++;
+      value += String.fromCharCode(code2);
+      if (code2 === 13 && text2.charCodeAt(pos) === 10) {
+        pos++;
+        value += "\n";
+      }
+      lineNumber++;
+      tokenLineStartOffset = pos;
+      return token = 14;
+    }
+    switch (code2) {
+      // tokens: []{}:,
+      case 123:
+        pos++;
+        return token = 1;
+      case 125:
+        pos++;
+        return token = 2;
+      case 91:
+        pos++;
+        return token = 3;
+      case 93:
+        pos++;
+        return token = 4;
+      case 58:
+        pos++;
+        return token = 6;
+      case 44:
+        pos++;
+        return token = 5;
+      // strings
+      case 34:
+        pos++;
+        value = scanString();
+        return token = 10;
+      // comments
+      case 47:
+        var start = pos - 1;
+        if (text2.charCodeAt(pos + 1) === 47) {
+          pos += 2;
+          while (pos < len) {
+            if (isLineBreak(text2.charCodeAt(pos))) {
+              break;
+            }
+            pos++;
+          }
+          value = text2.substring(start, pos);
+          return token = 12;
+        }
+        if (text2.charCodeAt(pos + 1) === 42) {
+          pos += 2;
+          var safeLength = len - 1;
+          var commentClosed = false;
+          while (pos < safeLength) {
+            var ch = text2.charCodeAt(pos);
+            if (ch === 42 && text2.charCodeAt(pos + 1) === 47) {
+              pos += 2;
+              commentClosed = true;
+              break;
+            }
+            pos++;
+            if (isLineBreak(ch)) {
+              if (ch === 13 && text2.charCodeAt(pos) === 10) {
+                pos++;
+              }
+              lineNumber++;
+              tokenLineStartOffset = pos;
+            }
+          }
+          if (!commentClosed) {
+            pos++;
+            scanError = 1;
+          }
+          value = text2.substring(start, pos);
+          return token = 13;
+        }
+        value += String.fromCharCode(code2);
+        pos++;
+        return token = 16;
+      // numbers
+      case 45:
+        value += String.fromCharCode(code2);
+        pos++;
+        if (pos === len || !isDigit(text2.charCodeAt(pos))) {
+          return token = 16;
+        }
+      // found a minus, followed by a number so
+      // we fall through to proceed with scanning
+      // numbers
+      case 48:
+      case 49:
+      case 50:
+      case 51:
+      case 52:
+      case 53:
+      case 54:
+      case 55:
+      case 56:
+      case 57:
+        value += scanNumber();
+        return token = 11;
+      // literals and unknown symbols
+      default:
+        while (pos < len && isUnknownContentCharacter(code2)) {
+          pos++;
+          code2 = text2.charCodeAt(pos);
+        }
+        if (tokenOffset !== pos) {
+          value = text2.substring(tokenOffset, pos);
+          switch (value) {
+            case "true":
+              return token = 8;
+            case "false":
+              return token = 9;
+            case "null":
+              return token = 7;
+          }
+          return token = 16;
+        }
+        value += String.fromCharCode(code2);
+        pos++;
+        return token = 16;
+    }
+  }
+  function isUnknownContentCharacter(code2) {
+    if (isWhiteSpace2(code2) || isLineBreak(code2)) {
+      return false;
+    }
+    switch (code2) {
+      case 125:
+      case 93:
+      case 123:
+      case 91:
+      case 34:
+      case 58:
+      case 44:
+      case 47:
+        return false;
+    }
+    return true;
+  }
+  function scanNextNonTrivia() {
+    var result;
+    do {
+      result = scanNext();
+    } while (result >= 12 && result <= 15);
+    return result;
+  }
+  return {
+    setPosition,
+    getPosition: function() {
+      return pos;
+    },
+    scan: ignoreTrivia ? scanNextNonTrivia : scanNext,
+    getToken: function() {
+      return token;
+    },
+    getTokenValue: function() {
+      return value;
+    },
+    getTokenOffset: function() {
+      return tokenOffset;
+    },
+    getTokenLength: function() {
+      return pos - tokenOffset;
+    },
+    getTokenStartLine: function() {
+      return lineStartOffset;
+    },
+    getTokenStartCharacter: function() {
+      return tokenOffset - prevTokenLineStartOffset;
+    },
+    getTokenError: function() {
+      return scanError;
+    }
+  };
+}
+function isWhiteSpace2(ch) {
+  return ch === 32 || ch === 9 || ch === 11 || ch === 12 || ch === 160 || ch === 5760 || ch >= 8192 && ch <= 8203 || ch === 8239 || ch === 8287 || ch === 12288 || ch === 65279;
+}
+function isLineBreak(ch) {
+  return ch === 10 || ch === 13 || ch === 8232 || ch === 8233;
+}
+function isDigit(ch) {
+  return ch >= 48 && ch <= 57;
+}
+var init_scanner = __esm({
+  "node_modules/@vscode/emmet-helper/node_modules/jsonc-parser/lib/esm/impl/scanner.js"() {
+    "use strict";
+  }
+});
+
+// node_modules/@vscode/emmet-helper/node_modules/jsonc-parser/lib/esm/impl/format.js
+var init_format = __esm({
+  "node_modules/@vscode/emmet-helper/node_modules/jsonc-parser/lib/esm/impl/format.js"() {
+    "use strict";
+    init_scanner();
+  }
+});
+
+// node_modules/@vscode/emmet-helper/node_modules/jsonc-parser/lib/esm/impl/parser.js
+function parse(text2, errors, options) {
+  if (errors === void 0) {
+    errors = [];
+  }
+  if (options === void 0) {
+    options = ParseOptions.DEFAULT;
+  }
+  var currentProperty = null;
+  var currentParent = [];
+  var previousParents = [];
+  function onValue(value) {
+    if (Array.isArray(currentParent)) {
+      currentParent.push(value);
+    } else if (currentProperty !== null) {
+      currentParent[currentProperty] = value;
+    }
+  }
+  var visitor = {
+    onObjectBegin: function() {
+      var object = {};
+      onValue(object);
+      previousParents.push(currentParent);
+      currentParent = object;
+      currentProperty = null;
+    },
+    onObjectProperty: function(name) {
+      currentProperty = name;
+    },
+    onObjectEnd: function() {
+      currentParent = previousParents.pop();
+    },
+    onArrayBegin: function() {
+      var array = [];
+      onValue(array);
+      previousParents.push(currentParent);
+      currentParent = array;
+      currentProperty = null;
+    },
+    onArrayEnd: function() {
+      currentParent = previousParents.pop();
+    },
+    onLiteralValue: onValue,
+    onError: function(error2, offset, length) {
+      errors.push({ error: error2, offset, length });
+    }
+  };
+  visit(text2, visitor, options);
+  return currentParent[0];
+}
+function visit(text2, visitor, options) {
+  if (options === void 0) {
+    options = ParseOptions.DEFAULT;
+  }
+  var _scanner = createScanner2(text2, false);
+  function toNoArgVisit(visitFunction) {
+    return visitFunction ? function() {
+      return visitFunction(_scanner.getTokenOffset(), _scanner.getTokenLength(), _scanner.getTokenStartLine(), _scanner.getTokenStartCharacter());
+    } : function() {
+      return true;
+    };
+  }
+  function toOneArgVisit(visitFunction) {
+    return visitFunction ? function(arg) {
+      return visitFunction(arg, _scanner.getTokenOffset(), _scanner.getTokenLength(), _scanner.getTokenStartLine(), _scanner.getTokenStartCharacter());
+    } : function() {
+      return true;
+    };
+  }
+  var onObjectBegin = toNoArgVisit(visitor.onObjectBegin), onObjectProperty = toOneArgVisit(visitor.onObjectProperty), onObjectEnd = toNoArgVisit(visitor.onObjectEnd), onArrayBegin = toNoArgVisit(visitor.onArrayBegin), onArrayEnd = toNoArgVisit(visitor.onArrayEnd), onLiteralValue = toOneArgVisit(visitor.onLiteralValue), onSeparator = toOneArgVisit(visitor.onSeparator), onComment = toNoArgVisit(visitor.onComment), onError = toOneArgVisit(visitor.onError);
+  var disallowComments = options && options.disallowComments;
+  var allowTrailingComma = options && options.allowTrailingComma;
+  function scanNext() {
+    while (true) {
+      var token = _scanner.scan();
+      switch (_scanner.getTokenError()) {
+        case 4:
+          handleError(
+            14
+            /* InvalidUnicode */
+          );
+          break;
+        case 5:
+          handleError(
+            15
+            /* InvalidEscapeCharacter */
+          );
+          break;
+        case 3:
+          handleError(
+            13
+            /* UnexpectedEndOfNumber */
+          );
+          break;
+        case 1:
+          if (!disallowComments) {
+            handleError(
+              11
+              /* UnexpectedEndOfComment */
+            );
+          }
+          break;
+        case 2:
+          handleError(
+            12
+            /* UnexpectedEndOfString */
+          );
+          break;
+        case 6:
+          handleError(
+            16
+            /* InvalidCharacter */
+          );
+          break;
+      }
+      switch (token) {
+        case 12:
+        case 13:
+          if (disallowComments) {
+            handleError(
+              10
+              /* InvalidCommentToken */
+            );
+          } else {
+            onComment();
+          }
+          break;
+        case 16:
+          handleError(
+            1
+            /* InvalidSymbol */
+          );
+          break;
+        case 15:
+        case 14:
+          break;
+        default:
+          return token;
+      }
+    }
+  }
+  function handleError(error2, skipUntilAfter, skipUntil) {
+    if (skipUntilAfter === void 0) {
+      skipUntilAfter = [];
+    }
+    if (skipUntil === void 0) {
+      skipUntil = [];
+    }
+    onError(error2);
+    if (skipUntilAfter.length + skipUntil.length > 0) {
+      var token = _scanner.getToken();
+      while (token !== 17) {
+        if (skipUntilAfter.indexOf(token) !== -1) {
+          scanNext();
+          break;
+        } else if (skipUntil.indexOf(token) !== -1) {
+          break;
+        }
+        token = scanNext();
+      }
+    }
+  }
+  function parseString(isValue2) {
+    var value = _scanner.getTokenValue();
+    if (isValue2) {
+      onLiteralValue(value);
+    } else {
+      onObjectProperty(value);
+    }
+    scanNext();
+    return true;
+  }
+  function parseLiteral() {
+    switch (_scanner.getToken()) {
+      case 11:
+        var tokenValue = _scanner.getTokenValue();
+        var value = Number(tokenValue);
+        if (isNaN(value)) {
+          handleError(
+            2
+            /* InvalidNumberFormat */
+          );
+          value = 0;
+        }
+        onLiteralValue(value);
+        break;
+      case 7:
+        onLiteralValue(null);
+        break;
+      case 8:
+        onLiteralValue(true);
+        break;
+      case 9:
+        onLiteralValue(false);
+        break;
+      default:
+        return false;
+    }
+    scanNext();
+    return true;
+  }
+  function parseProperty() {
+    if (_scanner.getToken() !== 10) {
+      handleError(3, [], [
+        2,
+        5
+        /* CommaToken */
+      ]);
+      return false;
+    }
+    parseString(false);
+    if (_scanner.getToken() === 6) {
+      onSeparator(":");
+      scanNext();
+      if (!parseValue2()) {
+        handleError(4, [], [
+          2,
+          5
+          /* CommaToken */
+        ]);
+      }
+    } else {
+      handleError(5, [], [
+        2,
+        5
+        /* CommaToken */
+      ]);
+    }
+    return true;
+  }
+  function parseObject() {
+    onObjectBegin();
+    scanNext();
+    var needsComma = false;
+    while (_scanner.getToken() !== 2 && _scanner.getToken() !== 17) {
+      if (_scanner.getToken() === 5) {
+        if (!needsComma) {
+          handleError(4, [], []);
+        }
+        onSeparator(",");
+        scanNext();
+        if (_scanner.getToken() === 2 && allowTrailingComma) {
+          break;
+        }
+      } else if (needsComma) {
+        handleError(6, [], []);
+      }
+      if (!parseProperty()) {
+        handleError(4, [], [
+          2,
+          5
+          /* CommaToken */
+        ]);
+      }
+      needsComma = true;
+    }
+    onObjectEnd();
+    if (_scanner.getToken() !== 2) {
+      handleError(7, [
+        2
+        /* CloseBraceToken */
+      ], []);
+    } else {
+      scanNext();
+    }
+    return true;
+  }
+  function parseArray() {
+    onArrayBegin();
+    scanNext();
+    var needsComma = false;
+    while (_scanner.getToken() !== 4 && _scanner.getToken() !== 17) {
+      if (_scanner.getToken() === 5) {
+        if (!needsComma) {
+          handleError(4, [], []);
+        }
+        onSeparator(",");
+        scanNext();
+        if (_scanner.getToken() === 4 && allowTrailingComma) {
+          break;
+        }
+      } else if (needsComma) {
+        handleError(6, [], []);
+      }
+      if (!parseValue2()) {
+        handleError(4, [], [
+          4,
+          5
+          /* CommaToken */
+        ]);
+      }
+      needsComma = true;
+    }
+    onArrayEnd();
+    if (_scanner.getToken() !== 4) {
+      handleError(8, [
+        4
+        /* CloseBracketToken */
+      ], []);
+    } else {
+      scanNext();
+    }
+    return true;
+  }
+  function parseValue2() {
+    switch (_scanner.getToken()) {
+      case 3:
+        return parseArray();
+      case 1:
+        return parseObject();
+      case 10:
+        return parseString(true);
+      default:
+        return parseLiteral();
+    }
+  }
+  scanNext();
+  if (_scanner.getToken() === 17) {
+    if (options.allowEmptyContent) {
+      return true;
+    }
+    handleError(4, [], []);
+    return false;
+  }
+  if (!parseValue2()) {
+    handleError(4, [], []);
+    return false;
+  }
+  if (_scanner.getToken() !== 17) {
+    handleError(9, [], []);
+  }
+  return true;
+}
+var ParseOptions;
+var init_parser = __esm({
+  "node_modules/@vscode/emmet-helper/node_modules/jsonc-parser/lib/esm/impl/parser.js"() {
+    "use strict";
+    init_scanner();
+    (function(ParseOptions2) {
+      ParseOptions2.DEFAULT = {
+        allowTrailingComma: false
+      };
+    })(ParseOptions || (ParseOptions = {}));
+  }
+});
+
+// node_modules/@vscode/emmet-helper/node_modules/jsonc-parser/lib/esm/impl/edit.js
+var init_edit = __esm({
+  "node_modules/@vscode/emmet-helper/node_modules/jsonc-parser/lib/esm/impl/edit.js"() {
+    "use strict";
+    init_format();
+    init_parser();
+  }
+});
+
+// node_modules/@vscode/emmet-helper/node_modules/jsonc-parser/lib/esm/main.js
+function printParseErrorCode(code2) {
+  switch (code2) {
+    case 1:
+      return "InvalidSymbol";
+    case 2:
+      return "InvalidNumberFormat";
+    case 3:
+      return "PropertyNameExpected";
+    case 4:
+      return "ValueExpected";
+    case 5:
+      return "ColonExpected";
+    case 6:
+      return "CommaExpected";
+    case 7:
+      return "CloseBraceExpected";
+    case 8:
+      return "CloseBracketExpected";
+    case 9:
+      return "EndOfFileExpected";
+    case 10:
+      return "InvalidCommentToken";
+    case 11:
+      return "UnexpectedEndOfComment";
+    case 12:
+      return "UnexpectedEndOfString";
+    case 13:
+      return "UnexpectedEndOfNumber";
+    case 14:
+      return "InvalidUnicode";
+    case 15:
+      return "InvalidEscapeCharacter";
+    case 16:
+      return "InvalidCharacter";
+  }
+  return "<unknown ParseErrorCode>";
+}
+var parse2;
+var init_main3 = __esm({
+  "node_modules/@vscode/emmet-helper/node_modules/jsonc-parser/lib/esm/main.js"() {
+    "use strict";
+    init_format();
+    init_edit();
+    init_scanner();
+    init_parser();
+    parse2 = parse;
+  }
+});
+
+// node_modules/@vscode/emmet-helper/lib/esm/data.js
+var cssData, htmlData2;
+var init_data = __esm({
+  "node_modules/@vscode/emmet-helper/lib/esm/data.js"() {
+    cssData = {
+      "properties": ["additive-symbols", "align-content", "align-items", "justify-items", "justify-self", "justify-items", "align-self", "all", "alt", "animation", "animation-delay", "animation-direction", "animation-duration", "animation-fill-mode", "animation-iteration-count", "animation-name", "animation-play-state", "animation-timing-function", "backface-visibility", "background", "background-attachment", "background-blend-mode", "background-clip", "background-color", "background-image", "background-origin", "background-position", "background-position-x", "background-position-y", "background-repeat", "background-size", "behavior", "block-size", "border", "border-block-end", "border-block-start", "border-block-end-color", "border-block-start-color", "border-block-end-style", "border-block-start-style", "border-block-end-width", "border-block-start-width", "border-bottom", "border-bottom-color", "border-bottom-left-radius", "border-bottom-right-radius", "border-bottom-style", "border-bottom-width", "border-collapse", "border-color", "border-image", "border-image-outset", "border-image-repeat", "border-image-slice", "border-image-source", "border-image-width", "border-inline-end", "border-inline-start", "border-inline-end-color", "border-inline-start-color", "border-inline-end-style", "border-inline-start-style", "border-inline-end-width", "border-inline-start-width", "border-left", "border-left-color", "border-left-style", "border-left-width", "border-radius", "border-right", "border-right-color", "border-right-style", "border-right-width", "border-spacing", "border-style", "border-top", "border-top-color", "border-top-left-radius", "border-top-right-radius", "border-top-style", "border-top-width", "border-width", "bottom", "box-decoration-break", "box-shadow", "box-sizing", "break-after", "break-before", "break-inside", "caption-side", "caret-color", "clear", "clip", "clip-path", "clip-rule", "color", "color-interpolation-filters", "column-count", "column-fill", "column-gap", "column-rule", "column-rule-color", "column-rule-style", "column-rule-width", "columns", "column-span", "column-width", "contain", "content", "counter-increment", "counter-reset", "cursor", "direction", "display", "empty-cells", "enable-background", "fallback", "fill", "fill-opacity", "fill-rule", "filter", "flex", "flex-basis", "flex-direction", "flex-flow", "flex-grow", "flex-shrink", "flex-wrap", "float", "flood-color", "flood-opacity", "font", "font-family", "font-feature-settings", "font-kerning", "font-language-override", "font-size", "font-size-adjust", "font-stretch", "font-style", "font-synthesis", "font-variant", "font-variant-alternates", "font-variant-caps", "font-variant-east-asian", "font-variant-ligatures", "font-variant-numeric", "font-variant-position", "font-weight", "glyph-orientation-horizontal", "glyph-orientation-vertical", "grid-area", "grid-auto-columns", "grid-auto-flow", "grid-auto-rows", "grid-column", "grid-column-end", "grid-column-gap", "grid-column-start", "grid-gap", "grid-row", "grid-row-end", "grid-row-gap", "grid-row-start", "grid-template", "grid-template-areas", "grid-template-columns", "grid-template-rows", "height", "hyphens", "image-orientation", "image-rendering", "ime-mode", "inline-size", "isolation", "justify-content", "kerning", "left", "letter-spacing", "lighting-color", "line-break", "line-height", "list-style", "list-style-image", "list-style-position", "list-style-type", "margin", "margin-block-end", "margin-block-start", "margin-bottom", "margin-inline-end", "margin-inline-start", "margin-left", "margin-right", "margin-top", "marker", "marker-end", "marker-mid", "marker-start", "mask-type", "max-block-size", "max-height", "max-inline-size", "max-width", "min-block-size", "min-height", "min-inline-size", "min-width", "mix-blend-mode", "motion", "motion-offset", "motion-path", "motion-rotation", "-moz-animation", "-moz-animation-delay", "-moz-animation-direction", "-moz-animation-duration", "-moz-animation-iteration-count", "-moz-animation-name", "-moz-animation-play-state", "-moz-animation-timing-function", "-moz-appearance", "-moz-backface-visibility", "-moz-background-clip", "-moz-background-inline-policy", "-moz-background-origin", "-moz-border-bottom-colors", "-moz-border-image", "-moz-border-left-colors", "-moz-border-right-colors", "-moz-border-top-colors", "-moz-box-align", "-moz-box-direction", "-moz-box-flex", "-moz-box-flexgroup", "-moz-box-ordinal-group", "-moz-box-orient", "-moz-box-pack", "-moz-box-sizing", "-moz-column-count", "-moz-column-gap", "-moz-column-rule", "-moz-column-rule-color", "-moz-column-rule-style", "-moz-column-rule-width", "-moz-columns", "-moz-column-width", "-moz-font-feature-settings", "-moz-hyphens", "-moz-perspective", "-moz-perspective-origin", "-moz-text-align-last", "-moz-text-decoration-color", "-moz-text-decoration-line", "-moz-text-decoration-style", "-moz-text-size-adjust", "-moz-transform", "-moz-transform-origin", "-moz-transition", "-moz-transition-delay", "-moz-transition-duration", "-moz-transition-property", "-moz-transition-timing-function", "-moz-user-focus", "-moz-user-select", "-ms-accelerator", "-ms-behavior", "-ms-block-progression", "-ms-content-zoom-chaining", "-ms-content-zooming", "-ms-content-zoom-limit", "-ms-content-zoom-limit-max", "-ms-content-zoom-limit-min", "-ms-content-zoom-snap", "-ms-content-zoom-snap-points", "-ms-content-zoom-snap-type", "-ms-filter", "-ms-flex", "-ms-flex-align", "-ms-flex-direction", "-ms-flex-flow", "-ms-flex-item-align", "-ms-flex-line-pack", "-ms-flex-order", "-ms-flex-pack", "-ms-flex-wrap", "-ms-flow-from", "-ms-flow-into", "-ms-grid-column", "-ms-grid-column-align", "-ms-grid-columns", "-ms-grid-column-span", "-ms-grid-layer", "-ms-grid-row", "-ms-grid-row-align", "-ms-grid-rows", "-ms-grid-row-span", "-ms-high-contrast-adjust", "-ms-hyphenate-limit-chars", "-ms-hyphenate-limit-lines", "-ms-hyphenate-limit-zone", "-ms-hyphens", "-ms-ime-mode", "-ms-interpolation-mode", "-ms-layout-grid", "-ms-layout-grid-char", "-ms-layout-grid-line", "-ms-layout-grid-mode", "-ms-layout-grid-type", "-ms-line-break", "-ms-overflow-style", "-ms-perspective", "-ms-perspective-origin", "-ms-perspective-origin-x", "-ms-perspective-origin-y", "-ms-progress-appearance", "-ms-scrollbar-3dlight-color", "-ms-scrollbar-arrow-color", "-ms-scrollbar-base-color", "-ms-scrollbar-darkshadow-color", "-ms-scrollbar-face-color", "-ms-scrollbar-highlight-color", "-ms-scrollbar-shadow-color", "-ms-scrollbar-track-color", "-ms-scroll-chaining", "-ms-scroll-limit", "-ms-scroll-limit-x-max", "-ms-scroll-limit-x-min", "-ms-scroll-limit-y-max", "-ms-scroll-limit-y-min", "-ms-scroll-rails", "-ms-scroll-snap-points-x", "-ms-scroll-snap-points-y", "-ms-scroll-snap-type", "-ms-scroll-snap-x", "-ms-scroll-snap-y", "-ms-scroll-translation", "-ms-text-align-last", "-ms-text-autospace", "-ms-text-combine-horizontal", "-ms-text-justify", "-ms-text-kashida-space", "-ms-text-overflow", "-ms-text-size-adjust", "-ms-text-underline-position", "-ms-touch-action", "-ms-touch-select", "-ms-transform", "-ms-transform-origin", "-ms-transform-origin-x", "-ms-transform-origin-y", "-ms-transform-origin-z", "-ms-user-select", "-ms-word-break", "-ms-word-wrap", "-ms-wrap-flow", "-ms-wrap-margin", "-ms-wrap-through", "-ms-writing-mode", "-ms-zoom", "-ms-zoom-animation", "nav-down", "nav-index", "nav-left", "nav-right", "nav-up", "negative", "-o-animation", "-o-animation-delay", "-o-animation-direction", "-o-animation-duration", "-o-animation-fill-mode", "-o-animation-iteration-count", "-o-animation-name", "-o-animation-play-state", "-o-animation-timing-function", "object-fit", "object-position", "-o-border-image", "-o-object-fit", "-o-object-position", "opacity", "order", "orphans", "-o-table-baseline", "-o-tab-size", "-o-text-overflow", "-o-transform", "-o-transform-origin", "-o-transition", "-o-transition-delay", "-o-transition-duration", "-o-transition-property", "-o-transition-timing-function", "offset-block-end", "offset-block-start", "offset-inline-end", "offset-inline-start", "outline", "outline-color", "outline-offset", "outline-style", "outline-width", "overflow", "overflow-wrap", "overflow-x", "overflow-y", "pad", "padding", "padding-bottom", "padding-block-end", "padding-block-start", "padding-inline-end", "padding-inline-start", "padding-left", "padding-right", "padding-top", "page-break-after", "page-break-before", "page-break-inside", "paint-order", "perspective", "perspective-origin", "pointer-events", "position", "prefix", "quotes", "range", "resize", "right", "ruby-align", "ruby-overhang", "ruby-position", "ruby-span", "scrollbar-3dlight-color", "scrollbar-arrow-color", "scrollbar-base-color", "scrollbar-darkshadow-color", "scrollbar-face-color", "scrollbar-highlight-color", "scrollbar-shadow-color", "scrollbar-track-color", "scroll-behavior", "scroll-snap-coordinate", "scroll-snap-destination", "scroll-snap-points-x", "scroll-snap-points-y", "scroll-snap-type", "shape-image-threshold", "shape-margin", "shape-outside", "shape-rendering", "size", "src", "stop-color", "stop-opacity", "stroke", "stroke-dasharray", "stroke-dashoffset", "stroke-linecap", "stroke-linejoin", "stroke-miterlimit", "stroke-opacity", "stroke-width", "suffix", "system", "symbols", "table-layout", "tab-size", "text-align", "text-align-last", "text-anchor", "text-decoration", "text-decoration-color", "text-decoration-line", "text-decoration-style", "text-indent", "text-justify", "text-orientation", "text-overflow", "text-rendering", "text-shadow", "text-transform", "text-underline-position", "top", "touch-action", "transform", "transform-origin", "transform-style", "transition", "transition-delay", "transition-duration", "transition-property", "transition-timing-function", "unicode-bidi", "unicode-range", "user-select", "vertical-align", "visibility", "-webkit-animation", "-webkit-animation-delay", "-webkit-animation-direction", "-webkit-animation-duration", "-webkit-animation-fill-mode", "-webkit-animation-iteration-count", "-webkit-animation-name", "-webkit-animation-play-state", "-webkit-animation-timing-function", "-webkit-appearance", "-webkit-backdrop-filter", "-webkit-backface-visibility", "-webkit-background-clip", "-webkit-background-composite", "-webkit-background-origin", "-webkit-border-image", "-webkit-box-align", "-webkit-box-direction", "-webkit-box-flex", "-webkit-box-flex-group", "-webkit-box-ordinal-group", "-webkit-box-orient", "-webkit-box-pack", "-webkit-box-reflect", "-webkit-box-sizing", "-webkit-break-after", "-webkit-break-before", "-webkit-break-inside", "-webkit-column-break-after", "-webkit-column-break-before", "-webkit-column-break-inside", "-webkit-column-count", "-webkit-column-gap", "-webkit-column-rule", "-webkit-column-rule-color", "-webkit-column-rule-style", "-webkit-column-rule-width", "-webkit-columns", "-webkit-column-span", "-webkit-column-width", "-webkit-filter", "-webkit-flow-from", "-webkit-flow-into", "-webkit-font-feature-settings", "-webkit-hyphens", "-webkit-line-break", "-webkit-margin-bottom-collapse", "-webkit-margin-collapse", "-webkit-margin-start", "-webkit-margin-top-collapse", "-webkit-mask-clip", "-webkit-mask-image", "-webkit-mask-origin", "-webkit-mask-repeat", "-webkit-mask-size", "-webkit-nbsp-mode", "-webkit-overflow-scrolling", "-webkit-padding-start", "-webkit-perspective", "-webkit-perspective-origin", "-webkit-region-fragment", "-webkit-tap-highlight-color", "-webkit-text-fill-color", "-webkit-text-size-adjust", "-webkit-text-stroke", "-webkit-text-stroke-color", "-webkit-text-stroke-width", "-webkit-touch-callout", "-webkit-transform", "-webkit-transform-origin", "-webkit-transform-origin-x", "-webkit-transform-origin-y", "-webkit-transform-origin-z", "-webkit-transform-style", "-webkit-transition", "-webkit-transition-delay", "-webkit-transition-duration", "-webkit-transition-property", "-webkit-transition-timing-function", "-webkit-user-drag", "-webkit-user-modify", "-webkit-user-select", "white-space", "widows", "width", "will-change", "word-break", "word-spacing", "word-wrap", "writing-mode", "z-index", "zoom"]
+    };
+    htmlData2 = {
+      "tags": [
+        "body",
+        "head",
+        "html",
+        "address",
+        "blockquote",
+        "dd",
+        "div",
+        "section",
+        "article",
+        "aside",
+        "header",
+        "footer",
+        "nav",
+        "menu",
+        "dl",
+        "dt",
+        "fieldset",
+        "form",
+        "frame",
+        "frameset",
+        "h1",
+        "h2",
+        "h3",
+        "h4",
+        "h5",
+        "h6",
+        "iframe",
+        "noframes",
+        "object",
+        "ol",
+        "p",
+        "ul",
+        "applet",
+        "center",
+        "dir",
+        "hr",
+        "pre",
+        "a",
+        "abbr",
+        "acronym",
+        "area",
+        "b",
+        "base",
+        "basefont",
+        "bdo",
+        "big",
+        "br",
+        "button",
+        "caption",
+        "cite",
+        "code",
+        "col",
+        "colgroup",
+        "del",
+        "dfn",
+        "em",
+        "font",
+        "i",
+        "img",
+        "input",
+        "ins",
+        "isindex",
+        "kbd",
+        "label",
+        "legend",
+        "li",
+        "link",
+        "map",
+        "meta",
+        "noscript",
+        "optgroup",
+        "option",
+        "param",
+        "q",
+        "s",
+        "samp",
+        "script",
+        "select",
+        "small",
+        "span",
+        "strike",
+        "strong",
+        "style",
+        "sub",
+        "sup",
+        "table",
+        "tbody",
+        "td",
+        "textarea",
+        "tfoot",
+        "th",
+        "thead",
+        "title",
+        "tr",
+        "tt",
+        "u",
+        "var",
+        "canvas",
+        "main",
+        "figure",
+        "plaintext",
+        "figcaption",
+        "hgroup",
+        "details",
+        "summary",
+        "audio",
+        "bdi",
+        "data",
+        "datalist",
+        "dialog",
+        "embed",
+        "mark",
+        "math",
+        "meter",
+        "output",
+        "picture",
+        "portal",
+        "progress",
+        "rp",
+        "rt",
+        "ruby",
+        "search",
+        "slot",
+        "source",
+        "template",
+        "time",
+        "track",
+        "video",
+        "wbr"
+      ]
+    };
+  }
+});
+
+// node_modules/@vscode/emmet-helper/lib/esm/fileService.js
+function isAbsolutePath(path2) {
+  return PathMatchRegex.test(path2);
+}
+function normalizePath(parts) {
+  const newParts = [];
+  for (const part of parts) {
+    if (part.length === 0 || part.length === 1 && part.charCodeAt(0) === Dot) {
+    } else if (part.length === 2 && part.charCodeAt(0) === Dot && part.charCodeAt(1) === Dot) {
+      newParts.pop();
+    } else {
+      newParts.push(part);
+    }
+  }
+  if (parts.length > 1 && parts[parts.length - 1].length === 0) {
+    newParts.push("");
+  }
+  let res = newParts.join("/");
+  if (parts[0].length === 0) {
+    res = "/" + res;
+  }
+  return res;
+}
+function joinPath(uri, ...paths) {
+  const parts = uri.path.split("/");
+  for (const path2 of paths) {
+    parts.push(...path2.split("/"));
+  }
+  return uri.with({ path: normalizePath(parts) });
+}
+var FileType2, PathMatchRegex, Dot;
+var init_fileService = __esm({
+  "node_modules/@vscode/emmet-helper/lib/esm/fileService.js"() {
+    (function(FileType3) {
+      FileType3[FileType3["Unknown"] = 0] = "Unknown";
+      FileType3[FileType3["File"] = 1] = "File";
+      FileType3[FileType3["Directory"] = 2] = "Directory";
+      FileType3[FileType3["SymbolicLink"] = 64] = "SymbolicLink";
+    })(FileType2 || (FileType2 = {}));
+    PathMatchRegex = new RegExp("^(/|//|\\\\\\\\|[A-Za-z]:(/|\\\\))");
+    Dot = ".".charCodeAt(0);
+  }
+});
+
+// node_modules/emmet/dist/emmet.es.js
+function isNumber$1(code2) {
+  return code2 > 47 && code2 < 58;
+}
+function isAlpha$1(code2, from, to) {
+  from = from || 65;
+  to = to || 90;
+  code2 &= ~32;
+  return code2 >= from && code2 <= to;
+}
+function isAlphaNumericWord(code2) {
+  return isNumber$1(code2) || isAlphaWord(code2);
+}
+function isAlphaWord(code2) {
+  return code2 === 95 || isAlpha$1(code2);
+}
+function isUmlaut(code2) {
+  return code2 === 196 || code2 == 214 || code2 === 220 || code2 === 228 || code2 === 246 || code2 === 252;
+}
+function isWhiteSpace$3(code2) {
+  return code2 === 32 || code2 === 9 || code2 === 160;
+}
+function isSpace(code2) {
+  return isWhiteSpace$3(code2) || code2 === 10 || code2 === 13;
+}
+function isQuote$2(code2) {
+  return code2 === 39 || code2 === 34;
+}
+function tokenScanner$1(tokens) {
+  return {
+    tokens,
+    start: 0,
+    pos: 0,
+    size: tokens.length
+  };
+}
+function peek$3(scanner) {
+  return scanner.tokens[scanner.pos];
+}
+function next(scanner) {
+  return scanner.tokens[scanner.pos++];
+}
+function slice(scanner, from = scanner.start, to = scanner.pos) {
+  return scanner.tokens.slice(from, to);
+}
+function readable$1(scanner) {
+  return scanner.pos < scanner.size;
+}
+function consume$2(scanner, test) {
+  const token = peek$3(scanner);
+  if (token && test(token)) {
+    scanner.pos++;
+    return true;
+  }
+  return false;
+}
+function error$1(scanner, message, token = peek$3(scanner)) {
+  if (token && token.start != null) {
+    message += ` at ${token.start}`;
+  }
+  const err = new Error(message);
+  err["pos"] = token && token.start;
+  return err;
+}
+function abbreviation(abbr, options = {}) {
+  const scanner = tokenScanner$1(abbr);
+  const result = statements(scanner, options);
+  if (readable$1(scanner)) {
+    throw error$1(scanner, "Unexpected character");
+  }
+  return result;
+}
+function statements(scanner, options) {
+  const result = {
+    type: "TokenGroup",
+    elements: []
+  };
+  let ctx = result;
+  let node;
+  const stack = [];
+  while (readable$1(scanner)) {
+    if (node = element$2(scanner, options) || group(scanner, options)) {
+      ctx.elements.push(node);
+      if (consume$2(scanner, isChildOperator)) {
+        stack.push(ctx);
+        ctx = node;
+      } else if (consume$2(scanner, isSiblingOperator$1)) {
+        continue;
+      } else if (consume$2(scanner, isClimbOperator)) {
+        do {
+          if (stack.length) {
+            ctx = stack.pop();
+          }
+        } while (consume$2(scanner, isClimbOperator));
+      }
+    } else {
+      break;
+    }
+  }
+  return result;
+}
+function group(scanner, options) {
+  if (consume$2(scanner, isGroupStart)) {
+    const result = statements(scanner, options);
+    const token = next(scanner);
+    if (isBracket$2(token, "group", false)) {
+      result.repeat = repeater$1(scanner);
+    }
+    return result;
+  }
+}
+function element$2(scanner, options) {
+  let attr;
+  const elem = {
+    type: "TokenElement",
+    name: void 0,
+    attributes: void 0,
+    value: void 0,
+    repeat: void 0,
+    selfClose: false,
+    elements: []
+  };
+  if (elementName(scanner, options)) {
+    elem.name = slice(scanner);
+  }
+  while (readable$1(scanner)) {
+    scanner.start = scanner.pos;
+    if (!elem.repeat && !isEmpty(elem) && consume$2(scanner, isRepeater)) {
+      elem.repeat = scanner.tokens[scanner.pos - 1];
+    } else if (!elem.value && text(scanner)) {
+      elem.value = getText(scanner);
+    } else if (attr = shortAttribute(scanner, "id", options) || shortAttribute(scanner, "class", options) || attributeSet(scanner)) {
+      if (!elem.attributes) {
+        elem.attributes = Array.isArray(attr) ? attr.slice() : [attr];
+      } else {
+        elem.attributes = elem.attributes.concat(attr);
+      }
+    } else {
+      if (!isEmpty(elem) && consume$2(scanner, isCloseOperator)) {
+        elem.selfClose = true;
+        if (!elem.repeat && consume$2(scanner, isRepeater)) {
+          elem.repeat = scanner.tokens[scanner.pos - 1];
+        }
+      }
+      break;
+    }
+  }
+  return !isEmpty(elem) ? elem : void 0;
+}
+function attributeSet(scanner) {
+  if (consume$2(scanner, isAttributeSetStart)) {
+    const attributes = [];
+    let attr;
+    while (readable$1(scanner)) {
+      if (attr = attribute(scanner)) {
+        attributes.push(attr);
+      } else if (consume$2(scanner, isAttributeSetEnd)) {
+        break;
+      } else if (!consume$2(scanner, isWhiteSpace$2)) {
+        throw error$1(scanner, `Unexpected "${peek$3(scanner).type}" token`);
+      }
+    }
+    return attributes;
+  }
+}
+function shortAttribute(scanner, type, options) {
+  if (isOperator$1(peek$3(scanner), type)) {
+    scanner.pos++;
+    let count = 1;
+    while (isOperator$1(peek$3(scanner), type)) {
+      scanner.pos++;
+      count++;
+    }
+    const attr = {
+      name: [createLiteral$1(type)]
+    };
+    if (count > 1) {
+      attr.multiple = true;
+    }
+    if (options.jsx && text(scanner)) {
+      attr.value = getText(scanner);
+      attr.expression = true;
+    } else {
+      attr.value = literal$1$1(scanner) ? slice(scanner) : void 0;
+    }
+    return attr;
+  }
+}
+function attribute(scanner) {
+  if (quoted(scanner)) {
+    return {
+      value: slice(scanner)
+    };
+  }
+  if (literal$1$1(scanner, true)) {
+    const name = slice(scanner);
+    let value;
+    if (consume$2(scanner, isEquals)) {
+      if (quoted(scanner) || literal$1$1(scanner, true)) {
+        value = slice(scanner);
+      }
+    }
+    return { name, value };
+  }
+}
+function repeater$1(scanner) {
+  return isRepeater(peek$3(scanner)) ? scanner.tokens[scanner.pos++] : void 0;
+}
+function quoted(scanner) {
+  const start = scanner.pos;
+  const quote2 = peek$3(scanner);
+  if (isQuote$1(quote2)) {
+    scanner.pos++;
+    while (readable$1(scanner)) {
+      if (isQuote$1(next(scanner), quote2.single)) {
+        scanner.start = start;
+        return true;
+      }
+    }
+    throw error$1(scanner, "Unclosed quote", quote2);
+  }
+  return false;
+}
+function literal$1$1(scanner, allowBrackets) {
+  const start = scanner.pos;
+  const brackets = {
+    attribute: 0,
+    expression: 0,
+    group: 0
+  };
+  while (readable$1(scanner)) {
+    const token = peek$3(scanner);
+    if (brackets.expression) {
+      if (isBracket$2(token, "expression")) {
+        brackets[token.context] += token.open ? 1 : -1;
+      }
+    } else if (isQuote$1(token) || isOperator$1(token) || isWhiteSpace$2(token) || isRepeater(token)) {
+      break;
+    } else if (isBracket$2(token)) {
+      if (!allowBrackets) {
+        break;
+      }
+      if (token.open) {
+        brackets[token.context]++;
+      } else if (!brackets[token.context]) {
+        break;
+      } else {
+        brackets[token.context]--;
+      }
+    }
+    scanner.pos++;
+  }
+  if (start !== scanner.pos) {
+    scanner.start = start;
+    return true;
+  }
+  return false;
+}
+function elementName(scanner, options) {
+  const start = scanner.pos;
+  if (options.jsx && consume$2(scanner, isCapitalizedLiteral)) {
+    while (readable$1(scanner)) {
+      const { pos } = scanner;
+      if (!consume$2(scanner, isClassNameOperator) || !consume$2(scanner, isCapitalizedLiteral)) {
+        scanner.pos = pos;
+        break;
+      }
+    }
+  }
+  while (readable$1(scanner) && consume$2(scanner, isElementName$1)) {
+  }
+  if (scanner.pos !== start) {
+    scanner.start = start;
+    return true;
+  }
+  return false;
+}
+function text(scanner) {
+  const start = scanner.pos;
+  if (consume$2(scanner, isTextStart)) {
+    let brackets = 0;
+    while (readable$1(scanner)) {
+      const token = next(scanner);
+      if (isBracket$2(token, "expression")) {
+        if (token.open) {
+          brackets++;
+        } else if (!brackets) {
+          break;
+        } else {
+          brackets--;
+        }
+      }
+    }
+    scanner.start = start;
+    return true;
+  }
+  return false;
+}
+function getText(scanner) {
+  let from = scanner.start;
+  let to = scanner.pos;
+  if (isBracket$2(scanner.tokens[from], "expression", true)) {
+    from++;
+  }
+  if (isBracket$2(scanner.tokens[to - 1], "expression", false)) {
+    to--;
+  }
+  return slice(scanner, from, to);
+}
+function isBracket$2(token, context, isOpen) {
+  return Boolean(token && token.type === "Bracket" && (!context || token.context === context) && (isOpen == null || token.open === isOpen));
+}
+function isOperator$1(token, type) {
+  return Boolean(token && token.type === "Operator" && (!type || token.operator === type));
+}
+function isQuote$1(token, isSingle) {
+  return Boolean(token && token.type === "Quote" && (isSingle == null || token.single === isSingle));
+}
+function isWhiteSpace$2(token) {
+  return Boolean(token && token.type === "WhiteSpace");
+}
+function isEquals(token) {
+  return isOperator$1(token, "equal");
+}
+function isRepeater(token) {
+  return Boolean(token && token.type === "Repeater");
+}
+function isLiteral$2(token) {
+  return token.type === "Literal";
+}
+function isCapitalizedLiteral(token) {
+  if (isLiteral$2(token)) {
+    const ch = token.value.charCodeAt(0);
+    return ch >= 65 && ch <= 90;
+  }
+  return false;
+}
+function isElementName$1(token) {
+  return token.type === "Literal" || token.type === "RepeaterNumber" || token.type === "RepeaterPlaceholder";
+}
+function isClassNameOperator(token) {
+  return isOperator$1(token, "class");
+}
+function isAttributeSetStart(token) {
+  return isBracket$2(token, "attribute", true);
+}
+function isAttributeSetEnd(token) {
+  return isBracket$2(token, "attribute", false);
+}
+function isTextStart(token) {
+  return isBracket$2(token, "expression", true);
+}
+function isGroupStart(token) {
+  return isBracket$2(token, "group", true);
+}
+function createLiteral$1(value) {
+  return { type: "Literal", value };
+}
+function isEmpty(elem) {
+  return !elem.name && !elem.value && !elem.attributes;
+}
+function isChildOperator(token) {
+  return isOperator$1(token, "child");
+}
+function isSiblingOperator$1(token) {
+  return isOperator$1(token, "sibling");
+}
+function isClimbOperator(token) {
+  return isOperator$1(token, "climb");
+}
+function isCloseOperator(token) {
+  return isOperator$1(token, "close");
+}
+function escaped(scanner) {
+  if (scanner.eat(Chars$3.Escape)) {
+    scanner.start = scanner.pos;
+    if (!scanner.eof()) {
+      scanner.pos++;
+    }
+    return true;
+  }
+  return false;
+}
+function tokenize$1(source) {
+  const scanner = new Scanner(source);
+  const result = [];
+  const ctx = {
+    group: 0,
+    attribute: 0,
+    expression: 0,
+    quote: 0
+  };
+  let ch = 0;
+  let token;
+  while (!scanner.eof()) {
+    ch = scanner.peek();
+    token = getToken$1(scanner, ctx);
+    if (token) {
+      result.push(token);
+      if (token.type === "Quote") {
+        ctx.quote = ch === ctx.quote ? 0 : ch;
+      } else if (token.type === "Bracket") {
+        ctx[token.context] += token.open ? 1 : -1;
+      }
+    } else {
+      throw scanner.error("Unexpected character");
+    }
+  }
+  return result;
+}
+function getToken$1(scanner, ctx) {
+  return field$2(scanner, ctx) || repeaterPlaceholder(scanner) || repeaterNumber(scanner) || repeater(scanner) || whiteSpace$1(scanner) || literal$2(scanner, ctx) || operator$1(scanner) || quote(scanner) || bracket$1(scanner);
+}
+function literal$2(scanner, ctx) {
+  const start = scanner.pos;
+  const expressionStart2 = ctx.expression;
+  let value = "";
+  while (!scanner.eof()) {
+    if (escaped(scanner)) {
+      value += scanner.current();
+      continue;
+    }
+    const ch = scanner.peek();
+    if (ch === Chars$3.Slash && !ctx.quote && !ctx.expression && !ctx.attribute) {
+      const prev = scanner.string.charCodeAt(scanner.pos - 1);
+      const next2 = scanner.string.charCodeAt(scanner.pos + 1);
+      if (isNumber$1(prev) && isNumber$1(next2)) {
+        value += scanner.string[scanner.pos++];
+        continue;
+      }
+    }
+    if (ch === ctx.quote || ch === Chars$3.Dollar || isAllowedOperator(ch, ctx)) {
+      break;
+    }
+    if (expressionStart2) {
+      if (ch === Chars$3.CurlyBracketOpen) {
+        ctx.expression++;
+      } else if (ch === Chars$3.CurlyBracketClose) {
+        if (ctx.expression > expressionStart2) {
+          ctx.expression--;
+        } else {
+          break;
+        }
+      }
+    } else if (!ctx.quote) {
+      if (!ctx.attribute && !isElementName(ch)) {
+        break;
+      }
+      if (isAllowedSpace(ch, ctx) || isAllowedRepeater(ch, ctx) || isQuote$2(ch) || bracketType(ch)) {
+        break;
+      }
+    }
+    value += scanner.string[scanner.pos++];
+  }
+  if (start !== scanner.pos) {
+    scanner.start = start;
+    return {
+      type: "Literal",
+      value,
+      start,
+      end: scanner.pos
+    };
+  }
+}
+function whiteSpace$1(scanner) {
+  const start = scanner.pos;
+  if (scanner.eatWhile(isSpace)) {
+    return {
+      type: "WhiteSpace",
+      start,
+      end: scanner.pos,
+      value: scanner.substring(start, scanner.pos)
+    };
+  }
+}
+function quote(scanner) {
+  const ch = scanner.peek();
+  if (isQuote$2(ch)) {
+    return {
+      type: "Quote",
+      single: ch === Chars$3.SingleQuote,
+      start: scanner.pos++,
+      end: scanner.pos
+    };
+  }
+}
+function bracket$1(scanner) {
+  const ch = scanner.peek();
+  const context = bracketType(ch);
+  if (context) {
+    return {
+      type: "Bracket",
+      open: isOpenBracket$2(ch),
+      context,
+      start: scanner.pos++,
+      end: scanner.pos
+    };
+  }
+}
+function operator$1(scanner) {
+  const op = operatorType$1(scanner.peek());
+  if (op) {
+    return {
+      type: "Operator",
+      operator: op,
+      start: scanner.pos++,
+      end: scanner.pos
+    };
+  }
+}
+function repeater(scanner) {
+  const start = scanner.pos;
+  if (scanner.eat(Chars$3.Asterisk)) {
+    scanner.start = scanner.pos;
+    let count = 1;
+    let implicit = false;
+    if (scanner.eatWhile(isNumber$1)) {
+      count = Number(scanner.current());
+    } else {
+      implicit = true;
+    }
+    return {
+      type: "Repeater",
+      count,
+      value: 0,
+      implicit,
+      start,
+      end: scanner.pos
+    };
+  }
+}
+function repeaterPlaceholder(scanner) {
+  const start = scanner.pos;
+  if (scanner.eat(Chars$3.Dollar) && scanner.eat(Chars$3.Hash)) {
+    return {
+      type: "RepeaterPlaceholder",
+      value: void 0,
+      start,
+      end: scanner.pos
+    };
+  }
+  scanner.pos = start;
+}
+function repeaterNumber(scanner) {
+  const start = scanner.pos;
+  if (scanner.eatWhile(Chars$3.Dollar)) {
+    const size = scanner.pos - start;
+    let reverse = false;
+    let base = 1;
+    let parent = 0;
+    if (scanner.eat(Chars$3.At)) {
+      while (scanner.eat(Chars$3.Climb)) {
+        parent++;
+      }
+      reverse = scanner.eat(Chars$3.Dash);
+      scanner.start = scanner.pos;
+      if (scanner.eatWhile(isNumber$1)) {
+        base = Number(scanner.current());
+      }
+    }
+    scanner.start = start;
+    return {
+      type: "RepeaterNumber",
+      size,
+      reverse,
+      base,
+      parent,
+      start,
+      end: scanner.pos
+    };
+  }
+}
+function field$2(scanner, ctx) {
+  const start = scanner.pos;
+  if ((ctx.expression || ctx.attribute) && scanner.eat(Chars$3.Dollar) && scanner.eat(Chars$3.CurlyBracketOpen)) {
+    scanner.start = scanner.pos;
+    let index;
+    let name = "";
+    if (scanner.eatWhile(isNumber$1)) {
+      index = Number(scanner.current());
+      name = scanner.eat(Chars$3.Colon) ? consumePlaceholder$2(scanner) : "";
+    } else if (isAlpha$1(scanner.peek())) {
+      name = consumePlaceholder$2(scanner);
+    }
+    if (scanner.eat(Chars$3.CurlyBracketClose)) {
+      return {
+        type: "Field",
+        index,
+        name,
+        start,
+        end: scanner.pos
+      };
+    }
+    throw scanner.error("Expecting }");
+  }
+  scanner.pos = start;
+}
+function consumePlaceholder$2(stream) {
+  const stack = [];
+  stream.start = stream.pos;
+  while (!stream.eof()) {
+    if (stream.eat(Chars$3.CurlyBracketOpen)) {
+      stack.push(stream.pos);
+    } else if (stream.eat(Chars$3.CurlyBracketClose)) {
+      if (!stack.length) {
+        stream.pos--;
+        break;
+      }
+      stack.pop();
+    } else {
+      stream.pos++;
+    }
+  }
+  if (stack.length) {
+    stream.pos = stack.pop();
+    throw stream.error(`Expecting }`);
+  }
+  return stream.current();
+}
+function isAllowedOperator(ch, ctx) {
+  const op = operatorType$1(ch);
+  if (!op || ctx.quote || ctx.expression) {
+    return false;
+  }
+  return !ctx.attribute || op === "equal";
+}
+function isAllowedSpace(ch, ctx) {
+  return isSpace(ch) && !ctx.expression;
+}
+function isAllowedRepeater(ch, ctx) {
+  return ch === Chars$3.Asterisk && !ctx.attribute && !ctx.expression;
+}
+function bracketType(ch) {
+  if (ch === Chars$3.RoundBracketOpen || ch === Chars$3.RoundBracketClose) {
+    return "group";
+  }
+  if (ch === Chars$3.SquareBracketOpen || ch === Chars$3.SquareBracketClose) {
+    return "attribute";
+  }
+  if (ch === Chars$3.CurlyBracketOpen || ch === Chars$3.CurlyBracketClose) {
+    return "expression";
+  }
+}
+function operatorType$1(ch) {
+  return ch === Chars$3.Child && "child" || ch === Chars$3.Sibling && "sibling" || ch === Chars$3.Climb && "climb" || ch === Chars$3.Dot && "class" || ch === Chars$3.Hash && "id" || ch === Chars$3.Slash && "close" || ch === Chars$3.Equals && "equal" || void 0;
+}
+function isOpenBracket$2(ch) {
+  return ch === Chars$3.CurlyBracketOpen || ch === Chars$3.SquareBracketOpen || ch === Chars$3.RoundBracketOpen;
+}
+function isElementName(ch) {
+  return isAlphaNumericWord(ch) || isUmlaut(ch) || ch === Chars$3.Dash || ch === Chars$3.Colon || ch === Chars$3.Excl;
+}
+function stringify$1(token, state) {
+  if (!tokenVisitor[token.type]) {
+    throw new Error(`Unknown token ${token.type}`);
+  }
+  return tokenVisitor[token.type](token, state);
+}
+function convert(abbr, options = {}) {
+  let textInserted = false;
+  let cleanText;
+  if (options.text) {
+    if (Array.isArray(options.text)) {
+      cleanText = options.text.filter((s2) => s2.trim());
+    } else {
+      cleanText = options.text;
+    }
+  }
+  const result = {
+    type: "Abbreviation",
+    children: convertGroup(abbr, {
+      inserted: false,
+      repeaters: [],
+      text: options.text,
+      cleanText,
+      repeatGuard: options.maxRepeat || Number.POSITIVE_INFINITY,
+      getText(pos) {
+        var _a2;
+        textInserted = true;
+        let value;
+        if (Array.isArray(options.text)) {
+          if (pos !== void 0 && pos >= 0 && pos < cleanText.length) {
+            return cleanText[pos];
+          }
+          value = pos !== void 0 ? options.text[pos] : options.text.join("\n");
+        } else {
+          value = (_a2 = options.text) !== null && _a2 !== void 0 ? _a2 : "";
+        }
+        return value;
+      },
+      getVariable(name) {
+        const varValue = options.variables && options.variables[name];
+        return varValue != null ? varValue : name;
+      }
+    })
+  };
+  if (options.text != null && !textInserted) {
+    const deepest = deepestNode(last$1(result.children));
+    if (deepest) {
+      const text2 = Array.isArray(options.text) ? options.text.join("\n") : options.text;
+      insertText(deepest, text2);
+      if (deepest.name === "a" && options.href) {
+        insertHref(deepest, text2);
+      }
+    }
+  }
+  return result;
+}
+function convertStatement(node, state) {
+  let result = [];
+  if (node.repeat) {
+    const original = node.repeat;
+    const repeat2 = Object.assign({}, original);
+    repeat2.count = repeat2.implicit && Array.isArray(state.text) ? state.cleanText.length : repeat2.count || 1;
+    let items;
+    state.repeaters.push(repeat2);
+    for (let i2 = 0; i2 < repeat2.count; i2++) {
+      repeat2.value = i2;
+      node.repeat = repeat2;
+      items = isGroup(node) ? convertGroup(node, state) : convertElement(node, state);
+      if (repeat2.implicit && !state.inserted) {
+        const target = last$1(items);
+        const deepest = target && deepestNode(target);
+        if (deepest) {
+          insertText(deepest, state.getText(repeat2.value));
+        }
+      }
+      result = result.concat(items);
+      if (--state.repeatGuard <= 0) {
+        break;
+      }
+    }
+    state.repeaters.pop();
+    node.repeat = original;
+    if (repeat2.implicit) {
+      state.inserted = true;
+    }
+  } else {
+    result = result.concat(isGroup(node) ? convertGroup(node, state) : convertElement(node, state));
+  }
+  return result;
+}
+function convertElement(node, state) {
+  let children = [];
+  const elem = {
+    type: "AbbreviationNode",
+    name: node.name && stringifyName(node.name, state),
+    value: node.value && stringifyValue$1(node.value, state),
+    attributes: void 0,
+    children,
+    repeat: node.repeat && Object.assign({}, node.repeat),
+    selfClosing: node.selfClose
+  };
+  let result = [elem];
+  for (const child of node.elements) {
+    children = children.concat(convertStatement(child, state));
+  }
+  if (node.attributes) {
+    elem.attributes = [];
+    for (const attr of node.attributes) {
+      elem.attributes.push(convertAttribute(attr, state));
+    }
+  }
+  if (!elem.name && !elem.attributes && elem.value && !elem.value.some(isField$1)) {
+    result = result.concat(children);
+  } else {
+    elem.children = children;
+  }
+  return result;
+}
+function convertGroup(node, state) {
+  let result = [];
+  for (const child of node.elements) {
+    result = result.concat(convertStatement(child, state));
+  }
+  if (node.repeat) {
+    result = attachRepeater(result, node.repeat);
+  }
+  return result;
+}
+function convertAttribute(node, state) {
+  let implied = false;
+  let isBoolean = false;
+  let valueType = node.expression ? "expression" : "raw";
+  let value;
+  const name = node.name && stringifyName(node.name, state);
+  if (name && name[0] === "!") {
+    implied = true;
+  }
+  if (name && name[name.length - 1] === ".") {
+    isBoolean = true;
+  }
+  if (node.value) {
+    const tokens = node.value.slice();
+    if (isQuote$1(tokens[0])) {
+      const quote2 = tokens.shift();
+      if (tokens.length && last$1(tokens).type === quote2.type) {
+        tokens.pop();
+      }
+      valueType = quote2.single ? "singleQuote" : "doubleQuote";
+    } else if (isBracket$2(tokens[0], "expression", true)) {
+      valueType = "expression";
+      tokens.shift();
+      if (isBracket$2(last$1(tokens), "expression", false)) {
+        tokens.pop();
+      }
+    }
+    value = stringifyValue$1(tokens, state);
+  }
+  return {
+    name: isBoolean || implied ? name.slice(implied ? 1 : 0, isBoolean ? -1 : void 0) : name,
+    value,
+    boolean: isBoolean,
+    implied,
+    valueType,
+    multiple: node.multiple
+  };
+}
+function stringifyName(tokens, state) {
+  let str = "";
+  for (let i2 = 0; i2 < tokens.length; i2++) {
+    str += stringify$1(tokens[i2], state);
+  }
+  return str;
+}
+function stringifyValue$1(tokens, state) {
+  const result = [];
+  let str = "";
+  for (let i2 = 0, token; i2 < tokens.length; i2++) {
+    token = tokens[i2];
+    if (isField$1(token)) {
+      if (str) {
+        result.push(str);
+        str = "";
+      }
+      result.push(token);
+    } else {
+      str += stringify$1(token, state);
+    }
+  }
+  if (str) {
+    result.push(str);
+  }
+  return result;
+}
+function isGroup(node) {
+  return node.type === "TokenGroup";
+}
+function isField$1(token) {
+  return typeof token === "object" && token.type === "Field" && token.index != null;
+}
+function last$1(arr) {
+  return arr[arr.length - 1];
+}
+function deepestNode(node) {
+  return node.children.length ? deepestNode(last$1(node.children)) : node;
+}
+function insertText(node, text2) {
+  if (node.value) {
+    const lastToken = last$1(node.value);
+    if (typeof lastToken === "string") {
+      node.value[node.value.length - 1] += text2;
+    } else {
+      node.value.push(text2);
+    }
+  } else {
+    node.value = [text2];
+  }
+}
+function insertHref(node, text2) {
+  var _a2;
+  let href = "";
+  if (urlRegex.test(text2)) {
+    href = text2;
+    if (!/\w+:/.test(href) && !href.startsWith("//")) {
+      href = `http://${href}`;
+    }
+  } else if (emailRegex.test(text2)) {
+    href = `mailto:${text2}`;
+  }
+  const hrefAttribute = (_a2 = node.attributes) === null || _a2 === void 0 ? void 0 : _a2.find((attr) => attr.name === "href");
+  if (!hrefAttribute) {
+    if (!node.attributes) {
+      node.attributes = [];
+    }
+    node.attributes.push({ name: "href", value: [href], valueType: "doubleQuote" });
+  } else if (!hrefAttribute.value) {
+    hrefAttribute.value = [href];
+  }
+}
+function attachRepeater(items, repeater2) {
+  for (const item of items) {
+    if (!item.repeat) {
+      item.repeat = Object.assign({}, repeater2);
+    }
+  }
+  return items;
+}
+function parseAbbreviation(abbr, options) {
+  try {
+    const tokens = typeof abbr === "string" ? tokenize$1(abbr) : abbr;
+    return convert(abbreviation(tokens, options), options);
+  } catch (err) {
+    if (err instanceof ScannerError && typeof abbr === "string") {
+      err.message += `
+${abbr}
+${"-".repeat(err.pos)}^`;
+    }
+    throw err;
+  }
+}
+function tokenize(abbr, isValue2) {
+  let brackets = 0;
+  let token;
+  const scanner = new Scanner(abbr);
+  const tokens = [];
+  while (!scanner.eof()) {
+    token = getToken(scanner, brackets === 0 && !isValue2);
+    if (!token) {
+      throw scanner.error("Unexpected character");
+    }
+    if (token.type === "Bracket") {
+      if (!brackets && token.open) {
+        mergeTokens(scanner, tokens);
+      }
+      brackets += token.open ? 1 : -1;
+      if (brackets < 0) {
+        throw scanner.error("Unexpected bracket", token.start);
+      }
+    }
+    tokens.push(token);
+    if (shouldConsumeDashAfter(token) && (token = operator(scanner))) {
+      tokens.push(token);
+    }
+  }
+  return tokens;
+}
+function getToken(scanner, short) {
+  return field$1(scanner) || customProperty(scanner) || numberValue(scanner) || colorValue(scanner) || stringValue(scanner) || bracket(scanner) || operator(scanner) || whiteSpace(scanner) || literal$1(scanner, short);
+}
+function field$1(scanner) {
+  const start = scanner.pos;
+  if (scanner.eat(Chars$2.Dollar) && scanner.eat(Chars$2.CurlyBracketOpen)) {
+    scanner.start = scanner.pos;
+    let index;
+    let name = "";
+    if (scanner.eatWhile(isNumber$1)) {
+      index = Number(scanner.current());
+      name = scanner.eat(Chars$2.Colon) ? consumePlaceholder$1(scanner) : "";
+    } else if (isAlpha$1(scanner.peek())) {
+      name = consumePlaceholder$1(scanner);
+    }
+    if (scanner.eat(Chars$2.CurlyBracketClose)) {
+      return {
+        type: "Field",
+        index,
+        name,
+        start,
+        end: scanner.pos
+      };
+    }
+    throw scanner.error("Expecting }");
+  }
+  scanner.pos = start;
+}
+function consumePlaceholder$1(stream) {
+  const stack = [];
+  stream.start = stream.pos;
+  while (!stream.eof()) {
+    if (stream.eat(Chars$2.CurlyBracketOpen)) {
+      stack.push(stream.pos);
+    } else if (stream.eat(Chars$2.CurlyBracketClose)) {
+      if (!stack.length) {
+        stream.pos--;
+        break;
+      }
+      stack.pop();
+    } else {
+      stream.pos++;
+    }
+  }
+  if (stack.length) {
+    stream.pos = stack.pop();
+    throw stream.error(`Expecting }`);
+  }
+  return stream.current();
+}
+function literal$1(scanner, short) {
+  const start = scanner.pos;
+  if (scanner.eat(isIdentPrefix)) {
+    scanner.eatWhile(start ? isKeyword : isLiteral$1);
+  } else if (scanner.eat(isAlphaWord)) {
+    scanner.eatWhile(short ? isLiteral$1 : isKeyword);
+  } else {
+    scanner.eat(Chars$2.Dot);
+    scanner.eatWhile(isLiteral$1);
+  }
+  if (start !== scanner.pos) {
+    scanner.start = start;
+    return createLiteral(scanner, scanner.start = start);
+  }
+}
+function createLiteral(scanner, start = scanner.start, end = scanner.pos) {
+  return {
+    type: "Literal",
+    value: scanner.substring(start, end),
+    start,
+    end
+  };
+}
+function numberValue(scanner) {
+  const start = scanner.pos;
+  if (consumeNumber(scanner)) {
+    scanner.start = start;
+    const rawValue = scanner.current();
+    scanner.start = scanner.pos;
+    scanner.eat(Chars$2.Percent) || scanner.eatWhile(isAlphaWord);
+    return {
+      type: "NumberValue",
+      value: Number(rawValue),
+      rawValue,
+      unit: scanner.current(),
+      start,
+      end: scanner.pos
+    };
+  }
+}
+function stringValue(scanner) {
+  const ch = scanner.peek();
+  const start = scanner.pos;
+  let finished = false;
+  if (isQuote$2(ch)) {
+    scanner.pos++;
+    while (!scanner.eof()) {
+      if (scanner.eat(ch)) {
+        finished = true;
+        break;
+      } else {
+        scanner.pos++;
+      }
+    }
+    scanner.start = start;
+    return {
+      type: "StringValue",
+      value: scanner.substring(start + 1, scanner.pos - (finished ? 1 : 0)),
+      quote: ch === Chars$2.SingleQuote ? "single" : "double",
+      start,
+      end: scanner.pos
+    };
+  }
+}
+function colorValue(scanner) {
+  const start = scanner.pos;
+  if (scanner.eat(Chars$2.Hash)) {
+    const valueStart = scanner.pos;
+    let color2 = "";
+    let alpha = "";
+    if (scanner.eatWhile(isHex)) {
+      color2 = scanner.substring(valueStart, scanner.pos);
+      alpha = colorAlpha(scanner);
+    } else if (scanner.eat(Chars$2.Transparent)) {
+      color2 = "0";
+      alpha = colorAlpha(scanner) || "0";
+    } else {
+      alpha = colorAlpha(scanner);
+    }
+    if (color2 || alpha || scanner.eof()) {
+      const { r: r2, g: g2, b: b2, a: a2 } = parseColor(color2, alpha);
+      return {
+        type: "ColorValue",
+        r: r2,
+        g: g2,
+        b: b2,
+        a: a2,
+        raw: scanner.substring(start + 1, scanner.pos),
+        start,
+        end: scanner.pos
+      };
+    } else {
+      return createLiteral(scanner, start);
+    }
+  }
+  scanner.pos = start;
+}
+function colorAlpha(scanner) {
+  const start = scanner.pos;
+  if (scanner.eat(Chars$2.Dot)) {
+    scanner.start = start;
+    if (scanner.eatWhile(isNumber$1)) {
+      return scanner.current();
+    }
+    return "1";
+  }
+  return "";
+}
+function whiteSpace(scanner) {
+  const start = scanner.pos;
+  if (scanner.eatWhile(isSpace)) {
+    return {
+      type: "WhiteSpace",
+      start,
+      end: scanner.pos
+    };
+  }
+}
+function customProperty(scanner) {
+  const start = scanner.pos;
+  if (scanner.eat(Chars$2.Dash) && scanner.eat(Chars$2.Dash)) {
+    scanner.start = start;
+    scanner.eatWhile(isKeyword);
+    return {
+      type: "CustomProperty",
+      value: scanner.current(),
+      start,
+      end: scanner.pos
+    };
+  }
+  scanner.pos = start;
+}
+function bracket(scanner) {
+  const ch = scanner.peek();
+  if (isBracket$1(ch)) {
+    return {
+      type: "Bracket",
+      open: ch === Chars$2.RoundBracketOpen,
+      start: scanner.pos++,
+      end: scanner.pos
+    };
+  }
+}
+function operator(scanner) {
+  const op = operatorType(scanner.peek());
+  if (op) {
+    return {
+      type: "Operator",
+      operator: op,
+      start: scanner.pos++,
+      end: scanner.pos
+    };
+  }
+}
+function consumeNumber(stream) {
+  const start = stream.pos;
+  stream.eat(Chars$2.Dash);
+  const afterNegative = stream.pos;
+  const hasDecimal = stream.eatWhile(isNumber$1);
+  const prevPos = stream.pos;
+  if (stream.eat(Chars$2.Dot)) {
+    const hasFloat = stream.eatWhile(isNumber$1);
+    if (!hasDecimal && !hasFloat) {
+      stream.pos = prevPos;
+    }
+  }
+  if (stream.pos === afterNegative) {
+    stream.pos = start;
+  }
+  return stream.pos !== start;
+}
+function isIdentPrefix(code2) {
+  return code2 === Chars$2.At || code2 === Chars$2.Dollar;
+}
+function operatorType(ch) {
+  return ch === Chars$2.Sibling && OperatorType.Sibling || ch === Chars$2.Excl && OperatorType.Important || ch === Chars$2.Comma && OperatorType.ArgumentDelimiter || ch === Chars$2.Colon && OperatorType.PropertyDelimiter || ch === Chars$2.Dash && OperatorType.ValueDelimiter || void 0;
+}
+function isHex(code2) {
+  return isNumber$1(code2) || isAlpha$1(code2, 65, 70);
+}
+function isKeyword(code2) {
+  return isAlphaNumericWord(code2) || code2 === Chars$2.Dash;
+}
+function isBracket$1(code2) {
+  return code2 === Chars$2.RoundBracketOpen || code2 === Chars$2.RoundBracketClose;
+}
+function isLiteral$1(code2) {
+  return isAlphaWord(code2) || code2 === Chars$2.Percent || code2 === Chars$2.Slash;
+}
+function parseColor(value, alpha) {
+  let r2 = "0";
+  let g2 = "0";
+  let b2 = "0";
+  let a2 = Number(alpha != null && alpha !== "" ? alpha : 1);
+  if (value === "t") {
+    a2 = 0;
+  } else {
+    switch (value.length) {
+      case 0:
+        break;
+      case 1:
+        r2 = g2 = b2 = value + value;
+        break;
+      case 2:
+        r2 = g2 = b2 = value;
+        break;
+      case 3:
+        r2 = value[0] + value[0];
+        g2 = value[1] + value[1];
+        b2 = value[2] + value[2];
+        break;
+      default:
+        value += value;
+        r2 = value.slice(0, 2);
+        g2 = value.slice(2, 4);
+        b2 = value.slice(4, 6);
+    }
+  }
+  return {
+    r: parseInt(r2, 16),
+    g: parseInt(g2, 16),
+    b: parseInt(b2, 16),
+    a: a2
+  };
+}
+function shouldConsumeDashAfter(token) {
+  return token.type === "ColorValue" || token.type === "NumberValue" && !token.unit;
+}
+function mergeTokens(scanner, tokens) {
+  let start = 0;
+  let end = 0;
+  while (tokens.length) {
+    const token = last(tokens);
+    if (token.type === "Literal" || token.type === "NumberValue") {
+      start = token.start;
+      if (!end) {
+        end = token.end;
+      }
+      tokens.pop();
+    } else {
+      break;
+    }
+  }
+  if (start !== end) {
+    tokens.push(createLiteral(scanner, start, end));
+  }
+}
+function last(arr) {
+  return arr[arr.length - 1];
+}
+function tokenScanner(tokens) {
+  return {
+    tokens,
+    start: 0,
+    pos: 0,
+    size: tokens.length
+  };
+}
+function peek$2(scanner) {
+  return scanner.tokens[scanner.pos];
+}
+function readable(scanner) {
+  return scanner.pos < scanner.size;
+}
+function consume$1(scanner, test) {
+  if (test(peek$2(scanner))) {
+    scanner.pos++;
+    return true;
+  }
+  return false;
+}
+function error(scanner, message, token = peek$2(scanner)) {
+  if (token && token.start != null) {
+    message += ` at ${token.start}`;
+  }
+  const err = new Error(message);
+  err["pos"] = token && token.start;
+  return err;
+}
+function parser(tokens, options = {}) {
+  const scanner = tokenScanner(tokens);
+  const result = [];
+  let property2;
+  while (readable(scanner)) {
+    if (property2 = consumeProperty(scanner, options)) {
+      result.push(property2);
+    } else if (!consume$1(scanner, isSiblingOperator)) {
+      throw error(scanner, "Unexpected token");
+    }
+  }
+  return result;
+}
+function consumeProperty(scanner, options) {
+  let name;
+  let important = false;
+  let valueFragment;
+  const value = [];
+  const token = peek$2(scanner);
+  const valueMode = !!options.value;
+  if (!valueMode && isLiteral(token) && !isFunctionStart(scanner)) {
+    scanner.pos++;
+    name = token.value;
+    consume$1(scanner, isValueDelimiter);
+  }
+  if (valueMode) {
+    consume$1(scanner, isWhiteSpace$1);
+  }
+  while (readable(scanner)) {
+    if (consume$1(scanner, isImportant)) {
+      important = true;
+    } else if (valueFragment = consumeValue(scanner, valueMode)) {
+      value.push(valueFragment);
+    } else if (!consume$1(scanner, isFragmentDelimiter)) {
+      break;
+    }
+  }
+  if (name || value.length || important) {
+    return { name, value, important };
+  }
+}
+function consumeValue(scanner, inArgument) {
+  const result = [];
+  let token;
+  let args;
+  while (readable(scanner)) {
+    token = peek$2(scanner);
+    if (isValue(token)) {
+      scanner.pos++;
+      if (isLiteral(token) && (args = consumeArguments(scanner))) {
+        result.push({
+          type: "FunctionCall",
+          name: token.value,
+          arguments: args
+        });
+      } else {
+        result.push(token);
+      }
+    } else if (isValueDelimiter(token) || inArgument && isWhiteSpace$1(token)) {
+      scanner.pos++;
+    } else {
+      break;
+    }
+  }
+  return result.length ? { type: "CSSValue", value: result } : void 0;
+}
+function consumeArguments(scanner) {
+  const start = scanner.pos;
+  if (consume$1(scanner, isOpenBracket$1)) {
+    const args = [];
+    let value;
+    while (readable(scanner) && !consume$1(scanner, isCloseBracket$1)) {
+      if (value = consumeValue(scanner, true)) {
+        args.push(value);
+      } else if (!consume$1(scanner, isWhiteSpace$1) && !consume$1(scanner, isArgumentDelimiter)) {
+        throw error(scanner, "Unexpected token");
+      }
+    }
+    scanner.start = start;
+    return args;
+  }
+}
+function isLiteral(token) {
+  return token && token.type === "Literal";
+}
+function isBracket(token, open) {
+  return token && token.type === "Bracket" && (open == null || token.open === open);
+}
+function isOpenBracket$1(token) {
+  return isBracket(token, true);
+}
+function isCloseBracket$1(token) {
+  return isBracket(token, false);
+}
+function isWhiteSpace$1(token) {
+  return token && token.type === "WhiteSpace";
+}
+function isOperator(token, operator2) {
+  return token && token.type === "Operator" && (!operator2 || token.operator === operator2);
+}
+function isSiblingOperator(token) {
+  return isOperator(token, OperatorType.Sibling);
+}
+function isArgumentDelimiter(token) {
+  return isOperator(token, OperatorType.ArgumentDelimiter);
+}
+function isFragmentDelimiter(token) {
+  return isArgumentDelimiter(token);
+}
+function isImportant(token) {
+  return isOperator(token, OperatorType.Important);
+}
+function isValue(token) {
+  return token.type === "StringValue" || token.type === "ColorValue" || token.type === "NumberValue" || token.type === "Literal" || token.type === "Field" || token.type === "CustomProperty";
+}
+function isValueDelimiter(token) {
+  return isOperator(token, OperatorType.PropertyDelimiter) || isOperator(token, OperatorType.ValueDelimiter);
+}
+function isFunctionStart(scanner) {
+  const t1 = scanner.tokens[scanner.pos];
+  const t22 = scanner.tokens[scanner.pos + 1];
+  return t1 && t22 && isLiteral(t1) && t22.type === "Bracket";
+}
+function parse$2(abbr, options) {
+  try {
+    const tokens = typeof abbr === "string" ? tokenize(abbr, options && options.value) : abbr;
+    return parser(tokens, options);
+  } catch (err) {
+    if (err instanceof ScannerError && typeof abbr === "string") {
+      err.message += `
+${abbr}
+${"-".repeat(err.pos)}^`;
+    }
+    throw err;
+  }
+}
+function mergeAttributes(node, config) {
+  if (!node.attributes) {
+    return;
+  }
+  const attributes = [];
+  const lookup = {};
+  for (const attr of node.attributes) {
+    if (attr.name) {
+      const attrName2 = attr.name;
+      if (attrName2 in lookup) {
+        const prev = lookup[attrName2];
+        if (attrName2 === "class") {
+          prev.value = mergeValue(prev.value, attr.value, " ");
+        } else {
+          mergeDeclarations(prev, attr, config);
+        }
+      } else {
+        attributes.push(lookup[attrName2] = Object.assign({}, attr));
+      }
+    } else {
+      attributes.push(attr);
+    }
+  }
+  node.attributes = attributes;
+}
+function mergeValue(prev, next2, glue) {
+  if (prev && next2) {
+    if (prev.length && glue) {
+      append(prev, glue);
+    }
+    for (const t5 of next2) {
+      append(prev, t5);
+    }
+    return prev;
+  }
+  const result = prev || next2;
+  return result && result.slice();
+}
+function mergeDeclarations(dest, src, config) {
+  dest.name = src.name;
+  if (!config.options["output.reverseAttributes"]) {
+    dest.value = src.value;
+  }
+  if (!dest.implied) {
+    dest.implied = src.implied;
+  }
+  if (!dest.boolean) {
+    dest.boolean = src.boolean;
+  }
+  if (dest.valueType !== "expression") {
+    dest.valueType = src.valueType;
+  }
+  return dest;
+}
+function append(tokens, value) {
+  const lastIx = tokens.length - 1;
+  if (typeof tokens[lastIx] === "string" && typeof value === "string") {
+    tokens[lastIx] += value;
+  } else {
+    tokens.push(value);
+  }
+}
+function walk$1(node, fn, state) {
+  const ancestors = [node];
+  const callback = (ctx) => {
+    fn(ctx, ancestors, state);
+    ancestors.push(ctx);
+    ctx.children.forEach(callback);
+    ancestors.pop();
+  };
+  node.children.forEach(callback);
+}
+function find$1(node, callback) {
+  for (let i2 = 0; i2 < node.children.length; i2++) {
+    const child = node.children[i2];
+    if (callback(child)) {
+      return child;
+    }
+    const result = find$1(child, callback);
+    if (result) {
+      return result;
+    }
+  }
+}
+function findDeepest(node) {
+  let parent;
+  while (node.children.length) {
+    parent = node;
+    node = node.children[node.children.length - 1];
+  }
+  return { parent, node };
+}
+function isNode(node) {
+  return node.type === "AbbreviationNode";
+}
+function resolveSnippets(abbr, config) {
+  const stack = [];
+  const reversed = config.options["output.reverseAttributes"];
+  const { warn } = config;
+  const resolve = (child) => {
+    const snippet = child.name && config.snippets[child.name];
+    if (!snippet || stack.includes(snippet)) {
+      return null;
+    }
+    let snippetAbbr;
+    try {
+      snippetAbbr = parseAbbreviation(snippet, config);
+    } catch (err) {
+      warn === null || warn === void 0 ? void 0 : warn(`Unable to parse "${snippet}" snippet`, err);
+      return null;
+    }
+    stack.push(snippet);
+    walkResolve(snippetAbbr, resolve);
+    stack.pop();
+    for (const topNode of snippetAbbr.children) {
+      if (child.attributes) {
+        const from = topNode.attributes || [];
+        const to = child.attributes || [];
+        topNode.attributes = reversed ? to.concat(from) : from.concat(to);
+      }
+      mergeNodes(child, topNode);
+    }
+    return snippetAbbr;
+  };
+  walkResolve(abbr, resolve);
+  return abbr;
+}
+function walkResolve(node, resolve, config) {
+  let children = [];
+  for (const child of node.children) {
+    const resolved = resolve(child);
+    if (resolved) {
+      children = children.concat(resolved.children);
+      const deepest = findDeepest(resolved);
+      if (isNode(deepest.node)) {
+        deepest.node.children = deepest.node.children.concat(walkResolve(child, resolve));
+      }
+    } else {
+      children.push(child);
+      child.children = walkResolve(child, resolve);
+    }
+  }
+  return node.children = children;
+}
+function mergeNodes(from, to) {
+  if (from.selfClosing) {
+    to.selfClosing = true;
+  }
+  if (from.value != null) {
+    to.value = from.value;
+  }
+  if (from.repeat) {
+    to.repeat = from.repeat;
+  }
+}
+function createOutputStream(options, level = 0) {
+  return {
+    options,
+    value: "",
+    level,
+    offset: 0,
+    line: 0,
+    column: 0
+  };
+}
+function push(stream, text2) {
+  const processText = stream.options["output.text"];
+  _push(stream, processText(text2, stream.offset, stream.line, stream.column));
+}
+function pushString(stream, value) {
+  const lines = splitByLines$1(value);
+  for (let i2 = 0, il = lines.length - 1; i2 <= il; i2++) {
+    push(stream, lines[i2]);
+    if (i2 !== il) {
+      pushNewline(stream, true);
+    }
+  }
+}
+function pushNewline(stream, indent) {
+  const baseIndent = stream.options["output.baseIndent"];
+  const newline = stream.options["output.newline"];
+  push(stream, newline + baseIndent);
+  stream.line++;
+  stream.column = baseIndent.length;
+  if (indent) {
+    pushIndent(stream, indent === true ? stream.level : indent);
+  }
+}
+function pushIndent(stream, size = stream.level) {
+  const indent = stream.options["output.indent"];
+  push(stream, indent.repeat(Math.max(size, 0)));
+}
+function pushField(stream, index, placeholder) {
+  const field2 = stream.options["output.field"];
+  _push(stream, field2(index, placeholder, stream.offset, stream.line, stream.column));
+}
+function tagName(name, config) {
+  return strCase(name, config.options["output.tagCase"]);
+}
+function attrName(name, config) {
+  return strCase(name, config.options["output.attributeCase"]);
+}
+function attrQuote(attr, config, isOpen) {
+  if (attr.valueType === "expression") {
+    return isOpen ? expressionStart : expressionEnd;
+  }
+  return config.options["output.attributeQuotes"] === "single" ? "'" : '"';
+}
+function isBooleanAttribute(attr, config) {
+  return attr.boolean || config.options["output.booleanAttributes"].includes((attr.name || "").toLowerCase());
+}
+function selfClose(config) {
+  switch (config.options["output.selfClosingStyle"]) {
+    case "xhtml":
+      return " /";
+    case "xml":
+      return "/";
+    default:
+      return "";
+  }
+}
+function isInline(node, config) {
+  if (typeof node === "string") {
+    return config.options.inlineElements.includes(node.toLowerCase());
+  }
+  return node.name ? isInline(node.name, config) : Boolean(node.value && !node.attributes);
+}
+function splitByLines$1(text2) {
+  return text2.split(/\r\n|\r|\n/g);
+}
+function _push(stream, text2) {
+  stream.value += text2;
+  stream.offset += text2.length;
+  stream.column += text2.length;
+}
+function strCase(str, type) {
+  if (type) {
+    return type === "upper" ? str.toUpperCase() : str.toLowerCase();
+  }
+  return str;
+}
+function implicitTag(node, ancestors, config) {
+  if (!node.name && node.attributes) {
+    resolveImplicitTag(node, ancestors, config);
+  }
+}
+function resolveImplicitTag(node, ancestors, config) {
+  const parent = getParentElement(ancestors);
+  const contextName = config.context ? config.context.name : "";
+  const parentName = lowercase(parent ? parent.name : contextName);
+  node.name = elementMap[parentName] || (isInline(parentName, config) ? "span" : "div");
+}
+function lowercase(str) {
+  return (str || "").toLowerCase();
+}
+function getParentElement(ancestors) {
+  for (let i2 = ancestors.length - 1; i2 >= 0; i2--) {
+    const elem = ancestors[i2];
+    if (isNode(elem)) {
+      return elem;
+    }
+  }
+}
+function lorem(node, ancestors, config) {
+  let m2;
+  if (node.name && (m2 = node.name.match(reLorem))) {
+    const db = vocabularies[m2[1]] || vocabularies.latin;
+    const minWordCount = m2[2] ? Math.max(1, Number(m2[2])) : 30;
+    const maxWordCount = m2[3] ? Math.max(minWordCount, Number(m2[3].slice(1))) : minWordCount;
+    const wordCount = rand(minWordCount, maxWordCount);
+    const repeat2 = node.repeat || findRepeater(ancestors);
+    node.name = node.attributes = void 0;
+    node.value = [paragraph(db, wordCount, !repeat2 || repeat2.value === 0)];
+    if (node.repeat && ancestors.length > 1) {
+      resolveImplicitTag(node, ancestors, config);
+    }
+  }
+}
+function rand(from, to) {
+  return Math.floor(Math.random() * (to - from) + from);
+}
+function sample(arr, count) {
+  const len = arr.length;
+  const iterations = Math.min(len, count);
+  const result = [];
+  while (result.length < iterations) {
+    const str = arr[rand(0, len)];
+    if (!result.includes(str)) {
+      result.push(str);
+    }
+  }
+  return result;
+}
+function choice(val) {
+  return val[rand(0, val.length - 1)];
+}
+function sentence(words, end) {
+  if (words.length) {
+    words = [capitalize(words[0])].concat(words.slice(1));
+  }
+  return words.join(" ") + (end || choice("?!..."));
+}
+function capitalize(word) {
+  return word[0].toUpperCase() + word.slice(1);
+}
+function insertCommas(words) {
+  if (words.length < 2) {
+    return words;
+  }
+  words = words.slice();
+  const len = words.length;
+  const hasComma = /,$/;
+  let totalCommas = 0;
+  if (len > 3 && len <= 6) {
+    totalCommas = rand(0, 1);
+  } else if (len > 6 && len <= 12) {
+    totalCommas = rand(0, 2);
+  } else {
+    totalCommas = rand(1, 4);
+  }
+  for (let i2 = 0, pos; i2 < totalCommas; i2++) {
+    pos = rand(0, len - 2);
+    if (!hasComma.test(words[pos])) {
+      words[pos] += ",";
+    }
+  }
+  return words;
+}
+function paragraph(dict, wordCount, startWithCommon) {
+  const result = [];
+  let totalWords = 0;
+  let words;
+  if (startWithCommon && dict.common) {
+    words = dict.common.slice(0, wordCount);
+    totalWords += words.length;
+    result.push(sentence(insertCommas(words), "."));
+  }
+  while (totalWords < wordCount) {
+    words = sample(dict.words, Math.min(rand(2, 30), wordCount - totalWords));
+    totalWords += words.length;
+    result.push(sentence(insertCommas(words)));
+  }
+  return result.join(" ");
+}
+function findRepeater(ancestors) {
+  for (let i2 = ancestors.length - 1; i2 >= 0; i2--) {
+    const element2 = ancestors[i2];
+    if (element2.type === "AbbreviationNode" && element2.repeat) {
+      return element2.repeat;
+    }
+  }
+}
+function xsl(node) {
+  if (matchesName(node.name) && node.attributes && (node.children.length || node.value)) {
+    node.attributes = node.attributes.filter(isAllowed);
+  }
+}
+function isAllowed(attr) {
+  return attr.name !== "select";
+}
+function matchesName(name) {
+  return name === "xsl:variable" || name === "xsl:with-param";
+}
+function bem(node, ancestors, config) {
+  expandClassNames(node);
+  expandShortNotation(node, ancestors, config);
+}
+function expandClassNames(node) {
+  const data = getBEMData(node);
+  const classNames = [];
+  for (const cl of data.classNames) {
+    const ix = cl.indexOf("_");
+    if (ix > 0 && !cl.startsWith("-")) {
+      classNames.push(cl.slice(0, ix));
+      classNames.push(cl.slice(ix));
+    } else {
+      classNames.push(cl);
+    }
+  }
+  if (classNames.length) {
+    data.classNames = classNames.filter(uniqueClass);
+    data.block = findBlockName(data.classNames);
+    updateClass(node, data.classNames.join(" "));
+  }
+}
+function expandShortNotation(node, ancestors, config) {
+  const data = getBEMData(node);
+  const classNames = [];
+  const { options } = config;
+  const path2 = ancestors.slice(1).concat(node);
+  for (let cl of data.classNames) {
+    let prefix = "";
+    let m2;
+    const originalClass = cl;
+    if (m2 = cl.match(reElement)) {
+      prefix = getBlockName(path2, m2[1].length, config.context) + options["bem.element"] + m2[2];
+      classNames.push(prefix);
+      cl = cl.slice(m2[0].length);
+    }
+    if (m2 = cl.match(reModifier)) {
+      if (!prefix) {
+        prefix = getBlockName(path2, m2[1].length);
+        classNames.push(prefix);
+      }
+      classNames.push(`${prefix}${options["bem.modifier"]}${m2[2]}`);
+      cl = cl.slice(m2[0].length);
+    }
+    if (cl === originalClass) {
+      classNames.push(originalClass);
+    }
+  }
+  const arrClassNames = classNames.filter(uniqueClass);
+  if (arrClassNames.length) {
+    updateClass(node, arrClassNames.join(" "));
+  }
+}
+function getBEMData(node) {
+  if (!node._bem) {
+    let classValue = "";
+    if (node.attributes) {
+      for (const attr of node.attributes) {
+        if (attr.name === "class" && attr.value) {
+          classValue = stringifyValue(attr.value);
+          break;
+        }
+      }
+    }
+    node._bem = parseBEM(classValue);
+  }
+  return node._bem;
+}
+function getBEMDataFromContext(context) {
+  if (!context._bem) {
+    context._bem = parseBEM(context.attributes && context.attributes.class || "");
+  }
+  return context._bem;
+}
+function parseBEM(classValue) {
+  const classNames = classValue ? classValue.split(/\s+/) : [];
+  return {
+    classNames,
+    block: findBlockName(classNames)
+  };
+}
+function getBlockName(ancestors, depth = 0, context) {
+  const maxParentIx = 0;
+  let parentIx = Math.max(ancestors.length - depth, maxParentIx);
+  do {
+    const parent = ancestors[parentIx];
+    if (parent) {
+      const data = getBEMData(parent);
+      if (data.block) {
+        return data.block;
+      }
+    }
+  } while (maxParentIx < parentIx--);
+  if (context) {
+    const data = getBEMDataFromContext(context);
+    if (data.block) {
+      return data.block;
+    }
+  }
+  return "";
+}
+function findBlockName(classNames) {
+  return find(classNames, blockCandidates1) || find(classNames, blockCandidates2) || void 0;
+}
+function find(classNames, filter) {
+  for (const cl of classNames) {
+    if (reElement.test(cl) || reModifier.test(cl)) {
+      break;
+    }
+    if (filter(cl)) {
+      return cl;
+    }
+  }
+}
+function updateClass(node, value) {
+  for (const attr of node.attributes) {
+    if (attr.name === "class") {
+      attr.value = [value];
+      break;
+    }
+  }
+}
+function stringifyValue(value) {
+  let result = "";
+  for (const t5 of value) {
+    result += typeof t5 === "string" ? t5 : t5.name;
+  }
+  return result;
+}
+function uniqueClass(item, ix, arr) {
+  return !!item && arr.indexOf(item) === ix;
+}
+function label(node) {
+  if (node.name === "label") {
+    const input = find$1(node, (n2) => n2.name === "input" || n2.name === "textarea");
+    if (input) {
+      if (node.attributes) {
+        node.attributes = node.attributes.filter((attr) => {
+          return !(attr.name === "for" && isEmptyAttribute(attr));
+        });
+      }
+      if (input.attributes) {
+        input.attributes = input.attributes.filter((attr) => {
+          return !(attr.name === "id" && isEmptyAttribute(attr));
+        });
+      }
+    }
+  }
+}
+function isEmptyAttribute(attr) {
+  if (!attr.value) {
+    return true;
+  }
+  if (attr.value.length === 1) {
+    const token = attr.value[0];
+    if (token && typeof token !== "string" && !token.name) {
+      return true;
+    }
+  }
+  return false;
+}
+function walk(abbr, visitor, state) {
+  const callback = (ctx, index, items) => {
+    const { parent, current } = state;
+    state.parent = current;
+    state.current = ctx;
+    visitor(ctx, index, items, state, next2);
+    state.current = current;
+    state.parent = parent;
+  };
+  const next2 = (node, index, items) => {
+    state.ancestors.push(state.current);
+    callback(node, index, items);
+    state.ancestors.pop();
+  };
+  abbr.children.forEach(callback);
+}
+function createWalkState(config) {
+  return {
+    // @ts-ignore: Will set value in iterator
+    current: null,
+    parent: void 0,
+    ancestors: [],
+    config,
+    field: 1,
+    out: createOutputStream(config.options)
+  };
+}
+function isSnippet(node) {
+  return node ? !node.name && !node.attributes : false;
+}
+function isInlineElement(node, config) {
+  return node ? isInline(node, config) : false;
+}
+function isField(token) {
+  return typeof token === "object" && token.type === "Field";
+}
+function pushTokens(tokens, state) {
+  const { out } = state;
+  let largestIndex = -1;
+  for (const t5 of tokens) {
+    if (typeof t5 === "string") {
+      pushString(out, t5);
+    } else {
+      pushField(out, state.field + t5.index, t5.name);
+      if (t5.index > largestIndex) {
+        largestIndex = t5.index;
+      }
+    }
+  }
+  if (largestIndex !== -1) {
+    state.field += largestIndex + 1;
+  }
+}
+function splitByLines(tokens) {
+  const result = [];
+  let line = [];
+  for (const t5 of tokens) {
+    if (typeof t5 === "string") {
+      const lines = t5.split(/\r\n?|\n/g);
+      line.push(lines.shift() || "");
+      while (lines.length) {
+        result.push(line);
+        line = [lines.shift() || ""];
+      }
+    } else {
+      line.push(t5);
+    }
+  }
+  line.length && result.push(line);
+  return result;
+}
+function shouldOutputAttribute(attr) {
+  return !attr.implied || attr.valueType !== "raw" || !!attr.value && attr.value.length > 0;
+}
+function template(text2) {
+  const tokens = [];
+  const scanner = { pos: 0, text: text2 };
+  let placeholder;
+  let offset = scanner.pos;
+  let pos = scanner.pos;
+  while (scanner.pos < scanner.text.length) {
+    pos = scanner.pos;
+    if (placeholder = consumePlaceholder(scanner)) {
+      if (offset !== scanner.pos) {
+        tokens.push(text2.slice(offset, pos));
+      }
+      tokens.push(placeholder);
+      offset = scanner.pos;
+    } else {
+      scanner.pos++;
+    }
+  }
+  if (offset !== scanner.pos) {
+    tokens.push(text2.slice(offset));
+  }
+  return tokens;
+}
+function consumePlaceholder(scanner) {
+  if (peek$1(scanner) === TemplateChars.Start) {
+    const start = ++scanner.pos;
+    let namePos = start;
+    let afterPos = start;
+    let stack = 1;
+    while (scanner.pos < scanner.text.length) {
+      const code2 = peek$1(scanner);
+      if (isTokenStart(code2)) {
+        namePos = scanner.pos;
+        while (isToken(peek$1(scanner))) {
+          scanner.pos++;
+        }
+        afterPos = scanner.pos;
+      } else {
+        if (code2 === TemplateChars.Start) {
+          stack++;
+        } else if (code2 === TemplateChars.End) {
+          if (--stack === 0) {
+            return {
+              before: scanner.text.slice(start, namePos),
+              after: scanner.text.slice(afterPos, scanner.pos++),
+              name: scanner.text.slice(namePos, afterPos)
+            };
+          }
+        }
+        scanner.pos++;
+      }
+    }
+  }
+}
+function peek$1(scanner, pos = scanner.pos) {
+  return scanner.text.charCodeAt(pos);
+}
+function isTokenStart(code2) {
+  return code2 >= 65 && code2 <= 90;
+}
+function isToken(code2) {
+  return isTokenStart(code2) || code2 > 47 && code2 < 58 || code2 === TemplateChars.Underscore || code2 === TemplateChars.Dash;
+}
+function createCommentState(config) {
+  const { options } = config;
+  return {
+    enabled: options["comment.enabled"],
+    trigger: options["comment.trigger"],
+    before: options["comment.before"] ? template(options["comment.before"]) : void 0,
+    after: options["comment.after"] ? template(options["comment.after"]) : void 0
+  };
+}
+function commentNodeBefore(node, state) {
+  if (shouldComment(node, state) && state.comment.before) {
+    output(node, state.comment.before, state);
+  }
+}
+function commentNodeAfter(node, state) {
+  if (shouldComment(node, state) && state.comment.after) {
+    output(node, state.comment.after, state);
+  }
+}
+function shouldComment(node, state) {
+  const { comment } = state;
+  if (!comment.enabled || !comment.trigger || !node.name || !node.attributes) {
+    return false;
+  }
+  for (const attr of node.attributes) {
+    if (attr.name && comment.trigger.includes(attr.name)) {
+      return true;
+    }
+  }
+  return false;
+}
+function output(node, tokens, state) {
+  const attrs = {};
+  const { out } = state;
+  for (const attr of node.attributes) {
+    if (attr.name && attr.value) {
+      attrs[attr.name.toUpperCase()] = attr.value;
+    }
+  }
+  for (const token of tokens) {
+    if (typeof token === "string") {
+      pushString(out, token);
+    } else if (attrs[token.name]) {
+      pushString(out, token.before);
+      pushTokens(attrs[token.name], state);
+      pushString(out, token.after);
+    }
+  }
+}
+function html(abbr, config) {
+  const state = createWalkState(config);
+  state.comment = createCommentState(config);
+  walk(abbr, element$1, state);
+  return state.out.value;
+}
+function element$1(node, index, items, state, next2) {
+  const { out, config } = state;
+  const format3 = shouldFormat$1(node, index, items, state);
+  const level = getIndent(state);
+  out.level += level;
+  format3 && pushNewline(out, true);
+  if (node.name) {
+    const name = tagName(node.name, config);
+    commentNodeBefore(node, state);
+    pushString(out, `<${name}`);
+    if (node.attributes) {
+      for (const attr of node.attributes) {
+        if (shouldOutputAttribute(attr)) {
+          pushAttribute(attr, state);
+        }
+      }
+    }
+    if (node.selfClosing && !node.children.length && !node.value) {
+      pushString(out, `${selfClose(config)}>`);
+    } else {
+      pushString(out, ">");
+      if (!pushSnippet(node, state, next2)) {
+        if (node.value) {
+          const innerFormat = node.value.some(hasNewline) || startsWithBlockTag(node.value, config);
+          innerFormat && pushNewline(state.out, ++out.level);
+          pushTokens(node.value, state);
+          innerFormat && pushNewline(state.out, --out.level);
+        }
+        node.children.forEach(next2);
+        if (!node.value && !node.children.length) {
+          const innerFormat = config.options["output.formatLeafNode"] || config.options["output.formatForce"].includes(node.name);
+          innerFormat && pushNewline(state.out, ++out.level);
+          pushTokens(caret, state);
+          innerFormat && pushNewline(state.out, --out.level);
+        }
+      }
+      pushString(out, `</${name}>`);
+      commentNodeAfter(node, state);
+    }
+  } else if (!pushSnippet(node, state, next2) && node.value) {
+    pushTokens(node.value, state);
+    node.children.forEach(next2);
+  }
+  if (format3 && index === items.length - 1 && state.parent) {
+    const offset = isSnippet(state.parent) ? 0 : 1;
+    pushNewline(out, out.level - offset);
+  }
+  out.level -= level;
+}
+function pushAttribute(attr, state) {
+  const { out, config } = state;
+  if (attr.name) {
+    const attributes = config.options["markup.attributes"];
+    const valuePrefix = config.options["markup.valuePrefix"];
+    let { name, value } = attr;
+    let lQuote = attrQuote(attr, config, true);
+    let rQuote = attrQuote(attr, config);
+    if (attributes) {
+      name = getMultiValue(name, attributes, attr.multiple) || name;
+    }
+    name = attrName(name, config);
+    if (config.options["jsx.enabled"] && attr.multiple) {
+      lQuote = expressionStart;
+      rQuote = expressionEnd;
+    }
+    const prefix = valuePrefix ? getMultiValue(attr.name, valuePrefix, attr.multiple) : null;
+    if (prefix && (value === null || value === void 0 ? void 0 : value.length) === 1 && typeof value[0] === "string") {
+      const val = value[0];
+      value = [isPropKey(val) ? `${prefix}.${val}` : `${prefix}['${val}']`];
+      if (config.options["jsx.enabled"]) {
+        lQuote = expressionStart;
+        rQuote = expressionEnd;
+      }
+    }
+    if (isBooleanAttribute(attr, config) && !value) {
+      if (!config.options["output.compactBoolean"]) {
+        value = [name];
+      }
+    } else if (!value) {
+      value = caret;
+    }
+    pushString(out, " " + name);
+    if (value) {
+      pushString(out, "=" + lQuote);
+      pushTokens(value, state);
+      pushString(out, rQuote);
+    } else if (config.options["output.selfClosingStyle"] !== "html") {
+      pushString(out, "=" + lQuote + rQuote);
+    }
+  }
+}
+function pushSnippet(node, state, next2) {
+  if (node.value && node.children.length) {
+    const fieldIx = node.value.findIndex(isField);
+    if (fieldIx !== -1) {
+      pushTokens(node.value.slice(0, fieldIx), state);
+      const line = state.out.line;
+      let pos = fieldIx + 1;
+      node.children.forEach(next2);
+      if (state.out.line !== line && typeof node.value[pos] === "string") {
+        pushString(state.out, node.value[pos++].trimLeft());
+      }
+      pushTokens(node.value.slice(pos), state);
+      return true;
+    }
+  }
+  return false;
+}
+function shouldFormat$1(node, index, items, state) {
+  const { config, parent } = state;
+  if (!config.options["output.format"]) {
+    return false;
+  }
+  if (index === 0 && !parent) {
+    return false;
+  }
+  if (parent && isSnippet(parent) && items.length === 1) {
+    return false;
+  }
+  if (isSnippet(node)) {
+    const format3 = isSnippet(items[index - 1]) || isSnippet(items[index + 1]) || node.value.some(hasNewline) || node.value.some(isField) && node.children.length;
+    if (format3) {
+      return true;
+    }
+  }
+  if (isInline(node, config)) {
+    if (index === 0) {
+      for (let i2 = 0; i2 < items.length; i2++) {
+        if (!isInline(items[i2], config)) {
+          return true;
+        }
+      }
+    } else if (!isInline(items[index - 1], config)) {
+      return true;
+    }
+    if (config.options["output.inlineBreak"]) {
+      let adjacentInline = 1;
+      let before = index;
+      let after = index;
+      while (isInlineElement(items[--before], config)) {
+        adjacentInline++;
+      }
+      while (isInlineElement(items[++after], config)) {
+        adjacentInline++;
+      }
+      if (adjacentInline >= config.options["output.inlineBreak"]) {
+        return true;
+      }
+    }
+    for (let i2 = 0, il = node.children.length; i2 < il; i2++) {
+      if (shouldFormat$1(node.children[i2], i2, node.children, state)) {
+        return true;
+      }
+    }
+    return false;
+  }
+  return true;
+}
+function getIndent(state) {
+  const { config, parent } = state;
+  if (!parent || isSnippet(parent) || parent.name && config.options["output.formatSkip"].includes(parent.name)) {
+    return 0;
+  }
+  return 1;
+}
+function hasNewline(value) {
+  return typeof value === "string" && /\r|\n/.test(value);
+}
+function startsWithBlockTag(value, config) {
+  if (value.length && typeof value[0] === "string") {
+    const matches = htmlTagRegex.exec(value[0]);
+    if ((matches === null || matches === void 0 ? void 0 : matches.length) && !config.options["inlineElements"].includes(matches[1].toLowerCase())) {
+      return true;
+    }
+  }
+  return false;
+}
+function getMultiValue(key, data, multiple) {
+  return multiple && data[`${key}*`] || data[key];
+}
+function isPropKey(name) {
+  return !reservedKeywords.has(name) && /^[a-zA-Z_$][\w_$]*$/.test(name);
+}
+function indentFormat(abbr, config, options) {
+  const state = createWalkState(config);
+  state.options = options || {};
+  walk(abbr, element, state);
+  return state.out.value;
+}
+function element(node, index, items, state, next2) {
+  const { out, options } = state;
+  const { primary, secondary } = collectAttributes(node);
+  const level = state.parent ? 1 : 0;
+  out.level += level;
+  if (shouldFormat(node, index, items, state)) {
+    pushNewline(out, true);
+  }
+  if (node.name && (node.name !== "div" || !primary.length)) {
+    pushString(out, (options.beforeName || "") + node.name + (options.afterName || ""));
+  }
+  pushPrimaryAttributes(primary, state);
+  pushSecondaryAttributes(secondary.filter(shouldOutputAttribute), state);
+  if (node.selfClosing && !node.value && !node.children.length) {
+    if (state.options.selfClose) {
+      pushString(out, state.options.selfClose);
+    }
+  } else {
+    pushValue(node, state);
+    node.children.forEach(next2);
+  }
+  out.level -= level;
+}
+function collectAttributes(node) {
+  const primary = [];
+  const secondary = [];
+  if (node.attributes) {
+    for (const attr of node.attributes) {
+      if (isPrimaryAttribute(attr)) {
+        primary.push(attr);
+      } else {
+        secondary.push(attr);
+      }
+    }
+  }
+  return { primary, secondary };
+}
+function pushPrimaryAttributes(attrs, state) {
+  for (const attr of attrs) {
+    if (attr.value) {
+      if (attr.name === "class") {
+        pushString(state.out, ".");
+        const tokens = attr.value.map((t5) => typeof t5 === "string" ? t5.replace(/\s+/g, ".") : t5);
+        pushTokens(tokens, state);
+      } else {
+        pushString(state.out, "#");
+        pushTokens(attr.value, state);
+      }
+    }
+  }
+}
+function pushSecondaryAttributes(attrs, state) {
+  if (attrs.length) {
+    const { out, config, options } = state;
+    options.beforeAttribute && pushString(out, options.beforeAttribute);
+    for (let i2 = 0; i2 < attrs.length; i2++) {
+      const attr = attrs[i2];
+      pushString(out, attrName(attr.name || "", config));
+      if (isBooleanAttribute(attr, config) && !attr.value) {
+        if (!config.options["output.compactBoolean"] && options.booleanValue) {
+          pushString(out, "=" + options.booleanValue);
+        }
+      } else {
+        pushString(out, "=" + attrQuote(attr, config, true));
+        pushTokens(attr.value || caret, state);
+        pushString(out, attrQuote(attr, config));
+      }
+      if (i2 !== attrs.length - 1 && options.glueAttribute) {
+        pushString(out, options.glueAttribute);
+      }
+    }
+    options.afterAttribute && pushString(out, options.afterAttribute);
+  }
+}
+function pushValue(node, state) {
+  if (!node.value && node.children.length) {
+    return;
+  }
+  const value = node.value || caret;
+  const lines = splitByLines(value);
+  const { out, options } = state;
+  if (lines.length === 1) {
+    if (node.name || node.attributes) {
+      push(out, " ");
+    }
+    pushTokens(value, state);
+  } else {
+    const lineLengths = [];
+    let maxLength = 0;
+    for (const line of lines) {
+      const len = valueLength(line);
+      lineLengths.push(len);
+      if (len > maxLength) {
+        maxLength = len;
+      }
+    }
+    out.level++;
+    for (let i2 = 0; i2 < lines.length; i2++) {
+      pushNewline(out, true);
+      options.beforeTextLine && push(out, options.beforeTextLine);
+      pushTokens(lines[i2], state);
+      if (options.afterTextLine) {
+        push(out, " ".repeat(maxLength - lineLengths[i2]));
+        push(out, options.afterTextLine);
+      }
+    }
+    out.level--;
+  }
+}
+function isPrimaryAttribute(attr) {
+  return attr.name === "class" || attr.name === "id";
+}
+function valueLength(tokens) {
+  let len = 0;
+  for (const token of tokens) {
+    len += typeof token === "string" ? token.length : token.name.length;
+  }
+  return len;
+}
+function shouldFormat(node, index, items, state) {
+  if (!state.parent && index === 0) {
+    return false;
+  }
+  return !isSnippet(node);
+}
+function haml(abbr, config) {
+  return indentFormat(abbr, config, {
+    beforeName: "%",
+    beforeAttribute: "(",
+    afterAttribute: ")",
+    glueAttribute: " ",
+    afterTextLine: " |",
+    booleanValue: "true",
+    selfClose: "/"
+  });
+}
+function slim(abbr, config) {
+  return indentFormat(abbr, config, {
+    beforeAttribute: " ",
+    glueAttribute: " ",
+    beforeTextLine: "| ",
+    selfClose: "/"
+  });
+}
+function pug(abbr, config) {
+  return indentFormat(abbr, config, {
+    beforeAttribute: "(",
+    afterAttribute: ")",
+    glueAttribute: ", ",
+    beforeTextLine: "| ",
+    selfClose: config.options["output.selfClosingStyle"] === "xml" ? "/" : ""
+  });
+}
+function parse$1(abbr, config) {
+  let oldTextValue;
+  if (typeof abbr === "string") {
+    const parseOpt = Object.assign({}, config);
+    if (config.options["jsx.enabled"]) {
+      parseOpt.jsx = true;
+    }
+    if (config.options["markup.href"]) {
+      parseOpt.href = true;
+    }
+    abbr = parseAbbreviation(abbr, parseOpt);
+    oldTextValue = config.text;
+    config.text = void 0;
+  }
+  abbr = resolveSnippets(abbr, config);
+  walk$1(abbr, transform, config);
+  config.text = oldTextValue !== null && oldTextValue !== void 0 ? oldTextValue : config.text;
+  return abbr;
+}
+function stringify(abbr, config) {
+  const formatter = formatters[config.syntax] || html;
+  return formatter(abbr, config);
+}
+function transform(node, ancestors, config) {
+  implicitTag(node, ancestors, config);
+  mergeAttributes(node, config);
+  lorem(node, ancestors, config);
+  if (config.syntax === "xsl") {
+    xsl(node);
+  }
+  if (config.type === "markup") {
+    label(node);
+  }
+  if (config.options["bem.enabled"]) {
+    bem(node, ancestors, config);
+  }
+}
+function createSnippet(key, value) {
+  const m2 = value.match(reProperty);
+  if (m2) {
+    const keywords = {};
+    const parsed = m2[2] ? m2[2].split("|").map(parseValue) : [];
+    for (const item of parsed) {
+      for (const cssVal of item) {
+        collectKeywords(cssVal, keywords);
+      }
+    }
+    return {
+      type: CSSSnippetType.Property,
+      key,
+      property: m2[1],
+      value: parsed,
+      keywords,
+      dependencies: []
+    };
+  }
+  return { type: CSSSnippetType.Raw, key, value };
+}
+function nest(snippets2) {
+  snippets2 = snippets2.slice().sort(snippetsSort);
+  const stack = [];
+  let prev;
+  for (const cur of snippets2.filter(isProperty)) {
+    while (stack.length) {
+      prev = stack[stack.length - 1];
+      if (cur.property.startsWith(prev.property) && cur.property.charCodeAt(prev.property.length) === 45) {
+        prev.dependencies.push(cur);
+        stack.push(cur);
+        break;
+      }
+      stack.pop();
+    }
+    if (!stack.length) {
+      stack.push(cur);
+    }
+  }
+  return snippets2;
+}
+function snippetsSort(a2, b2) {
+  if (a2.key === b2.key) {
+    return 0;
+  }
+  return a2.key < b2.key ? -1 : 1;
+}
+function parseValue(value) {
+  return parse$2(value.trim(), opt)[0].value;
+}
+function isProperty(snippet) {
+  return snippet.type === CSSSnippetType.Property;
+}
+function collectKeywords(cssVal, dest) {
+  for (const v2 of cssVal.value) {
+    if (v2.type === "Literal") {
+      dest[v2.value] = v2;
+    } else if (v2.type === "FunctionCall") {
+      dest[v2.name] = v2;
+    } else if (v2.type === "Field") {
+      const value = v2.name.trim();
+      if (value) {
+        dest[value] = { type: "Literal", value };
+      }
+    }
+  }
+}
+function scoreMatch(str1, str2, partialMatch = false) {
+  str1 = str1.toLowerCase();
+  str2 = str2.toLowerCase();
+  if (str1 === str2) {
+    return 1;
+  }
+  if (!str1 || !str2 || str1.charCodeAt(0) !== str2.charCodeAt(0)) {
+    return 0;
+  }
+  const str1Len = str1.length;
+  const str2Len = str2.length;
+  if (!partialMatch && str1Len > str2Len) {
+    return 0;
+  }
+  const minLength = Math.min(str1Len, str2Len);
+  const maxLength = Math.max(str1Len, str2Len);
+  let i2 = 1;
+  let j = 1;
+  let score = maxLength;
+  let ch1 = 0;
+  let ch2 = 0;
+  let found = false;
+  let acronym = false;
+  while (i2 < str1Len) {
+    ch1 = str1.charCodeAt(i2);
+    found = false;
+    acronym = false;
+    while (j < str2Len) {
+      ch2 = str2.charCodeAt(j);
+      if (ch1 === ch2) {
+        found = true;
+        score += maxLength - (acronym ? i2 : j);
+        break;
+      }
+      acronym = ch2 === 45;
+      j++;
+    }
+    if (!found) {
+      if (!partialMatch) {
+        return 0;
+      }
+      break;
+    }
+    i2++;
+  }
+  const matchRatio = i2 / maxLength;
+  const delta = maxLength - minLength;
+  const maxScore = sum(maxLength) - sum(delta);
+  return score * matchRatio / maxScore;
+}
+function sum(n2) {
+  return n2 * (n2 + 1) / 2;
+}
+function color(token, shortHex) {
+  if (!token.r && !token.g && !token.b && !token.a) {
+    return "transparent";
+  } else if (token.a === 1) {
+    return asHex(token, shortHex);
+  }
+  return asRGB(token);
+}
+function asHex(token, short) {
+  const fn = short && isShortHex(token.r) && isShortHex(token.g) && isShortHex(token.b) ? toShortHex : toHex;
+  return "#" + fn(token.r) + fn(token.g) + fn(token.b);
+}
+function asRGB(token) {
+  const values = [token.r, token.g, token.b];
+  if (token.a !== 1) {
+    values.push(frac(token.a, 8));
+  }
+  return `${values.length === 3 ? "rgb" : "rgba"}(${values.join(", ")})`;
+}
+function frac(num, digits = 4) {
+  return num.toFixed(digits).replace(/\.?0+$/, "");
+}
+function isShortHex(hex) {
+  return !(hex % 17);
+}
+function toShortHex(num) {
+  return (num >> 4).toString(16);
+}
+function toHex(num) {
+  return pad(num.toString(16), 2);
+}
+function pad(value, len) {
+  while (value.length < len) {
+    value = "0" + value;
+  }
+  return value;
+}
+function css(abbr, config) {
+  var _a2;
+  const out = createOutputStream(config.options);
+  const format3 = config.options["output.format"];
+  if (((_a2 = config.context) === null || _a2 === void 0 ? void 0 : _a2.name) === CSSAbbreviationScope.Section) {
+    abbr = abbr.filter((node) => node.snippet);
+  }
+  for (let i2 = 0; i2 < abbr.length; i2++) {
+    if (format3 && i2 !== 0) {
+      pushNewline(out, true);
+    }
+    property(abbr[i2], out, config);
+  }
+  return out.value;
+}
+function property(node, out, config) {
+  const isJSON = config.options["stylesheet.json"];
+  if (node.name) {
+    const name = isJSON ? toCamelCase(node.name) : node.name;
+    pushString(out, name + config.options["stylesheet.between"]);
+    if (node.value.length) {
+      propertyValue(node, out, config);
+    } else {
+      pushField(out, 0, "");
+    }
+    if (isJSON) {
+      push(out, ",");
+    } else {
+      outputImportant(node, out, true);
+      push(out, config.options["stylesheet.after"]);
+    }
+  } else {
+    for (const cssVal of node.value) {
+      for (const v2 of cssVal.value) {
+        outputToken(v2, out, config);
+      }
+    }
+    outputImportant(node, out, node.value.length > 0);
+  }
+}
+function propertyValue(node, out, config) {
+  const isJSON = config.options["stylesheet.json"];
+  const num = isJSON ? getSingleNumeric(node) : null;
+  if (num && (!num.unit || num.unit === "px")) {
+    push(out, String(num.value));
+  } else {
+    const quote2 = getQuote(config);
+    isJSON && push(out, quote2);
+    for (let i2 = 0; i2 < node.value.length; i2++) {
+      if (i2 !== 0) {
+        push(out, ", ");
+      }
+      outputValue(node.value[i2], out, config);
+    }
+    isJSON && push(out, quote2);
+  }
+}
+function outputImportant(node, out, separator) {
+  if (node.important) {
+    if (separator) {
+      push(out, " ");
+    }
+    push(out, "!important");
+  }
+}
+function outputValue(value, out, config) {
+  for (let i2 = 0, prevEnd = -1; i2 < value.value.length; i2++) {
+    const token = value.value[i2];
+    if (i2 !== 0 && (token.type !== "Field" || token.start !== prevEnd)) {
+      push(out, " ");
+    }
+    outputToken(token, out, config);
+    prevEnd = token["end"];
+  }
+}
+function outputToken(token, out, config) {
+  if (token.type === "ColorValue") {
+    push(out, color(token, config.options["stylesheet.shortHex"]));
+  } else if (token.type === "Literal" || token.type === "CustomProperty") {
+    pushString(out, token.value);
+  } else if (token.type === "NumberValue") {
+    pushString(out, frac(token.value, 4) + token.unit);
+  } else if (token.type === "StringValue") {
+    const quote2 = token.quote === "double" ? '"' : "'";
+    pushString(out, quote2 + token.value + quote2);
+  } else if (token.type === "Field") {
+    pushField(out, token.index, token.name);
+  } else if (token.type === "FunctionCall") {
+    push(out, token.name + "(");
+    for (let i2 = 0; i2 < token.arguments.length; i2++) {
+      if (i2) {
+        push(out, ", ");
+      }
+      outputValue(token.arguments[i2], out, config);
+    }
+    push(out, ")");
+  }
+}
+function getSingleNumeric(node) {
+  if (node.value.length === 1) {
+    const cssVal = node.value[0];
+    if (cssVal.value.length === 1 && cssVal.value[0].type === "NumberValue") {
+      return cssVal.value[0];
+    }
+  }
+}
+function toCamelCase(str) {
+  return str.replace(/\-(\w)/g, (_2, letter) => letter.toUpperCase());
+}
+function getQuote(config) {
+  return config.options["stylesheet.jsonDoubleQuotes"] ? '"' : "'";
+}
+function parse3(abbr, config) {
+  var _a2;
+  const snippets2 = ((_a2 = config.cache) === null || _a2 === void 0 ? void 0 : _a2.stylesheetSnippets) || convertSnippets(config.snippets);
+  const result = [];
+  if (config.cache) {
+    config.cache.stylesheetSnippets = snippets2;
+  }
+  if (typeof abbr === "string") {
+    abbr = parse$2(abbr, { value: isValueScope(config) });
+  }
+  const filteredSnippets = getSnippetsForScope(snippets2, config);
+  for (const node of abbr) {
+    const resolved = resolveNode(node, filteredSnippets, config);
+    if (resolved) {
+      result.push(resolved);
+    }
+  }
+  return result;
+}
+function convertSnippets(snippets2) {
+  const result = [];
+  for (const key of Object.keys(snippets2)) {
+    result.push(createSnippet(key, snippets2[key]));
+  }
+  return nest(result);
+}
+function resolveNode(node, snippets2, config) {
+  if (!resolveGradient(node, config)) {
+    const score = config.options["stylesheet.fuzzySearchMinScore"];
+    if (isValueScope(config)) {
+      const propName = config.context.name;
+      const snippet = snippets2.find((s2) => s2.type === CSSSnippetType.Property && s2.property === propName);
+      resolveValueKeywords(node, config, snippet, score);
+      node.snippet = snippet;
+    } else if (node.name) {
+      const snippet = findBestMatch(node.name, snippets2, score, true);
+      node.snippet = snippet;
+      if (snippet) {
+        const resolved = snippet.type === CSSSnippetType.Property ? resolveAsProperty(node, snippet, config) : resolveAsSnippet(node, snippet);
+        if (resolved) {
+          node = resolved;
+        } else if (config.options["stylesheet.strictMatch"]) {
+          return null;
+        }
+      }
+    }
+  }
+  if (node.name || config.context) {
+    resolveNumericValue(node, config);
+  }
+  return node;
+}
+function resolveGradient(node, config) {
+  let gradientFn = null;
+  const cssVal = node.value.length === 1 ? node.value[0] : null;
+  if (cssVal && cssVal.value.length === 1) {
+    const v2 = cssVal.value[0];
+    if (v2.type === "FunctionCall" && v2.name === gradientName) {
+      gradientFn = v2;
+    }
+  }
+  if (gradientFn || node.name === gradientName) {
+    if (!gradientFn) {
+      gradientFn = {
+        type: "FunctionCall",
+        name: "linear-gradient",
+        arguments: [cssValue(field(0, ""))]
+      };
+    } else {
+      gradientFn = Object.assign(Object.assign({}, gradientFn), { name: "linear-gradient" });
+    }
+    if (!config.context) {
+      node.name = "background-image";
+    }
+    node.value = [cssValue(gradientFn)];
+    return true;
+  }
+  return false;
+}
+function resolveAsProperty(node, snippet, config) {
+  const abbr = node.name;
+  const inlineValue = getUnmatchedPart(abbr, snippet.key);
+  if (inlineValue) {
+    if (node.value.length) {
+      return null;
+    }
+    const kw = resolveKeyword(inlineValue, config, snippet);
+    if (!kw) {
+      return null;
+    }
+    node.value.push(cssValue(kw));
+  }
+  node.name = snippet.property;
+  if (node.value.length) {
+    resolveValueKeywords(node, config, snippet);
+  } else if (snippet.value.length) {
+    const defaultValue = snippet.value[0];
+    node.value = snippet.value.length === 1 || defaultValue.some(hasField) ? defaultValue : defaultValue.map((n2) => wrapWithField(n2, config));
+  }
+  return node;
+}
+function resolveValueKeywords(node, config, snippet, minScore) {
+  for (const cssVal of node.value) {
+    const value = [];
+    for (const token of cssVal.value) {
+      if (token.type === "Literal") {
+        value.push(resolveKeyword(token.value, config, snippet, minScore) || token);
+      } else if (token.type === "FunctionCall") {
+        const match = resolveKeyword(token.name, config, snippet, minScore);
+        if (match && match.type === "FunctionCall") {
+          value.push(Object.assign(Object.assign({}, match), { arguments: token.arguments.concat(match.arguments.slice(token.arguments.length)) }));
+        } else {
+          value.push(token);
+        }
+      } else {
+        value.push(token);
+      }
+    }
+    cssVal.value = value;
+  }
+}
+function resolveAsSnippet(node, snippet) {
+  let offset = 0;
+  let m2;
+  const reField = /\$\{(\d+)(:[^}]+)?\}/g;
+  const inputValue = node.value[0];
+  const outputValue2 = [];
+  while (m2 = reField.exec(snippet.value)) {
+    if (offset !== m2.index) {
+      outputValue2.push(literal(snippet.value.slice(offset, m2.index)));
+    }
+    offset = m2.index + m2[0].length;
+    if (inputValue && inputValue.value.length) {
+      outputValue2.push(inputValue.value.shift());
+    } else {
+      outputValue2.push(field(Number(m2[1]), m2[2] ? m2[2].slice(1) : ""));
+    }
+  }
+  const tail = snippet.value.slice(offset);
+  if (tail) {
+    outputValue2.push(literal(tail));
+  }
+  node.name = void 0;
+  node.value = [cssValue(...outputValue2)];
+  return node;
+}
+function findBestMatch(abbr, items, minScore = 0, partialMatch = false) {
+  let matchedItem = null;
+  let maxScore = 0;
+  for (const item of items) {
+    const score = scoreMatch(abbr, getScoringPart(item), partialMatch);
+    if (score === 1) {
+      return item;
+    }
+    if (score && score >= maxScore) {
+      maxScore = score;
+      matchedItem = item;
+    }
+  }
+  return maxScore >= minScore ? matchedItem : null;
+}
+function getScoringPart(item) {
+  return typeof item === "string" ? item : item.key;
+}
+function getUnmatchedPart(abbr, str) {
+  for (let i2 = 0, lastPos = 0; i2 < abbr.length; i2++) {
+    lastPos = str.indexOf(abbr[i2], lastPos);
+    if (lastPos === -1) {
+      return abbr.slice(i2);
+    }
+    lastPos++;
+  }
+  return "";
+}
+function resolveKeyword(kw, config, snippet, minScore) {
+  let ref;
+  if (snippet) {
+    if (ref = findBestMatch(kw, Object.keys(snippet.keywords), minScore)) {
+      return snippet.keywords[ref];
+    }
+    for (const dep of snippet.dependencies) {
+      if (ref = findBestMatch(kw, Object.keys(dep.keywords), minScore)) {
+        return dep.keywords[ref];
+      }
+    }
+  }
+  if (ref = findBestMatch(kw, config.options["stylesheet.keywords"], minScore)) {
+    return literal(ref);
+  }
+  return null;
+}
+function resolveNumericValue(node, config) {
+  const aliases = config.options["stylesheet.unitAliases"];
+  const unitless = config.options["stylesheet.unitless"];
+  for (const v2 of node.value) {
+    for (const t5 of v2.value) {
+      if (t5.type === "NumberValue") {
+        if (t5.unit) {
+          t5.unit = aliases[t5.unit] || t5.unit;
+        } else if (t5.value !== 0 && !unitless.includes(node.name)) {
+          t5.unit = t5.rawValue.includes(".") ? config.options["stylesheet.floatUnit"] : config.options["stylesheet.intUnit"];
+        }
+      }
+    }
+  }
+}
+function cssValue(...args) {
+  return {
+    type: "CSSValue",
+    value: args
+  };
+}
+function literal(value) {
+  return { type: "Literal", value };
+}
+function field(index, name) {
+  return { type: "Field", index, name };
+}
+function hasField(value) {
+  for (const v2 of value.value) {
+    if (v2.type === "Field" || v2.type === "FunctionCall" && v2.arguments.some(hasField)) {
+      return true;
+    }
+  }
+  return false;
+}
+function wrapWithField(node, config, state = { index: 1 }) {
+  let value = [];
+  for (const v2 of node.value) {
+    switch (v2.type) {
+      case "ColorValue":
+        value.push(field(state.index++, color(v2, config.options["stylesheet.shortHex"])));
+        break;
+      case "Literal":
+        value.push(field(state.index++, v2.value));
+        break;
+      case "NumberValue":
+        value.push(field(state.index++, `${v2.value}${v2.unit}`));
+        break;
+      case "StringValue":
+        const q = v2.quote === "single" ? "'" : '"';
+        value.push(field(state.index++, q + v2.value + q));
+        break;
+      case "FunctionCall":
+        value.push(field(state.index++, v2.name), literal("("));
+        for (let i2 = 0, il = v2.arguments.length; i2 < il; i2++) {
+          value = value.concat(wrapWithField(v2.arguments[i2], config, state).value);
+          if (i2 !== il - 1) {
+            value.push(literal(", "));
+          }
+        }
+        value.push(literal(")"));
+        break;
+      default:
+        value.push(v2);
+    }
+  }
+  return Object.assign(Object.assign({}, node), { value });
+}
+function isValueScope(config) {
+  if (config.context) {
+    return config.context.name === CSSAbbreviationScope.Value || !config.context.name.startsWith("@@");
+  }
+  return false;
+}
+function getSnippetsForScope(snippets2, config) {
+  if (config.context) {
+    if (config.context.name === CSSAbbreviationScope.Section) {
+      return snippets2.filter((s2) => s2.type === CSSSnippetType.Raw);
+    }
+    if (config.context.name === CSSAbbreviationScope.Property) {
+      return snippets2.filter((s2) => s2.type === CSSSnippetType.Property);
+    }
+  }
+  return snippets2;
+}
+function parseSnippets(snippets2) {
+  const result = {};
+  Object.keys(snippets2).forEach((k) => {
+    for (const name of k.split("|")) {
+      result[name] = snippets2[k];
+    }
+  });
+  return result;
+}
+function resolveConfig(config = {}, globals = {}) {
+  const type = config.type || "markup";
+  const syntax = config.syntax || defaultSyntaxes[type];
+  return Object.assign(Object.assign(Object.assign({}, defaultConfig), config), {
+    type,
+    syntax,
+    variables: mergedData(type, syntax, "variables", config, globals),
+    snippets: mergedData(type, syntax, "snippets", config, globals),
+    options: mergedData(type, syntax, "options", config, globals)
+  });
+}
+function mergedData(type, syntax, key, config, globals = {}) {
+  const typeDefaults = syntaxConfig[type];
+  const typeOverride = globals[type];
+  const syntaxDefaults = syntaxConfig[syntax];
+  const syntaxOverride = globals[syntax];
+  return Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({}, defaultConfig[key]), typeDefaults && typeDefaults[key]), syntaxDefaults && syntaxDefaults[key]), typeOverride && typeOverride[key]), syntaxOverride && syntaxOverride[key]), config[key]);
+}
+function backwardScanner(text2, start = 0) {
+  return { text: text2, start, pos: text2.length };
+}
+function sol(scanner) {
+  return scanner.pos === scanner.start;
+}
+function peek(scanner, offset = 0) {
+  return scanner.text.charCodeAt(scanner.pos - 1 + offset);
+}
+function previous(scanner) {
+  if (!sol(scanner)) {
+    return scanner.text.charCodeAt(--scanner.pos);
+  }
+}
+function consume(scanner, match) {
+  if (sol(scanner)) {
+    return false;
+  }
+  const ok = typeof match === "function" ? match(peek(scanner)) : match === peek(scanner);
+  if (ok) {
+    scanner.pos--;
+  }
+  return !!ok;
+}
+function consumeWhile(scanner, match) {
+  const start = scanner.pos;
+  while (consume(scanner, match)) {
+  }
+  return scanner.pos < start;
+}
+function isQuote2(c2) {
+  return c2 === Chars$1.SingleQuote || c2 === Chars$1.DoubleQuote;
+}
+function consumeQuoted(scanner) {
+  const start = scanner.pos;
+  const quote2 = previous(scanner);
+  if (isQuote2(quote2)) {
+    while (!sol(scanner)) {
+      if (previous(scanner) === quote2 && peek(scanner) !== Chars$1.Escape) {
+        return true;
+      }
+    }
+  }
+  scanner.pos = start;
+  return false;
+}
+function isHtml(scanner) {
+  const start = scanner.pos;
+  if (!consume(scanner, Chars.AngleRight)) {
+    return false;
+  }
+  let ok = false;
+  consume(scanner, Chars.Slash);
+  while (!sol(scanner)) {
+    consumeWhile(scanner, isWhiteSpace3);
+    if (consumeIdent(scanner)) {
+      if (consume(scanner, Chars.Slash)) {
+        ok = consume(scanner, Chars.AngleLeft);
+        break;
+      } else if (consume(scanner, Chars.AngleLeft)) {
+        ok = true;
+        break;
+      } else if (consume(scanner, isWhiteSpace3)) {
+        continue;
+      } else if (consume(scanner, Chars.Equals)) {
+        if (consumeIdent(scanner)) {
+          continue;
+        }
+        break;
+      } else if (consumeAttributeWithUnquotedValue(scanner)) {
+        ok = true;
+        break;
+      }
+      break;
+    }
+    if (consumeAttribute(scanner)) {
+      continue;
+    }
+    break;
+  }
+  scanner.pos = start;
+  return ok;
+}
+function consumeAttribute(scanner) {
+  return consumeAttributeWithQuotedValue(scanner) || consumeAttributeWithUnquotedValue(scanner);
+}
+function consumeAttributeWithQuotedValue(scanner) {
+  const start = scanner.pos;
+  if (consumeQuoted(scanner) && consume(scanner, Chars.Equals) && consumeIdent(scanner)) {
+    return true;
+  }
+  scanner.pos = start;
+  return false;
+}
+function consumeAttributeWithUnquotedValue(scanner) {
+  const start = scanner.pos;
+  const stack = [];
+  while (!sol(scanner)) {
+    const ch = peek(scanner);
+    if (isCloseBracket(ch)) {
+      stack.push(ch);
+    } else if (isOpenBracket(ch)) {
+      if (stack.pop() !== bracePairs[ch]) {
+        break;
+      }
+    } else if (!isUnquotedValue(ch)) {
+      break;
+    }
+    scanner.pos--;
+  }
+  if (start !== scanner.pos && consume(scanner, Chars.Equals) && consumeIdent(scanner)) {
+    return true;
+  }
+  scanner.pos = start;
+  return false;
+}
+function consumeIdent(scanner) {
+  return consumeWhile(scanner, isIdent);
+}
+function isIdent(ch) {
+  return ch === Chars.Colon || ch === Chars.Dash || isAlpha(ch) || isNumber(ch);
+}
+function isAlpha(ch) {
+  ch &= ~32;
+  return ch >= 65 && ch <= 90;
+}
+function isNumber(ch) {
+  return ch > 47 && ch < 58;
+}
+function isWhiteSpace3(ch) {
+  return ch === Chars.Space || ch === Chars.Tab;
+}
+function isUnquotedValue(ch) {
+  return !isNaN(ch) && ch !== Chars.Equals && !isWhiteSpace3(ch) && !isQuote2(ch);
+}
+function isOpenBracket(ch) {
+  return ch === Brackets.CurlyL || ch === Brackets.RoundL || ch === Brackets.SquareL;
+}
+function isCloseBracket(ch) {
+  return ch === Brackets.CurlyR || ch === Brackets.RoundR || ch === Brackets.SquareR;
+}
+function extractAbbreviation(line, pos = line.length, options = {}) {
+  const opt2 = Object.assign(Object.assign({}, defaultOptions), options);
+  pos = Math.min(line.length, Math.max(0, pos == null ? line.length : pos));
+  if (opt2.lookAhead) {
+    pos = offsetPastAutoClosed(line, pos, opt2);
+  }
+  let ch;
+  const start = getStartOffset(line, pos, opt2.prefix || "");
+  if (start === -1) {
+    return void 0;
+  }
+  const scanner = backwardScanner(line, start);
+  scanner.pos = pos;
+  const stack = [];
+  while (!sol(scanner)) {
+    ch = peek(scanner);
+    if (stack.includes(Brackets.CurlyR)) {
+      if (ch === Brackets.CurlyR) {
+        stack.push(ch);
+        scanner.pos--;
+        continue;
+      }
+      if (ch !== Brackets.CurlyL) {
+        scanner.pos--;
+        continue;
+      }
+    }
+    if (isCloseBrace(ch, opt2.type)) {
+      stack.push(ch);
+    } else if (isOpenBrace(ch, opt2.type)) {
+      if (stack.pop() !== bracePairs[ch]) {
+        break;
+      }
+    } else if (stack.includes(Brackets.SquareR) || stack.includes(Brackets.CurlyR)) {
+      scanner.pos--;
+      continue;
+    } else if (isHtml(scanner) || !isAbbreviation(ch)) {
+      break;
+    }
+    scanner.pos--;
+  }
+  if (!stack.length && scanner.pos !== pos) {
+    const abbreviation2 = line.slice(scanner.pos, pos).replace(/^[*+>^]+/, "");
+    return {
+      abbreviation: abbreviation2,
+      location: pos - abbreviation2.length,
+      start: options.prefix ? start - options.prefix.length : pos - abbreviation2.length,
+      end: pos
+    };
+  }
+}
+function offsetPastAutoClosed(line, pos, options) {
+  if (isQuote2(line.charCodeAt(pos))) {
+    pos++;
+  }
+  while (isCloseBrace(line.charCodeAt(pos), options.type)) {
+    pos++;
+  }
+  return pos;
+}
+function getStartOffset(line, pos, prefix) {
+  if (!prefix) {
+    return 0;
+  }
+  const scanner = backwardScanner(line);
+  const compiledPrefix = prefix.split("").map(code);
+  scanner.pos = pos;
+  let result;
+  while (!sol(scanner)) {
+    if (consumePair(scanner, Brackets.SquareR, Brackets.SquareL) || consumePair(scanner, Brackets.CurlyR, Brackets.CurlyL)) {
+      continue;
+    }
+    result = scanner.pos;
+    if (consumeArray(scanner, compiledPrefix)) {
+      return result;
+    }
+    scanner.pos--;
+  }
+  return -1;
+}
+function consumePair(scanner, close, open) {
+  const start = scanner.pos;
+  if (consume(scanner, close)) {
+    while (!sol(scanner)) {
+      if (consume(scanner, open)) {
+        return true;
+      }
+      scanner.pos--;
+    }
+  }
+  scanner.pos = start;
+  return false;
+}
+function consumeArray(scanner, arr) {
+  const start = scanner.pos;
+  let consumed = false;
+  for (let i2 = arr.length - 1; i2 >= 0 && !sol(scanner); i2--) {
+    if (!consume(scanner, arr[i2])) {
+      break;
+    }
+    consumed = i2 === 0;
+  }
+  if (!consumed) {
+    scanner.pos = start;
+  }
+  return consumed;
+}
+function isAbbreviation(ch) {
+  return ch > 64 && ch < 91 || ch > 96 && ch < 123 || ch > 47 && ch < 58 || specialChars.includes(ch);
+}
+function isOpenBrace(ch, syntax) {
+  return ch === Brackets.RoundL || syntax === "markup" && (ch === Brackets.SquareL || ch === Brackets.CurlyL);
+}
+function isCloseBrace(ch, syntax) {
+  return ch === Brackets.RoundR || syntax === "markup" && (ch === Brackets.SquareR || ch === Brackets.CurlyR);
+}
+function expandAbbreviation(abbr, config) {
+  const resolvedConfig = resolveConfig(config);
+  return resolvedConfig.type === "stylesheet" ? stylesheet(abbr, resolvedConfig) : markup(abbr, resolvedConfig);
+}
+function markup(abbr, config) {
+  return stringify(parse$1(abbr, config), config);
+}
+function stylesheet(abbr, config) {
+  return css(parse3(abbr, config), config);
+}
+var Scanner, ScannerError, Chars$3, operators, tokenVisitor, urlRegex, emailRegex, OperatorType, Chars$2, expressionStart, expressionEnd, elementMap, latin, ru, sp, vocabularies, reLorem, reElement, reModifier, blockCandidates1, blockCandidates2, caret, TemplateChars, htmlTagRegex, reservedKeywords, formatters, CSSSnippetType, reProperty, opt, CSSAbbreviationScope, gradientName, markupSnippets, stylesheetSnippets, xslSnippets, pugSnippets, variables, defaultSyntaxes, defaultOptions$1, defaultConfig, syntaxConfig, Chars$1, Brackets, bracePairs, Chars, code, specialChars, defaultOptions;
+var init_emmet_es = __esm({
+  "node_modules/emmet/dist/emmet.es.js"() {
+    Scanner = class _Scanner {
+      constructor(str, start, end) {
+        if (end == null && typeof str === "string") {
+          end = str.length;
+        }
+        this.string = str;
+        this.pos = this.start = start || 0;
+        this.end = end || 0;
+      }
+      /**
+       * Returns true only if the stream is at the end of the file.
+       */
+      eof() {
+        return this.pos >= this.end;
+      }
+      /**
+       * Creates a new stream instance which is limited to given `start` and `end`
+       * range. E.g. its `eof()` method will look at `end` property, not actual
+       * stream end
+       */
+      limit(start, end) {
+        return new _Scanner(this.string, start, end);
+      }
+      /**
+       * Returns the next character code in the stream without advancing it.
+       * Will return NaN at the end of the file.
+       */
+      peek() {
+        return this.string.charCodeAt(this.pos);
+      }
+      /**
+       * Returns the next character in the stream and advances it.
+       * Also returns <code>undefined</code> when no more characters are available.
+       */
+      next() {
+        if (this.pos < this.string.length) {
+          return this.string.charCodeAt(this.pos++);
+        }
+      }
+      /**
+       * `match` can be a character code or a function that takes a character code
+       * and returns a boolean. If the next character in the stream 'matches'
+       * the given argument, it is consumed and returned.
+       * Otherwise, `false` is returned.
+       */
+      eat(match) {
+        const ch = this.peek();
+        const ok = typeof match === "function" ? match(ch) : ch === match;
+        if (ok) {
+          this.next();
+        }
+        return ok;
+      }
+      /**
+       * Repeatedly calls <code>eat</code> with the given argument, until it
+       * fails. Returns <code>true</code> if any characters were eaten.
+       */
+      eatWhile(match) {
+        const start = this.pos;
+        while (!this.eof() && this.eat(match)) {
+        }
+        return this.pos !== start;
+      }
+      /**
+       * Backs up the stream n characters. Backing it up further than the
+       * start of the current token will cause things to break, so be careful.
+       */
+      backUp(n2) {
+        this.pos -= n2 || 1;
+      }
+      /**
+       * Get the string between the start of the current token and the
+       * current stream position.
+       */
+      current() {
+        return this.substring(this.start, this.pos);
+      }
+      /**
+       * Returns substring for given range
+       */
+      substring(start, end) {
+        return this.string.slice(start, end);
+      }
+      /**
+       * Creates error object with current stream state
+       */
+      error(message, pos = this.pos) {
+        return new ScannerError(`${message} at ${pos + 1}`, pos, this.string);
+      }
+    };
+    ScannerError = class extends Error {
+      constructor(message, pos, str) {
+        super(message);
+        this.pos = pos;
+        this.string = str;
+      }
+    };
+    (function(Chars2) {
+      Chars2[Chars2["CurlyBracketOpen"] = 123] = "CurlyBracketOpen";
+      Chars2[Chars2["CurlyBracketClose"] = 125] = "CurlyBracketClose";
+      Chars2[Chars2["Escape"] = 92] = "Escape";
+      Chars2[Chars2["Equals"] = 61] = "Equals";
+      Chars2[Chars2["SquareBracketOpen"] = 91] = "SquareBracketOpen";
+      Chars2[Chars2["SquareBracketClose"] = 93] = "SquareBracketClose";
+      Chars2[Chars2["Asterisk"] = 42] = "Asterisk";
+      Chars2[Chars2["Hash"] = 35] = "Hash";
+      Chars2[Chars2["Dollar"] = 36] = "Dollar";
+      Chars2[Chars2["Dash"] = 45] = "Dash";
+      Chars2[Chars2["Dot"] = 46] = "Dot";
+      Chars2[Chars2["Slash"] = 47] = "Slash";
+      Chars2[Chars2["Colon"] = 58] = "Colon";
+      Chars2[Chars2["Excl"] = 33] = "Excl";
+      Chars2[Chars2["At"] = 64] = "At";
+      Chars2[Chars2["Underscore"] = 95] = "Underscore";
+      Chars2[Chars2["RoundBracketOpen"] = 40] = "RoundBracketOpen";
+      Chars2[Chars2["RoundBracketClose"] = 41] = "RoundBracketClose";
+      Chars2[Chars2["Sibling"] = 43] = "Sibling";
+      Chars2[Chars2["Child"] = 62] = "Child";
+      Chars2[Chars2["Climb"] = 94] = "Climb";
+      Chars2[Chars2["SingleQuote"] = 39] = "SingleQuote";
+      Chars2[Chars2["DoubleQuote"] = 34] = "DoubleQuote";
+    })(Chars$3 || (Chars$3 = {}));
+    operators = {
+      child: ">",
+      class: ".",
+      climb: "^",
+      id: "#",
+      equal: "=",
+      close: "/",
+      sibling: "+"
+    };
+    tokenVisitor = {
+      Literal(token) {
+        return token.value;
+      },
+      Quote(token) {
+        return token.single ? "'" : '"';
+      },
+      Bracket(token) {
+        if (token.context === "attribute") {
+          return token.open ? "[" : "]";
+        } else if (token.context === "expression") {
+          return token.open ? "{" : "}";
+        } else {
+          return token.open ? "(" : "}";
+        }
+      },
+      Operator(token) {
+        return operators[token.operator];
+      },
+      Field(token, state) {
+        if (token.index != null) {
+          return token.name ? `\${${token.index}:${token.name}}` : `\${${token.index}`;
+        } else if (token.name) {
+          return state.getVariable(token.name);
+        }
+        return "";
+      },
+      RepeaterPlaceholder(token, state) {
+        let repeater2;
+        for (let i2 = state.repeaters.length - 1; i2 >= 0; i2--) {
+          if (state.repeaters[i2].implicit) {
+            repeater2 = state.repeaters[i2];
+            break;
+          }
+        }
+        state.inserted = true;
+        return state.getText(repeater2 && repeater2.value);
+      },
+      RepeaterNumber(token, state) {
+        let value = 1;
+        const lastIx = state.repeaters.length - 1;
+        const repeater2 = state.repeaters[lastIx];
+        if (repeater2) {
+          value = token.reverse ? token.base + repeater2.count - repeater2.value - 1 : token.base + repeater2.value;
+          if (token.parent) {
+            const parentIx = Math.max(0, lastIx - token.parent);
+            if (parentIx !== lastIx) {
+              const parentRepeater = state.repeaters[parentIx];
+              value += repeater2.count * parentRepeater.value;
+            }
+          }
+        }
+        let result = String(value);
+        while (result.length < token.size) {
+          result = "0" + result;
+        }
+        return result;
+      },
+      WhiteSpace(token) {
+        return token.value;
+      }
+    };
+    urlRegex = /^((https?:|ftp:|file:)?\/\/|(www|ftp)\.)[^ ]*$/;
+    emailRegex = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,5}$/;
+    (function(OperatorType2) {
+      OperatorType2["Sibling"] = "+";
+      OperatorType2["Important"] = "!";
+      OperatorType2["ArgumentDelimiter"] = ",";
+      OperatorType2["ValueDelimiter"] = "-";
+      OperatorType2["PropertyDelimiter"] = ":";
+    })(OperatorType || (OperatorType = {}));
+    (function(Chars2) {
+      Chars2[Chars2["Hash"] = 35] = "Hash";
+      Chars2[Chars2["Dollar"] = 36] = "Dollar";
+      Chars2[Chars2["Dash"] = 45] = "Dash";
+      Chars2[Chars2["Dot"] = 46] = "Dot";
+      Chars2[Chars2["Colon"] = 58] = "Colon";
+      Chars2[Chars2["Comma"] = 44] = "Comma";
+      Chars2[Chars2["Excl"] = 33] = "Excl";
+      Chars2[Chars2["At"] = 64] = "At";
+      Chars2[Chars2["Percent"] = 37] = "Percent";
+      Chars2[Chars2["Underscore"] = 95] = "Underscore";
+      Chars2[Chars2["RoundBracketOpen"] = 40] = "RoundBracketOpen";
+      Chars2[Chars2["RoundBracketClose"] = 41] = "RoundBracketClose";
+      Chars2[Chars2["CurlyBracketOpen"] = 123] = "CurlyBracketOpen";
+      Chars2[Chars2["CurlyBracketClose"] = 125] = "CurlyBracketClose";
+      Chars2[Chars2["Sibling"] = 43] = "Sibling";
+      Chars2[Chars2["SingleQuote"] = 39] = "SingleQuote";
+      Chars2[Chars2["DoubleQuote"] = 34] = "DoubleQuote";
+      Chars2[Chars2["Transparent"] = 116] = "Transparent";
+      Chars2[Chars2["Slash"] = 47] = "Slash";
+    })(Chars$2 || (Chars$2 = {}));
+    expressionStart = "{";
+    expressionEnd = "}";
+    elementMap = {
+      p: "span",
+      ul: "li",
+      ol: "li",
+      table: "tr",
+      tr: "td",
+      tbody: "tr",
+      thead: "tr",
+      tfoot: "tr",
+      colgroup: "col",
+      select: "option",
+      optgroup: "option",
+      audio: "source",
+      video: "source",
+      object: "param",
+      map: "area"
+    };
+    latin = {
+      "common": ["lorem", "ipsum", "dolor", "sit", "amet", "consectetur", "adipisicing", "elit"],
+      "words": [
+        "exercitationem",
+        "perferendis",
+        "perspiciatis",
+        "laborum",
+        "eveniet",
+        "sunt",
+        "iure",
+        "nam",
+        "nobis",
+        "eum",
+        "cum",
+        "officiis",
+        "excepturi",
+        "odio",
+        "consectetur",
+        "quasi",
+        "aut",
+        "quisquam",
+        "vel",
+        "eligendi",
+        "itaque",
+        "non",
+        "odit",
+        "tempore",
+        "quaerat",
+        "dignissimos",
+        "facilis",
+        "neque",
+        "nihil",
+        "expedita",
+        "vitae",
+        "vero",
+        "ipsum",
+        "nisi",
+        "animi",
+        "cumque",
+        "pariatur",
+        "velit",
+        "modi",
+        "natus",
+        "iusto",
+        "eaque",
+        "sequi",
+        "illo",
+        "sed",
+        "ex",
+        "et",
+        "voluptatibus",
+        "tempora",
+        "veritatis",
+        "ratione",
+        "assumenda",
+        "incidunt",
+        "nostrum",
+        "placeat",
+        "aliquid",
+        "fuga",
+        "provident",
+        "praesentium",
+        "rem",
+        "necessitatibus",
+        "suscipit",
+        "adipisci",
+        "quidem",
+        "possimus",
+        "voluptas",
+        "debitis",
+        "sint",
+        "accusantium",
+        "unde",
+        "sapiente",
+        "voluptate",
+        "qui",
+        "aspernatur",
+        "laudantium",
+        "soluta",
+        "amet",
+        "quo",
+        "aliquam",
+        "saepe",
+        "culpa",
+        "libero",
+        "ipsa",
+        "dicta",
+        "reiciendis",
+        "nesciunt",
+        "doloribus",
+        "autem",
+        "impedit",
+        "minima",
+        "maiores",
+        "repudiandae",
+        "ipsam",
+        "obcaecati",
+        "ullam",
+        "enim",
+        "totam",
+        "delectus",
+        "ducimus",
+        "quis",
+        "voluptates",
+        "dolores",
+        "molestiae",
+        "harum",
+        "dolorem",
+        "quia",
+        "voluptatem",
+        "molestias",
+        "magni",
+        "distinctio",
+        "omnis",
+        "illum",
+        "dolorum",
+        "voluptatum",
+        "ea",
+        "quas",
+        "quam",
+        "corporis",
+        "quae",
+        "blanditiis",
+        "atque",
+        "deserunt",
+        "laboriosam",
+        "earum",
+        "consequuntur",
+        "hic",
+        "cupiditate",
+        "quibusdam",
+        "accusamus",
+        "ut",
+        "rerum",
+        "error",
+        "minus",
+        "eius",
+        "ab",
+        "ad",
+        "nemo",
+        "fugit",
+        "officia",
+        "at",
+        "in",
+        "id",
+        "quos",
+        "reprehenderit",
+        "numquam",
+        "iste",
+        "fugiat",
+        "sit",
+        "inventore",
+        "beatae",
+        "repellendus",
+        "magnam",
+        "recusandae",
+        "quod",
+        "explicabo",
+        "doloremque",
+        "aperiam",
+        "consequatur",
+        "asperiores",
+        "commodi",
+        "optio",
+        "dolor",
+        "labore",
+        "temporibus",
+        "repellat",
+        "veniam",
+        "architecto",
+        "est",
+        "esse",
+        "mollitia",
+        "nulla",
+        "a",
+        "similique",
+        "eos",
+        "alias",
+        "dolore",
+        "tenetur",
+        "deleniti",
+        "porro",
+        "facere",
+        "maxime",
+        "corrupti"
+      ]
+    };
+    ru = {
+      "common": ["\u0434\u0430\u043B\u0435\u043A\u043E-\u0434\u0430\u043B\u0435\u043A\u043E", "\u0437\u0430", "\u0441\u043B\u043E\u0432\u0435\u0441\u043D\u044B\u043C\u0438", "\u0433\u043E\u0440\u0430\u043C\u0438", "\u0432 \u0441\u0442\u0440\u0430\u043D\u0435", "\u0433\u043B\u0430\u0441\u043D\u044B\u0445", "\u0438 \u0441\u043E\u0433\u043B\u0430\u0441\u043D\u044B\u0445", "\u0436\u0438\u0432\u0443\u0442", "\u0440\u044B\u0431\u043D\u044B\u0435", "\u0442\u0435\u043A\u0441\u0442\u044B"],
+      "words": [
+        "\u0432\u0434\u0430\u043B\u0438",
+        "\u043E\u0442 \u0432\u0441\u0435\u0445",
+        "\u043E\u043D\u0438",
+        "\u0431\u0443\u043A\u0432\u0435\u043D\u043D\u044B\u0445",
+        "\u0434\u043E\u043C\u0430\u0445",
+        "\u043D\u0430 \u0431\u0435\u0440\u0435\u0433\u0443",
+        "\u0441\u0435\u043C\u0430\u043D\u0442\u0438\u043A\u0430",
+        "\u0431\u043E\u043B\u044C\u0448\u043E\u0433\u043E",
+        "\u044F\u0437\u044B\u043A\u043E\u0432\u043E\u0433\u043E",
+        "\u043E\u043A\u0435\u0430\u043D\u0430",
+        "\u043C\u0430\u043B\u0435\u043D\u044C\u043A\u0438\u0439",
+        "\u0440\u0443\u0447\u0435\u0435\u043A",
+        "\u0434\u0430\u043B\u044C",
+        "\u0436\u0443\u0440\u0447\u0438\u0442",
+        "\u043F\u043E \u0432\u0441\u0435\u0439",
+        "\u043E\u0431\u0435\u0441\u043F\u0435\u0447\u0438\u0432\u0430\u0435\u0442",
+        "\u0435\u0435",
+        "\u0432\u0441\u0435\u043C\u0438",
+        "\u043D\u0435\u043E\u0431\u0445\u043E\u0434\u0438\u043C\u044B\u043C\u0438",
+        "\u043F\u0440\u0430\u0432\u0438\u043B\u0430\u043C\u0438",
+        "\u044D\u0442\u0430",
+        "\u043F\u0430\u0440\u0430\u0434\u0438\u0433\u043C\u0430\u0442\u0438\u0447\u0435\u0441\u043A\u0430\u044F",
+        "\u0441\u0442\u0440\u0430\u043D\u0430",
+        "\u043A\u043E\u0442\u043E\u0440\u043E\u0439",
+        "\u0436\u0430\u0440\u0435\u043D\u043D\u044B\u0435",
+        "\u043F\u0440\u0435\u0434\u043B\u043E\u0436\u0435\u043D\u0438\u044F",
+        "\u0437\u0430\u043B\u0435\u0442\u0430\u044E\u0442",
+        "\u043F\u0440\u044F\u043C\u043E",
+        "\u0440\u043E\u0442",
+        "\u0434\u0430\u0436\u0435",
+        "\u0432\u0441\u0435\u043C\u043E\u0433\u0443\u0449\u0430\u044F",
+        "\u043F\u0443\u043D\u043A\u0442\u0443\u0430\u0446\u0438\u044F",
+        "\u043D\u0435",
+        "\u0438\u043C\u0435\u0435\u0442",
+        "\u0432\u043B\u0430\u0441\u0442\u0438",
+        "\u043D\u0430\u0434",
+        "\u0440\u044B\u0431\u043D\u044B\u043C\u0438",
+        "\u0442\u0435\u043A\u0441\u0442\u0430\u043C\u0438",
+        "\u0432\u0435\u0434\u0443\u0449\u0438\u043C\u0438",
+        "\u0431\u0435\u0437\u043E\u0440\u0444\u043E\u0433\u0440\u0430\u0444\u0438\u0447\u043D\u044B\u0439",
+        "\u043E\u0431\u0440\u0430\u0437",
+        "\u0436\u0438\u0437\u043D\u0438",
+        "\u043E\u0434\u043D\u0430\u0436\u0434\u044B",
+        "\u043E\u0434\u043D\u0430",
+        "\u043C\u0430\u043B\u0435\u043D\u044C\u043A\u0430\u044F",
+        "\u0441\u0442\u0440\u043E\u0447\u043A\u0430",
+        "\u0440\u044B\u0431\u043D\u043E\u0433\u043E",
+        "\u0442\u0435\u043A\u0441\u0442\u0430",
+        "\u0438\u043C\u0435\u043D\u0438",
+        "lorem",
+        "ipsum",
+        "\u0440\u0435\u0448\u0438\u043B\u0430",
+        "\u0432\u044B\u0439\u0442\u0438",
+        "\u0431\u043E\u043B\u044C\u0448\u043E\u0439",
+        "\u043C\u0438\u0440",
+        "\u0433\u0440\u0430\u043C\u043C\u0430\u0442\u0438\u043A\u0438",
+        "\u0432\u0435\u043B\u0438\u043A\u0438\u0439",
+        "\u043E\u043A\u0441\u043C\u043E\u043A\u0441",
+        "\u043F\u0440\u0435\u0434\u0443\u043F\u0440\u0435\u0436\u0434\u0430\u043B",
+        "\u043E",
+        "\u0437\u043B\u044B\u0445",
+        "\u0437\u0430\u043F\u044F\u0442\u044B\u0445",
+        "\u0434\u0438\u043A\u0438\u0445",
+        "\u0437\u043D\u0430\u043A\u0430\u0445",
+        "\u0432\u043E\u043F\u0440\u043E\u0441\u0430",
+        "\u043A\u043E\u0432\u0430\u0440\u043D\u044B\u0445",
+        "\u0442\u043E\u0447\u043A\u0430\u0445",
+        "\u0437\u0430\u043F\u044F\u0442\u043E\u0439",
+        "\u043D\u043E",
+        "\u0442\u0435\u043A\u0441\u0442",
+        "\u0434\u0430\u043B",
+        "\u0441\u0431\u0438\u0442\u044C",
+        "\u0441\u0435\u0431\u044F",
+        "\u0442\u043E\u043B\u043A\u0443",
+        "\u043E\u043D",
+        "\u0441\u043E\u0431\u0440\u0430\u043B",
+        "\u0441\u0435\u043C\u044C",
+        "\u0441\u0432\u043E\u0438\u0445",
+        "\u0437\u0430\u0433\u043B\u0430\u0432\u043D\u044B\u0445",
+        "\u0431\u0443\u043A\u0432",
+        "\u043F\u043E\u0434\u043F\u043E\u044F\u0441\u0430\u043B",
+        "\u0438\u043D\u0438\u0446\u0438\u0430\u043B",
+        "\u0437\u0430",
+        "\u043F\u043E\u044F\u0441",
+        "\u043F\u0443\u0441\u0442\u0438\u043B\u0441\u044F",
+        "\u0434\u043E\u0440\u043E\u0433\u0443",
+        "\u0432\u0437\u043E\u0431\u0440\u0430\u0432\u0448\u0438\u0441\u044C",
+        "\u043F\u0435\u0440\u0432\u0443\u044E",
+        "\u0432\u0435\u0440\u0448\u0438\u043D\u0443",
+        "\u043A\u0443\u0440\u0441\u0438\u0432\u043D\u044B\u0445",
+        "\u0433\u043E\u0440",
+        "\u0431\u0440\u043E\u0441\u0438\u043B",
+        "\u043F\u043E\u0441\u043B\u0435\u0434\u043D\u0438\u0439",
+        "\u0432\u0437\u0433\u043B\u044F\u0434",
+        "\u043D\u0430\u0437\u0430\u0434",
+        "\u0441\u0438\u043B\u0443\u044D\u0442",
+        "\u0441\u0432\u043E\u0435\u0433\u043E",
+        "\u0440\u043E\u0434\u043D\u043E\u0433\u043E",
+        "\u0433\u043E\u0440\u043E\u0434\u0430",
+        "\u0431\u0443\u043A\u0432\u043E\u0433\u0440\u0430\u0434",
+        "\u0437\u0430\u0433\u043E\u043B\u043E\u0432\u043E\u043A",
+        "\u0434\u0435\u0440\u0435\u0432\u043D\u0438",
+        "\u0430\u043B\u0444\u0430\u0432\u0438\u0442",
+        "\u043F\u043E\u0434\u0437\u0430\u0433\u043E\u043B\u043E\u0432\u043E\u043A",
+        "\u0441\u0432\u043E\u0435\u0433\u043E",
+        "\u043F\u0435\u0440\u0435\u0443\u043B\u043A\u0430",
+        "\u0433\u0440\u0443\u0441\u0442\u043D\u044B\u0439",
+        "\u0440\u0435\u0442\u043E\u0440\u0438\u0447\u0435\u0441\u043A\u0438\u0439",
+        "\u0432\u043E\u043F\u0440\u043E\u0441",
+        "\u0441\u043A\u0430\u0442\u0438\u043B\u0441\u044F",
+        "\u0435\u0433\u043E",
+        "\u0449\u0435\u043A\u0435",
+        "\u043F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u043B",
+        "\u0441\u0432\u043E\u0439",
+        "\u043F\u0443\u0442\u044C",
+        "\u0434\u043E\u0440\u043E\u0433\u0435",
+        "\u0432\u0441\u0442\u0440\u0435\u0442\u0438\u043B",
+        "\u0440\u0443\u043A\u043E\u043F\u0438\u0441\u044C",
+        "\u043E\u043D\u0430",
+        "\u043F\u0440\u0435\u0434\u0443\u043F\u0440\u0435\u0434\u0438\u043B\u0430",
+        "\u043C\u043E\u0435\u0439",
+        "\u0432\u0441\u0435",
+        "\u043F\u0435\u0440\u0435\u043F\u0438\u0441\u044B\u0432\u0430\u0435\u0442\u0441\u044F",
+        "\u043D\u0435\u0441\u043A\u043E\u043B\u044C\u043A\u043E",
+        "\u0440\u0430\u0437",
+        "\u0435\u0434\u0438\u043D\u0441\u0442\u0432\u0435\u043D\u043D\u043E\u0435",
+        "\u0447\u0442\u043E",
+        "\u043C\u0435\u043D\u044F",
+        "\u043E\u0441\u0442\u0430\u043B\u043E\u0441\u044C",
+        "\u044D\u0442\u043E",
+        "\u043F\u0440\u0438\u0441\u0442\u0430\u0432\u043A\u0430",
+        "\u0432\u043E\u0437\u0432\u0440\u0430\u0449\u0430\u0439\u0441\u044F",
+        "\u0442\u044B",
+        "\u043B\u0443\u0447\u0448\u0435",
+        "\u0441\u0432\u043E\u044E",
+        "\u0431\u0435\u0437\u043E\u043F\u0430\u0441\u043D\u0443\u044E",
+        "\u0441\u0442\u0440\u0430\u043D\u0443",
+        "\u043F\u043E\u0441\u043B\u0443\u0448\u0430\u0432\u0448\u0438\u0441\u044C",
+        "\u0440\u0443\u043A\u043E\u043F\u0438\u0441\u0438",
+        "\u043D\u0430\u0448",
+        "\u043F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u043B",
+        "\u0441\u0432\u043E\u0439",
+        "\u043F\u0443\u0442\u044C",
+        "\u0432\u0441\u043A\u043E\u0440\u0435",
+        "\u0435\u043C\u0443",
+        "\u043F\u043E\u0432\u0441\u0442\u0440\u0435\u0447\u0430\u043B\u0441\u044F",
+        "\u043A\u043E\u0432\u0430\u0440\u043D\u044B\u0439",
+        "\u0441\u043E\u0441\u0442\u0430\u0432\u0438\u0442\u0435\u043B\u044C",
+        "\u0440\u0435\u043A\u043B\u0430\u043C\u043D\u044B\u0445",
+        "\u0442\u0435\u043A\u0441\u0442\u043E\u0432",
+        "\u043D\u0430\u043F\u043E\u0438\u0432\u0448\u0438\u0439",
+        "\u044F\u0437\u044B\u043A\u043E\u043C",
+        "\u0440\u0435\u0447\u044C\u044E",
+        "\u0437\u0430\u043C\u0430\u043D\u0438\u0432\u0448\u0438\u0439",
+        "\u0441\u0432\u043E\u0435",
+        "\u0430\u0433\u0435\u043D\u0442\u0441\u0442\u0432\u043E",
+        "\u043A\u043E\u0442\u043E\u0440\u043E\u0435",
+        "\u0438\u0441\u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u043B\u043E",
+        "\u0441\u043D\u043E\u0432\u0430",
+        "\u0441\u043D\u043E\u0432\u0430",
+        "\u0441\u0432\u043E\u0438\u0445",
+        "\u043F\u0440\u043E\u0435\u043A\u0442\u0430\u0445",
+        "\u0435\u0441\u043B\u0438",
+        "\u043F\u0435\u0440\u0435\u043F\u0438\u0441\u0430\u043B\u0438",
+        "\u0442\u043E",
+        "\u0436\u0438\u0432\u0435\u0442",
+        "\u0442\u0430\u043C",
+        "\u0434\u043E",
+        "\u0441\u0438\u0445",
+        "\u043F\u043E\u0440"
+      ]
+    };
+    sp = {
+      "common": ["mujer", "uno", "dolor", "m\xE1s", "de", "poder", "mismo", "si"],
+      "words": [
+        "ejercicio",
+        "preferencia",
+        "perspicacia",
+        "laboral",
+        "pa\xF1o",
+        "suntuoso",
+        "molde",
+        "namibia",
+        "planeador",
+        "mirar",
+        "dem\xE1s",
+        "oficinista",
+        "excepci\xF3n",
+        "odio",
+        "consecuencia",
+        "casi",
+        "auto",
+        "chicharra",
+        "velo",
+        "elixir",
+        "ataque",
+        "no",
+        "odio",
+        "temporal",
+        "cu\xF3rum",
+        "dign\xEDsimo",
+        "facilismo",
+        "letra",
+        "nihilista",
+        "expedici\xF3n",
+        "alma",
+        "alveolar",
+        "aparte",
+        "le\xF3n",
+        "animal",
+        "como",
+        "paria",
+        "belleza",
+        "modo",
+        "natividad",
+        "justo",
+        "ataque",
+        "s\xE9quito",
+        "pillo",
+        "sed",
+        "ex",
+        "y",
+        "voluminoso",
+        "temporalidad",
+        "verdades",
+        "racional",
+        "asunci\xF3n",
+        "incidente",
+        "marejada",
+        "placenta",
+        "amanecer",
+        "fuga",
+        "previsor",
+        "presentaci\xF3n",
+        "lejos",
+        "necesariamente",
+        "sospechoso",
+        "adiposidad",
+        "quind\xEDo",
+        "p\xF3cima",
+        "voluble",
+        "d\xE9bito",
+        "sinti\xF3",
+        "accesorio",
+        "falda",
+        "sapiencia",
+        "volutas",
+        "queso",
+        "permacultura",
+        "laudo",
+        "soluciones",
+        "entero",
+        "pan",
+        "litro",
+        "tonelada",
+        "culpa",
+        "libertario",
+        "mosca",
+        "dictado",
+        "reincidente",
+        "nascimiento",
+        "dolor",
+        "escolar",
+        "impedimento",
+        "m\xEDnima",
+        "mayores",
+        "repugnante",
+        "dulce",
+        "obcecado",
+        "monta\xF1a",
+        "enigma",
+        "total",
+        "delet\xE9reo",
+        "d\xE9cima",
+        "c\xE1bala",
+        "fotograf\xEDa",
+        "dolores",
+        "molesto",
+        "olvido",
+        "paciencia",
+        "resiliencia",
+        "voluntad",
+        "molestias",
+        "magn\xEDfico",
+        "distinci\xF3n",
+        "ovni",
+        "marejada",
+        "cerro",
+        "torre",
+        "y",
+        "abogada",
+        "manantial",
+        "corporal",
+        "agua",
+        "crep\xFAsculo",
+        "ataque",
+        "desierto",
+        "laboriosamente",
+        "angustia",
+        "afortunado",
+        "alma",
+        "encefalograma",
+        "materialidad",
+        "cosas",
+        "o",
+        "renuncia",
+        "error",
+        "menos",
+        "conejo",
+        "abad\xEDa",
+        "analfabeto",
+        "remo",
+        "fugacidad",
+        "oficio",
+        "en",
+        "alm\xE1cigo",
+        "vos",
+        "pan",
+        "represi\xF3n",
+        "n\xFAmeros",
+        "triste",
+        "refugiado",
+        "trote",
+        "inventor",
+        "corchea",
+        "repelente",
+        "magma",
+        "recusado",
+        "patr\xF3n",
+        "expl\xEDcito",
+        "paloma",
+        "s\xEDndrome",
+        "inmune",
+        "autoinmune",
+        "comodidad",
+        "ley",
+        "vietnamita",
+        "demonio",
+        "tasmania",
+        "repeler",
+        "ap\xE9ndice",
+        "arquitecto",
+        "columna",
+        "yugo",
+        "computador",
+        "mula",
+        "a",
+        "prop\xF3sito",
+        "fantas\xEDa",
+        "alias",
+        "rayo",
+        "tenedor",
+        "deleznable",
+        "ventana",
+        "cara",
+        "anemia",
+        "corrupto"
+      ]
+    };
+    vocabularies = { ru, sp, latin };
+    reLorem = /^lorem([a-z]*)(\d*)(-\d*)?$/i;
+    reElement = /^(-+)([a-z0-9]+[a-z0-9-]*)/i;
+    reModifier = /^(_+)([a-z0-9]+[a-z0-9-_]*)/i;
+    blockCandidates1 = (className) => /^[a-z]\-/i.test(className);
+    blockCandidates2 = (className) => /^[a-z]/i.test(className);
+    caret = [{ type: "Field", index: 0, name: "" }];
+    (function(TemplateChars2) {
+      TemplateChars2[TemplateChars2["Start"] = 91] = "Start";
+      TemplateChars2[TemplateChars2["End"] = 93] = "End";
+      TemplateChars2[TemplateChars2["Underscore"] = 95] = "Underscore";
+      TemplateChars2[TemplateChars2["Dash"] = 45] = "Dash";
+    })(TemplateChars || (TemplateChars = {}));
+    htmlTagRegex = /^<([\w\-:]+)[\s>]/;
+    reservedKeywords = /* @__PURE__ */ new Set([
+      "for",
+      "while",
+      "of",
+      "async",
+      "await",
+      "const",
+      "let",
+      "var",
+      "continue",
+      "break",
+      "debugger",
+      "do",
+      "export",
+      "import",
+      "in",
+      "instanceof",
+      "new",
+      "return",
+      "switch",
+      "this",
+      "throw",
+      "try",
+      "catch",
+      "typeof",
+      "void",
+      "with",
+      "yield"
+    ]);
+    formatters = { html, haml, slim, pug };
+    (function(CSSSnippetType2) {
+      CSSSnippetType2["Raw"] = "Raw";
+      CSSSnippetType2["Property"] = "Property";
+    })(CSSSnippetType || (CSSSnippetType = {}));
+    reProperty = /^([a-z-]+)(?:\s*:\s*([^\n\r;]+?);*)?$/;
+    opt = { value: true };
+    CSSAbbreviationScope = {
+      /** Include all possible snippets in match */
+      Global: "@@global",
+      /** Include raw snippets only (e.g. no properties) in abbreviation match */
+      Section: "@@section",
+      /** Include properties only in abbreviation match */
+      Property: "@@property",
+      /** Resolve abbreviation in context of CSS property value */
+      Value: "@@value"
+    };
+    gradientName = "lg";
+    markupSnippets = {
+      "a": "a[href]",
+      "a:blank": "a[href='http://${0}' target='_blank' rel='noopener noreferrer']",
+      "a:link": "a[href='http://${0}']",
+      "a:mail": "a[href='mailto:${0}']",
+      "a:tel": "a[href='tel:+${0}']",
+      "abbr": "abbr[title]",
+      "acr|acronym": "acronym[title]",
+      "base": "base[href]/",
+      "basefont": "basefont/",
+      "br": "br/",
+      "frame": "frame/",
+      "hr": "hr/",
+      "bdo": "bdo[dir]",
+      "bdo:r": "bdo[dir=rtl]",
+      "bdo:l": "bdo[dir=ltr]",
+      "col": "col/",
+      "link": "link[rel=stylesheet href]/",
+      "link:css": "link[href='${1:style}.css']",
+      "link:print": "link[href='${1:print}.css' media=print]",
+      "link:favicon": "link[rel='shortcut icon' type=image/x-icon href='${1:favicon.ico}']",
+      "link:mf|link:manifest": "link[rel='manifest' href='${1:manifest.json}']",
+      "link:touch": "link[rel=apple-touch-icon href='${1:favicon.png}']",
+      "link:rss": "link[rel=alternate type=application/rss+xml title=RSS href='${1:rss.xml}']",
+      "link:atom": "link[rel=alternate type=application/atom+xml title=Atom href='${1:atom.xml}']",
+      "link:im|link:import": "link[rel=import href='${1:component}.html']",
+      "meta": "meta/",
+      "meta:utf": "meta[http-equiv=Content-Type content='text/html;charset=UTF-8']",
+      "meta:vp": "meta[name=viewport content='width=${1:device-width}, initial-scale=${2:1.0}']",
+      "meta:compat": "meta[http-equiv=X-UA-Compatible content='${1:IE=7}']",
+      "meta:edge": "meta:compat[content='${1:ie=edge}']",
+      "meta:redirect": "meta[http-equiv=refresh content='0; url=${1:http://example.com}']",
+      "meta:refresh": "meta[http-equiv=refresh content='${1:5}']",
+      "meta:kw": "meta[name=keywords content]",
+      "meta:desc": "meta[name=description content]",
+      "style": "style",
+      "script": "script",
+      "script:src": "script[src]",
+      "script:module": "script[type=module src]",
+      "img": "img[src alt]/",
+      "img:s|img:srcset": "img[srcset src alt]",
+      "img:z|img:sizes": "img[sizes srcset src alt]",
+      "picture": "picture",
+      "src|source": "source/",
+      "src:sc|source:src": "source[src type]",
+      "src:s|source:srcset": "source[srcset]",
+      "src:t|source:type": "source[srcset type='${1:image/}']",
+      "src:z|source:sizes": "source[sizes srcset]",
+      "src:m|source:media": "source[media='(${1:min-width: })' srcset]",
+      "src:mt|source:media:type": "source:media[type='${2:image/}']",
+      "src:mz|source:media:sizes": "source:media[sizes srcset]",
+      "src:zt|source:sizes:type": "source[sizes srcset type='${1:image/}']",
+      "iframe": "iframe[src frameborder=0]",
+      "embed": "embed[src type]/",
+      "object": "object[data type]",
+      "param": "param[name value]/",
+      "map": "map[name]",
+      "area": "area[shape coords href alt]/",
+      "area:d": "area[shape=default]",
+      "area:c": "area[shape=circle]",
+      "area:r": "area[shape=rect]",
+      "area:p": "area[shape=poly]",
+      "form": "form[action]",
+      "form:get": "form[method=get]",
+      "form:post": "form[method=post]",
+      "label": "label[for]",
+      "input": "input[type=${1:text}]/",
+      "inp": "input[name=${1} id=${1}]",
+      "input:h|input:hidden": "input[type=hidden name]",
+      "input:t|input:text": "inp[type=text]",
+      "input:search": "inp[type=search]",
+      "input:email": "inp[type=email]",
+      "input:url": "inp[type=url]",
+      "input:p|input:password": "inp[type=password]",
+      "input:datetime": "inp[type=datetime]",
+      "input:date": "inp[type=date]",
+      "input:datetime-local": "inp[type=datetime-local]",
+      "input:month": "inp[type=month]",
+      "input:week": "inp[type=week]",
+      "input:time": "inp[type=time]",
+      "input:tel": "inp[type=tel]",
+      "input:number": "inp[type=number]",
+      "input:color": "inp[type=color]",
+      "input:c|input:checkbox": "inp[type=checkbox]",
+      "input:r|input:radio": "inp[type=radio]",
+      "input:range": "inp[type=range]",
+      "input:f|input:file": "inp[type=file]",
+      "input:s|input:submit": "input[type=submit value]",
+      "input:i|input:image": "input[type=image src alt]",
+      "input:b|input:btn|input:button": "input[type=button value]",
+      "input:reset": "input:button[type=reset]",
+      "isindex": "isindex/",
+      "select": "select[name=${1} id=${1}]",
+      "select:d|select:disabled": "select[disabled.]",
+      "opt|option": "option[value]",
+      "textarea": "textarea[name=${1} id=${1}]",
+      "tarea:c|textarea:cols": "textarea[name=${1} id=${1} cols=${2:30}]",
+      "tarea:r|textarea:rows": "textarea[name=${1} id=${1} rows=${3:10}]",
+      "tarea:cr|textarea:cols:rows": "textarea[name=${1} id=${1} cols=${2:30} rows=${3:10}]",
+      "marquee": "marquee[behavior direction]",
+      "menu:c|menu:context": "menu[type=context]",
+      "menu:t|menu:toolbar": "menu[type=toolbar]",
+      "video": "video[src]",
+      "audio": "audio[src]",
+      "html:xml": "html[xmlns=http://www.w3.org/1999/xhtml]",
+      "keygen": "keygen/",
+      "command": "command/",
+      "btn:s|button:s|button:submit": "button[type=submit]",
+      "btn:r|button:r|button:reset": "button[type=reset]",
+      "btn:b|button:b|button:button": "button[type=button]",
+      "btn:d|button:d|button:disabled": "button[disabled.]",
+      "fst:d|fset:d|fieldset:d|fieldset:disabled": "fieldset[disabled.]",
+      "bq": "blockquote",
+      "fig": "figure",
+      "figc": "figcaption",
+      "pic": "picture",
+      "ifr": "iframe",
+      "emb": "embed",
+      "obj": "object",
+      "cap": "caption",
+      "colg": "colgroup",
+      "fst": "fieldset",
+      "btn": "button",
+      "optg": "optgroup",
+      "tarea": "textarea",
+      "leg": "legend",
+      "sect": "section",
+      "art": "article",
+      "hdr": "header",
+      "ftr": "footer",
+      "adr": "address",
+      "dlg": "dialog",
+      "str": "strong",
+      "prog": "progress",
+      "mn": "main",
+      "tem": "template",
+      "fset": "fieldset",
+      "datal": "datalist",
+      "kg": "keygen",
+      "out": "output",
+      "det": "details",
+      "sum": "summary",
+      "cmd": "command",
+      "data": "data[value]",
+      "meter": "meter[value]",
+      "time": "time[datetime]",
+      "ri:d|ri:dpr": "img:s",
+      "ri:v|ri:viewport": "img:z",
+      "ri:a|ri:art": "pic>src:m+img",
+      "ri:t|ri:type": "pic>src:t+img",
+      "!!!": "{<!DOCTYPE html>}",
+      "doc": "html[lang=${lang}]>(head>meta[charset=${charset}]+meta:vp+title{${1:Document}})+body",
+      "!|html:5": "!!!+doc",
+      "c": "{<!-- ${0} -->}",
+      "cc:ie": "{<!--[if IE]>${0}<![endif]-->}",
+      "cc:noie": "{<!--[if !IE]><!-->${0}<!--<![endif]-->}"
+    };
+    stylesheetSnippets = {
+      "@f": "@font-face {\n	font-family: ${1};\n	src: url(${2});\n}",
+      "@ff": "@font-face {\n	font-family: '${1:FontName}';\n	src: url('${2:FileName}.eot');\n	src: url('${2:FileName}.eot?#iefix') format('embedded-opentype'),\n		 url('${2:FileName}.woff') format('woff'),\n		 url('${2:FileName}.ttf') format('truetype'),\n		 url('${2:FileName}.svg#${1:FontName}') format('svg');\n	font-style: ${3:normal};\n	font-weight: ${4:normal};\n}",
+      "@i|@import": "@import url(${0});",
+      "@kf": "@keyframes ${1:identifier} {\n	${2}\n}",
+      "@m|@media": "@media ${1:screen} {\n	${0}\n}",
+      "ac": "align-content:start|end|flex-start|flex-end|center|space-between|space-around|stretch|space-evenly",
+      "ai": "align-items:start|end|flex-start|flex-end|center|baseline|stretch",
+      "anim": "animation:${1:name} ${2:duration} ${3:timing-function} ${4:delay} ${5:iteration-count} ${6:direction} ${7:fill-mode}",
+      "animdel": "animation-delay:time",
+      "animdir": "animation-direction:normal|reverse|alternate|alternate-reverse",
+      "animdur": "animation-duration:${1:0}s",
+      "animfm": "animation-fill-mode:both|forwards|backwards",
+      "animic": "animation-iteration-count:1|infinite",
+      "animn": "animation-name",
+      "animps": "animation-play-state:running|paused",
+      "animtf": "animation-timing-function:linear|ease|ease-in|ease-out|ease-in-out|cubic-bezier(${1:0.1}, ${2:0.7}, ${3:1.0}, ${3:0.1})",
+      "ap": "appearance:none",
+      "as": "align-self:start|end|auto|flex-start|flex-end|center|baseline|stretch",
+      "b": "bottom",
+      "bd": "border:${1:1px} ${2:solid} ${3:#000}",
+      "bdb": "border-bottom:${1:1px} ${2:solid} ${3:#000}",
+      "bdbc": "border-bottom-color:${1:#000}",
+      "bdbi": "border-bottom-image:url(${0})",
+      "bdbk": "border-break:close",
+      "bdbli": "border-bottom-left-image:url(${0})|continue",
+      "bdblrs": "border-bottom-left-radius",
+      "bdbri": "border-bottom-right-image:url(${0})|continue",
+      "bdbrrs": "border-bottom-right-radius",
+      "bdbs": "border-bottom-style",
+      "bdbw": "border-bottom-width",
+      "bdc": "border-color:${1:#000}",
+      "bdci": "border-corner-image:url(${0})|continue",
+      "bdcl": "border-collapse:collapse|separate",
+      "bdf": "border-fit:repeat|clip|scale|stretch|overwrite|overflow|space",
+      "bdi": "border-image:url(${0})",
+      "bdl": "border-left:${1:1px} ${2:solid} ${3:#000}",
+      "bdlc": "border-left-color:${1:#000}",
+      "bdlen": "border-length",
+      "bdli": "border-left-image:url(${0})",
+      "bdls": "border-left-style",
+      "bdlw": "border-left-width",
+      "bdr": "border-right:${1:1px} ${2:solid} ${3:#000}",
+      "bdrc": "border-right-color:${1:#000}",
+      "bdri": "border-right-image:url(${0})",
+      "bdrs": "border-radius",
+      "bdrst": "border-right-style",
+      "bdrw": "border-right-width",
+      "bds": "border-style:none|hidden|dotted|dashed|solid|double|dot-dash|dot-dot-dash|wave|groove|ridge|inset|outset",
+      "bdsp": "border-spacing",
+      "bdt": "border-top:${1:1px} ${2:solid} ${3:#000}",
+      "bdtc": "border-top-color:${1:#000}",
+      "bdti": "border-top-image:url(${0})",
+      "bdtli": "border-top-left-image:url(${0})|continue",
+      "bdtlrs": "border-top-left-radius",
+      "bdtri": "border-top-right-image:url(${0})|continue",
+      "bdtrrs": "border-top-right-radius",
+      "bdts": "border-top-style",
+      "bdtw": "border-top-width",
+      "bdw": "border-width",
+      "bbs": "border-block-start",
+      "bbe": "border-block-end",
+      "bis": "border-inline-start",
+      "bie": "border-inline-end",
+      "bfv": "backface-visibility:hidden|visible",
+      "bg": "background:${1:#000}",
+      "bg:n": "background: none",
+      "bga": "background-attachment:fixed|scroll",
+      "bgbk": "background-break:bounding-box|each-box|continuous",
+      "bgc": "background-color:${1:#fff}",
+      "bgcp": "background-clip:padding-box|border-box|content-box|no-clip",
+      "bgi": "background-image:url(${0})",
+      "bgo": "background-origin:padding-box|border-box|content-box",
+      "bgp": "background-position:${1:0} ${2:0}",
+      "bgpx": "background-position-x",
+      "bgpy": "background-position-y",
+      "bgr": "background-repeat:no-repeat|repeat-x|repeat-y|space|round",
+      "bgsz": "background-size:contain|cover",
+      "bs": "block-size",
+      "bxsh": "box-shadow:${1:inset }${2:hoff} ${3:voff} ${4:blur} ${5:#000}|none",
+      "bxsz": "box-sizing:border-box|content-box|border-box",
+      "c": "color:${1:#000}",
+      "cg": "column-gap",
+      "cr": "color:rgb(${1:0}, ${2:0}, ${3:0})",
+      "cra": "color:rgba(${1:0}, ${2:0}, ${3:0}, ${4:.5})",
+      "cl": "clear:both|left|right|none",
+      "cm": "/* ${0} */",
+      "cnt": "content:'${0}'|normal|open-quote|no-open-quote|close-quote|no-close-quote|attr(${0})|counter(${0})|counters(${0})",
+      "coi": "counter-increment",
+      "colm": "columns",
+      "colmc": "column-count",
+      "colmf": "column-fill",
+      "colmg": "column-gap",
+      "colmr": "column-rule",
+      "colmrc": "column-rule-color",
+      "colmrs": "column-rule-style",
+      "colmrw": "column-rule-width",
+      "colms": "column-span",
+      "colmw": "column-width",
+      "cor": "counter-reset",
+      "cp": "clip:auto|rect(${1:top} ${2:right} ${3:bottom} ${4:left})",
+      "cps": "caption-side:top|bottom",
+      "cur": "cursor:pointer|auto|default|crosshair|hand|help|move|pointer|text",
+      "d": "display:block|none|flex|inline-flex|inline|inline-block|grid|inline-grid|subgrid|list-item|run-in|contents|table|inline-table|table-caption|table-column|table-column-group|table-header-group|table-footer-group|table-row|table-row-group|table-cell|ruby|ruby-base|ruby-base-group|ruby-text|ruby-text-group",
+      "ec": "empty-cells:show|hide",
+      "f": "font:${1:1em} ${2:sans-serif}",
+      "fd": "font-display:auto|block|swap|fallback|optional",
+      "fef": "font-effect:none|engrave|emboss|outline",
+      "fem": "font-emphasize",
+      "femp": "font-emphasize-position:before|after",
+      "fems": "font-emphasize-style:none|accent|dot|circle|disc",
+      "ff": "font-family:serif|sans-serif|cursive|fantasy|monospace",
+      "fft": 'font-family:"Times New Roman", Times, Baskerville, Georgia, serif',
+      "ffa": 'font-family:Arial, "Helvetica Neue", Helvetica, sans-serif',
+      "ffv": "font-family:Verdana, Geneva, sans-serif",
+      "fl": "float:left|right|none",
+      "fs": "font-style:italic|normal|oblique",
+      "fsm": "font-smoothing:antialiased|subpixel-antialiased|none",
+      "fst": "font-stretch:normal|ultra-condensed|extra-condensed|condensed|semi-condensed|semi-expanded|expanded|extra-expanded|ultra-expanded",
+      "fv": "font-variant:normal|small-caps",
+      "fvs": "font-variation-settings:normal|inherit|initial|unset",
+      "fw": "font-weight:normal|bold|bolder|lighter",
+      "fx": "flex",
+      "fxb": "flex-basis:fill|max-content|min-content|fit-content|content",
+      "fxd": "flex-direction:row|row-reverse|column|column-reverse",
+      "fxf": "flex-flow",
+      "fxg": "flex-grow",
+      "fxsh": "flex-shrink",
+      "fxw": "flex-wrap:nowrap|wrap|wrap-reverse",
+      "fsz": "font-size",
+      "fsza": "font-size-adjust",
+      "g": "gap",
+      "gtc": "grid-template-columns:repeat(${0})|minmax()",
+      "gtr": "grid-template-rows:repeat(${0})|minmax()",
+      "gta": "grid-template-areas",
+      "gt": "grid-template",
+      "gg": "grid-gap",
+      "gcg": "grid-column-gap",
+      "grg": "grid-row-gap",
+      "gac": "grid-auto-columns:auto|minmax()",
+      "gar": "grid-auto-rows:auto|minmax()",
+      "gaf": "grid-auto-flow:row|column|dense|inherit|initial|unset",
+      "gd": "grid",
+      "gc": "grid-column",
+      "gcs": "grid-column-start",
+      "gce": "grid-column-end",
+      "gr": "grid-row",
+      "grs": "grid-row-start",
+      "gre": "grid-row-end",
+      "ga": "grid-area",
+      "h": "height",
+      "is": "inline-size",
+      "jc": "justify-content:start|end|stretch|flex-start|flex-end|center|space-between|space-around|space-evenly",
+      "ji": "justify-items:start|end|center|stretch",
+      "js": "justify-self:start|end|center|stretch",
+      "l": "left",
+      "lg": "background-image:linear-gradient(${1})",
+      "lh": "line-height",
+      "lis": "list-style",
+      "lisi": "list-style-image",
+      "lisp": "list-style-position:inside|outside",
+      "list": "list-style-type:disc|circle|square|decimal|decimal-leading-zero|lower-roman|upper-roman",
+      "lts": "letter-spacing:normal",
+      "m": "margin",
+      "mah": "max-height",
+      "mar": "max-resolution",
+      "maw": "max-width",
+      "mb": "margin-bottom",
+      "mih": "min-height",
+      "mir": "min-resolution",
+      "miw": "min-width",
+      "ml": "margin-left",
+      "mr": "margin-right",
+      "mt": "margin-top",
+      "mbs": "margin-block-start",
+      "mbe": "margin-block-end",
+      "mis": "margin-inline-start",
+      "mie": "margin-inline-end",
+      "ol": "outline",
+      "olc": "outline-color:${1:#000}|invert",
+      "olo": "outline-offset",
+      "ols": "outline-style:none|dotted|dashed|solid|double|groove|ridge|inset|outset",
+      "olw": "outline-width:thin|medium|thick",
+      "op|opa": "opacity",
+      "ord": "order",
+      "ori": "orientation:landscape|portrait",
+      "orp": "orphans",
+      "ov": "overflow:hidden|visible|hidden|scroll|auto",
+      "ovs": "overflow-style:scrollbar|auto|scrollbar|panner|move|marquee",
+      "ovx": "overflow-x:hidden|visible|hidden|scroll|auto",
+      "ovy": "overflow-y:hidden|visible|hidden|scroll|auto",
+      "p": "padding",
+      "pb": "padding-bottom",
+      "pgba": "page-break-after:auto|always|left|right",
+      "pgbb": "page-break-before:auto|always|left|right",
+      "pgbi": "page-break-inside:auto|avoid",
+      "pl": "padding-left",
+      "pos": "position:relative|absolute|relative|fixed|static",
+      "pr": "padding-right",
+      "pt": "padding-top",
+      "pbs": "padding-block-start",
+      "pbe": "padding-block-end",
+      "pis": "padding-inline-start",
+      "pie": "padding-inline-end",
+      "spbs": "scroll-padding-block-start",
+      "spbe": "scroll-padding-block-end",
+      "spis": "scroll-padding-inline-start",
+      "spie": "scroll-padding-inline-end",
+      "q": "quotes",
+      "qen": "quotes:'\\201C' '\\201D' '\\2018' '\\2019'",
+      "qru": "quotes:'\\00AB' '\\00BB' '\\201E' '\\201C'",
+      "r": "right",
+      "rg": "row-gap",
+      "rsz": "resize:none|both|horizontal|vertical",
+      "t": "top",
+      "ta": "text-align:left|center|right|justify",
+      "tal": "text-align-last:left|center|right",
+      "tbl": "table-layout:fixed",
+      "td": "text-decoration:none|underline|overline|line-through",
+      "te": "text-emphasis:none|accent|dot|circle|disc|before|after",
+      "th": "text-height:auto|font-size|text-size|max-size",
+      "ti": "text-indent",
+      "tj": "text-justify:auto|inter-word|inter-ideograph|inter-cluster|distribute|kashida|tibetan",
+      "to": "text-outline:${1:0} ${2:0} ${3:#000}",
+      "tov": "text-overflow:ellipsis|clip",
+      "tr": "text-replace",
+      "trf": "transform:${1}|skewX(${1:angle})|skewY(${1:angle})|scale(${1:x}, ${2:y})|scaleX(${1:x})|scaleY(${1:y})|scaleZ(${1:z})|scale3d(${1:x}, ${2:y}, ${3:z})|rotate(${1:angle})|rotateX(${1:angle})|rotateY(${1:angle})|rotateZ(${1:angle})|translate(${1:x}, ${2:y})|translateX(${1:x})|translateY(${1:y})|translateZ(${1:z})|translate3d(${1:tx}, ${2:ty}, ${3:tz})",
+      "trfo": "transform-origin",
+      "trfs": "transform-style:preserve-3d",
+      "trs": "transition:${1:prop} ${2:time}",
+      "trsde": "transition-delay:${1:time}",
+      "trsdu": "transition-duration:${1:time}",
+      "trsp": "transition-property:${1:prop}",
+      "trstf": "transition-timing-function:${1:fn}",
+      "tsh": "text-shadow:${1:hoff} ${2:voff} ${3:blur} ${4:#000}",
+      "tt": "text-transform:uppercase|lowercase|capitalize|none",
+      "tw": "text-wrap:none|normal|unrestricted|suppress",
+      "us": "user-select:none",
+      "v": "visibility:hidden|visible|collapse",
+      "va": "vertical-align:top|super|text-top|middle|baseline|bottom|text-bottom|sub",
+      "w|wid": "width",
+      "whs": "white-space:nowrap|pre|pre-wrap|pre-line|normal",
+      "whsc": "white-space-collapse:normal|keep-all|loose|break-strict|break-all",
+      "wido": "widows",
+      "wm": "writing-mode:lr-tb|lr-tb|lr-bt|rl-tb|rl-bt|tb-rl|tb-lr|bt-lr|bt-rl",
+      "wob": "word-break:normal|keep-all|break-all",
+      "wos": "word-spacing",
+      "wow": "word-wrap:none|unrestricted|suppress|break-word|normal",
+      "z": "z-index",
+      "zom": "zoom:1"
+    };
+    xslSnippets = {
+      "tm|tmatch": "xsl:template[match mode]",
+      "tn|tname": "xsl:template[name]",
+      "call": "xsl:call-template[name]",
+      "ap": "xsl:apply-templates[select mode]",
+      "api": "xsl:apply-imports",
+      "imp": "xsl:import[href]",
+      "inc": "xsl:include[href]",
+      "ch": "xsl:choose",
+      "wh|xsl:when": "xsl:when[test]",
+      "ot": "xsl:otherwise",
+      "if": "xsl:if[test]",
+      "par": "xsl:param[name]",
+      "pare": "xsl:param[name select]",
+      "var": "xsl:variable[name]",
+      "vare": "xsl:variable[name select]",
+      "wp": "xsl:with-param[name select]",
+      "key": "xsl:key[name match use]",
+      "elem": "xsl:element[name]",
+      "attr": "xsl:attribute[name]",
+      "attrs": "xsl:attribute-set[name]",
+      "cp": "xsl:copy[select]",
+      "co": "xsl:copy-of[select]",
+      "val": "xsl:value-of[select]",
+      "for|each": "xsl:for-each[select]",
+      "tex": "xsl:text",
+      "com": "xsl:comment",
+      "msg": "xsl:message[terminate=no]",
+      "fall": "xsl:fallback",
+      "num": "xsl:number[value]",
+      "nam": "namespace-alias[stylesheet-prefix result-prefix]",
+      "pres": "xsl:preserve-space[elements]",
+      "strip": "xsl:strip-space[elements]",
+      "proc": "xsl:processing-instruction[name]",
+      "sort": "xsl:sort[select order]",
+      "choose": "xsl:choose>xsl:when+xsl:otherwise",
+      "xsl": "!!!+xsl:stylesheet[version=1.0 xmlns:xsl=http://www.w3.org/1999/XSL/Transform]>{\n|}",
+      "!!!": '{<?xml version="1.0" encoding="UTF-8"?>}'
+    };
+    pugSnippets = {
+      "!!!": "{doctype html}"
+    };
+    variables = {
+      "lang": "en",
+      "locale": "en-US",
+      "charset": "UTF-8",
+      "indentation": "	",
+      "newline": "\n"
+    };
+    defaultSyntaxes = {
+      markup: "html",
+      stylesheet: "css"
+    };
+    defaultOptions$1 = {
+      "inlineElements": [
+        "a",
+        "abbr",
+        "acronym",
+        "applet",
+        "b",
+        "basefont",
+        "bdo",
+        "big",
+        "br",
+        "button",
+        "cite",
+        "code",
+        "del",
+        "dfn",
+        "em",
+        "font",
+        "i",
+        "iframe",
+        "img",
+        "input",
+        "ins",
+        "kbd",
+        "label",
+        "map",
+        "object",
+        "q",
+        "s",
+        "samp",
+        "select",
+        "small",
+        "span",
+        "strike",
+        "strong",
+        "sub",
+        "sup",
+        "textarea",
+        "tt",
+        "u",
+        "var"
+      ],
+      "output.indent": "	",
+      "output.baseIndent": "",
+      "output.newline": "\n",
+      "output.tagCase": "",
+      "output.attributeCase": "",
+      "output.attributeQuotes": "double",
+      "output.format": true,
+      "output.formatLeafNode": false,
+      "output.formatSkip": ["html"],
+      "output.formatForce": ["body"],
+      "output.inlineBreak": 3,
+      "output.compactBoolean": false,
+      "output.booleanAttributes": [
+        "contenteditable",
+        "seamless",
+        "async",
+        "autofocus",
+        "autoplay",
+        "checked",
+        "controls",
+        "defer",
+        "disabled",
+        "formnovalidate",
+        "hidden",
+        "ismap",
+        "loop",
+        "multiple",
+        "muted",
+        "novalidate",
+        "readonly",
+        "required",
+        "reversed",
+        "selected",
+        "typemustmatch"
+      ],
+      "output.reverseAttributes": false,
+      "output.selfClosingStyle": "html",
+      "output.field": (index, placeholder) => placeholder,
+      "output.text": (text2) => text2,
+      "markup.href": true,
+      "comment.enabled": false,
+      "comment.trigger": ["id", "class"],
+      "comment.before": "",
+      "comment.after": "\n<!-- /[#ID][.CLASS] -->",
+      "bem.enabled": false,
+      "bem.element": "__",
+      "bem.modifier": "_",
+      "jsx.enabled": false,
+      "stylesheet.keywords": ["auto", "inherit", "unset", "none"],
+      "stylesheet.unitless": ["z-index", "line-height", "opacity", "font-weight", "zoom", "flex", "flex-grow", "flex-shrink"],
+      "stylesheet.shortHex": true,
+      "stylesheet.between": ": ",
+      "stylesheet.after": ";",
+      "stylesheet.intUnit": "px",
+      "stylesheet.floatUnit": "em",
+      "stylesheet.unitAliases": { e: "em", p: "%", x: "ex", r: "rem" },
+      "stylesheet.json": false,
+      "stylesheet.jsonDoubleQuotes": false,
+      "stylesheet.fuzzySearchMinScore": 0,
+      "stylesheet.strictMatch": false
+    };
+    defaultConfig = {
+      type: "markup",
+      syntax: "html",
+      variables,
+      snippets: {},
+      options: defaultOptions$1
+    };
+    syntaxConfig = {
+      markup: {
+        snippets: parseSnippets(markupSnippets)
+      },
+      xhtml: {
+        options: {
+          "output.selfClosingStyle": "xhtml"
+        }
+      },
+      xml: {
+        options: {
+          "output.selfClosingStyle": "xml"
+        }
+      },
+      xsl: {
+        snippets: parseSnippets(xslSnippets),
+        options: {
+          "output.selfClosingStyle": "xml"
+        }
+      },
+      jsx: {
+        options: {
+          "jsx.enabled": true,
+          "markup.attributes": {
+            "class": "className",
+            "class*": "styleName",
+            "for": "htmlFor"
+          },
+          "markup.valuePrefix": {
+            "class*": "styles"
+          }
+        }
+      },
+      vue: {
+        options: {
+          "markup.attributes": {
+            "class*": ":class"
+          }
+        }
+      },
+      svelte: {
+        options: {
+          "jsx.enabled": true
+        }
+      },
+      pug: {
+        snippets: parseSnippets(pugSnippets)
+      },
+      stylesheet: {
+        snippets: parseSnippets(stylesheetSnippets)
+      },
+      sass: {
+        options: {
+          "stylesheet.after": ""
+        }
+      },
+      stylus: {
+        options: {
+          "stylesheet.between": " ",
+          "stylesheet.after": ""
+        }
+      }
+    };
+    (function(Chars2) {
+      Chars2[Chars2["SingleQuote"] = 39] = "SingleQuote";
+      Chars2[Chars2["DoubleQuote"] = 34] = "DoubleQuote";
+      Chars2[Chars2["Escape"] = 92] = "Escape";
+    })(Chars$1 || (Chars$1 = {}));
+    (function(Brackets2) {
+      Brackets2[Brackets2["SquareL"] = 91] = "SquareL";
+      Brackets2[Brackets2["SquareR"] = 93] = "SquareR";
+      Brackets2[Brackets2["RoundL"] = 40] = "RoundL";
+      Brackets2[Brackets2["RoundR"] = 41] = "RoundR";
+      Brackets2[Brackets2["CurlyL"] = 123] = "CurlyL";
+      Brackets2[Brackets2["CurlyR"] = 125] = "CurlyR";
+    })(Brackets || (Brackets = {}));
+    bracePairs = {
+      [Brackets.SquareL]: Brackets.SquareR,
+      [Brackets.RoundL]: Brackets.RoundR,
+      [Brackets.CurlyL]: Brackets.CurlyR
+    };
+    (function(Chars2) {
+      Chars2[Chars2["Tab"] = 9] = "Tab";
+      Chars2[Chars2["Space"] = 32] = "Space";
+      Chars2[Chars2["Dash"] = 45] = "Dash";
+      Chars2[Chars2["Slash"] = 47] = "Slash";
+      Chars2[Chars2["Colon"] = 58] = "Colon";
+      Chars2[Chars2["Equals"] = 61] = "Equals";
+      Chars2[Chars2["AngleLeft"] = 60] = "AngleLeft";
+      Chars2[Chars2["AngleRight"] = 62] = "AngleRight";
+    })(Chars || (Chars = {}));
+    code = (ch) => ch.charCodeAt(0);
+    specialChars = "#.*:$-_!@%^+>/".split("").map(code);
+    defaultOptions = {
+      type: "markup",
+      lookAhead: true,
+      prefix: ""
+    };
+  }
+});
+
+// node_modules/@vscode/emmet-helper/lib/esm/configCompat.js
+function parseSnippets2(snippets2) {
+  const result = {};
+  Object.keys(snippets2).forEach((k) => {
+    for (const name of k.split("|")) {
+      result[name] = snippets2[k];
+    }
+  });
+  return result;
+}
+var syntaxes;
+var init_configCompat = __esm({
+  "node_modules/@vscode/emmet-helper/lib/esm/configCompat.js"() {
+    syntaxes = {
+      markup: ["html", "xml", "xsl", "jsx", "js", "pug", "slim", "haml", "vue"],
+      stylesheet: ["css", "sass", "scss", "less", "sss", "stylus"]
+    };
+  }
+});
+
+// node_modules/@vscode/emmet-helper/lib/esm/emmetHelper.js
+var emmetHelper_exports = {};
+__export(emmetHelper_exports, {
+  FileType: () => FileType2,
+  doComplete: () => doComplete,
+  emmetSnippetField: () => emmetSnippetField,
+  expandAbbreviation: () => expandAbbreviation2,
+  extractAbbreviation: () => extractAbbreviation2,
+  extractAbbreviationFromText: () => extractAbbreviationFromText,
+  getDefaultSnippets: () => getDefaultSnippets,
+  getDefaultSyntax: () => getDefaultSyntax,
+  getEmmetMode: () => getEmmetMode,
+  getExpandOptions: () => getExpandOptions,
+  getSyntaxType: () => getSyntaxType,
+  isAbbreviationValid: () => isAbbreviationValid,
+  isStyleSheet: () => isStyleSheet,
+  parseAbbreviation: () => parseAbbreviation2,
+  updateExtensionsPath: () => updateExtensionsPath
+});
+function doComplete(document, position, syntax, emmetConfig) {
+  var _a2, _b;
+  if (emmetConfig.showExpandedAbbreviation === "never" || !getEmmetMode(syntax, emmetConfig.excludeLanguages)) {
+    return;
+  }
+  const isStyleSheetRes = isStyleSheet(syntax);
+  if (!isStyleSheetRes) {
+    if (!snippetKeyCache.has(syntax)) {
+      const registry = Object.assign(Object.assign({}, getDefaultSnippets(syntax)), customSnippetsRegistry[syntax]);
+      snippetKeyCache.set(syntax, Object.keys(registry));
+    }
+    markupSnippetKeys = (_a2 = snippetKeyCache.get(syntax)) !== null && _a2 !== void 0 ? _a2 : [];
+  }
+  const extractOptions = { lookAhead: !isStyleSheetRes, type: isStyleSheetRes ? "stylesheet" : "markup" };
+  const extractedValue = extractAbbreviation2(document, position, extractOptions);
+  if (!extractedValue) {
+    return;
+  }
+  const { abbreviationRange, abbreviation: abbreviation2, filter } = extractedValue;
+  const currentLineTillPosition = getCurrentLine(document, position).substr(0, position.character);
+  const currentWord = getCurrentWord(currentLineTillPosition);
+  if (currentWord === abbreviation2 && currentLineTillPosition.endsWith(`<${abbreviation2}`) && syntaxes.markup.includes(syntax)) {
+    return;
+  }
+  const expandOptions = getExpandOptions(syntax, emmetConfig, filter);
+  let expandedText = "";
+  let expandedAbbr;
+  let completionItems = [];
+  const createExpandedAbbr = (syntax2, abbr) => {
+    if (!isAbbreviationValid(syntax2, abbreviation2)) {
+      return;
+    }
+    try {
+      expandedText = expandAbbreviation(abbr, expandOptions);
+      if (isStyleSheetRes && "!important".startsWith(abbr)) {
+        expandedText = "!important";
+      }
+    } catch (e2) {
+    }
+    if (!expandedText || isExpandedTextNoise(syntax2, abbr, expandedText, expandOptions.options)) {
+      return;
+    }
+    expandedAbbr = CompletionItem.create(abbr);
+    expandedAbbr.textEdit = TextEdit.replace(abbreviationRange, escapeNonTabStopDollar(addFinalTabStop(expandedText)));
+    expandedAbbr.documentation = replaceTabStopsWithCursors(expandedText);
+    expandedAbbr.insertTextFormat = InsertTextFormat.Snippet;
+    expandedAbbr.detail = l10n4.t("Emmet Abbreviation");
+    expandedAbbr.label = abbreviation2;
+    expandedAbbr.label += filter ? "|" + filter.replace(",", "|") : "";
+    completionItems = [expandedAbbr];
+  };
+  if (isStyleSheet(syntax)) {
+    createExpandedAbbr(syntax, abbreviation2);
+    if (abbreviation2.length > 4 && cssData.properties.find((x2) => x2.startsWith(abbreviation2))) {
+      return CompletionList.create([], true);
+    }
+    if (expandedAbbr && expandedText.length) {
+      expandedAbbr.textEdit = TextEdit.replace(abbreviationRange, escapeNonTabStopDollar(addFinalTabStop(expandedText)));
+      expandedAbbr.documentation = replaceTabStopsWithCursors(expandedText);
+      expandedAbbr.label = removeTabStops(expandedText);
+      expandedAbbr.filterText = abbreviation2;
+      const stylesheetCustomSnippetsKeys = stylesheetCustomSnippetsKeyCache.has(syntax) ? stylesheetCustomSnippetsKeyCache.get(syntax) : stylesheetCustomSnippetsKeyCache.get("css");
+      completionItems = makeSnippetSuggestion(stylesheetCustomSnippetsKeys !== null && stylesheetCustomSnippetsKeys !== void 0 ? stylesheetCustomSnippetsKeys : [], abbreviation2, abbreviation2, abbreviationRange, expandOptions, "Emmet Custom Snippet", false);
+      if (!completionItems.find((x2) => {
+        var _a3, _b2, _c;
+        return ((_a3 = x2.textEdit) === null || _a3 === void 0 ? void 0 : _a3.newText) && ((_b2 = x2.textEdit) === null || _b2 === void 0 ? void 0 : _b2.newText) === ((_c = expandedAbbr === null || expandedAbbr === void 0 ? void 0 : expandedAbbr.textEdit) === null || _c === void 0 ? void 0 : _c.newText);
+      })) {
+        const abbrRegex = new RegExp(".*" + abbreviation2.split("").map((x2) => x2 === "$" || x2 === "+" ? "\\" + x2 : x2).join(".*") + ".*", "i");
+        if (/\d/.test(abbreviation2) || abbrRegex.test(expandedAbbr.label)) {
+          completionItems.push(expandedAbbr);
+        }
+      }
+    }
+  } else {
+    createExpandedAbbr(syntax, abbreviation2);
+    let tagToFindMoreSuggestionsFor = abbreviation2;
+    const newTagMatches = abbreviation2.match(/(>|\+)([\w:-]+)$/);
+    if (newTagMatches && newTagMatches.length === 3) {
+      tagToFindMoreSuggestionsFor = newTagMatches[2];
+    }
+    if (syntax !== "xml") {
+      const commonlyUsedTagSuggestions = makeSnippetSuggestion(commonlyUsedTags, tagToFindMoreSuggestionsFor, abbreviation2, abbreviationRange, expandOptions, "Emmet Abbreviation");
+      completionItems = completionItems.concat(commonlyUsedTagSuggestions);
+    }
+    if (emmetConfig.showAbbreviationSuggestions === true) {
+      const abbreviationSuggestions = makeSnippetSuggestion(markupSnippetKeys.filter((x2) => !commonlyUsedTags.includes(x2)), tagToFindMoreSuggestionsFor, abbreviation2, abbreviationRange, expandOptions, "Emmet Abbreviation");
+      if (expandedAbbr && abbreviationSuggestions.length > 0 && tagToFindMoreSuggestionsFor !== abbreviation2) {
+        expandedAbbr.sortText = "0" + expandedAbbr.label;
+        abbreviationSuggestions.forEach((item) => {
+          item.filterText = abbreviation2;
+          item.sortText = "9" + abbreviation2;
+        });
+      }
+      completionItems = completionItems.concat(abbreviationSuggestions);
+    }
+    if (syntax === "html" && completionItems.length >= 2 && abbreviation2.includes(":") && ((_b = expandedAbbr === null || expandedAbbr === void 0 ? void 0 : expandedAbbr.textEdit) === null || _b === void 0 ? void 0 : _b.newText) === `<${abbreviation2}>\${0}</${abbreviation2}>`) {
+      completionItems = completionItems.filter((item) => item.label !== abbreviation2);
+    }
+  }
+  if (emmetConfig.showSuggestionsAsSnippets === true) {
+    completionItems.forEach((x2) => x2.kind = CompletionItemKind.Snippet);
+  }
+  return completionItems.length ? CompletionList.create(completionItems, true) : void 0;
+}
+function makeSnippetSuggestion(snippetKeys, prefix, abbreviation2, abbreviationRange, expandOptions, snippetDetail, skipFullMatch = true) {
+  if (!prefix || !snippetKeys) {
+    return [];
+  }
+  const snippetCompletions = [];
+  snippetKeys.forEach((snippetKey) => {
+    if (!snippetKey.startsWith(prefix.toLowerCase()) || skipFullMatch && snippetKey === prefix.toLowerCase()) {
+      return;
+    }
+    const currentAbbr = abbreviation2 + snippetKey.substr(prefix.length);
+    let expandedAbbr;
+    try {
+      expandedAbbr = expandAbbreviation(currentAbbr, expandOptions);
+    } catch (e2) {
+    }
+    if (!expandedAbbr) {
+      return;
+    }
+    const item = CompletionItem.create(prefix + snippetKey.substr(prefix.length));
+    item.documentation = replaceTabStopsWithCursors(expandedAbbr);
+    item.detail = snippetDetail;
+    item.textEdit = TextEdit.replace(abbreviationRange, escapeNonTabStopDollar(addFinalTabStop(expandedAbbr)));
+    item.insertTextFormat = InsertTextFormat.Snippet;
+    snippetCompletions.push(item);
+  });
+  return snippetCompletions;
+}
+function getCurrentWord(currentLineTillPosition) {
+  if (currentLineTillPosition) {
+    const matches = currentLineTillPosition.match(/[\w,:,-,\.]*$/);
+    if (matches) {
+      return matches[0];
+    }
+  }
+}
+function replaceTabStopsWithCursors(expandedWord) {
+  return expandedWord.replace(/([^\\])\$\{\d+\}/g, "$1|").replace(/\$\{\d+:([^\}]+)\}/g, "$1");
+}
+function removeTabStops(expandedWord) {
+  return expandedWord.replace(/([^\\])\$\{\d+\}/g, "$1").replace(/\$\{\d+:([^\}]+)\}/g, "$1");
+}
+function escapeNonTabStopDollar(text2) {
+  return text2 ? text2.replace(/([^\\])(\$)([^\{])/g, "$1\\$2$3") : text2;
+}
+function addFinalTabStop(text2) {
+  if (!text2 || !text2.trim()) {
+    return text2;
+  }
+  let maxTabStop = -1;
+  let maxTabStopRanges = [];
+  let foundLastStop = false;
+  let replaceWithLastStop = false;
+  let i2 = 0;
+  const n2 = text2.length;
+  try {
+    while (i2 < n2 && !foundLastStop) {
+      if (text2[i2++] != "$" || text2[i2++] != "{") {
+        continue;
+      }
+      let numberStart = -1;
+      let numberEnd = -1;
+      while (i2 < n2 && /\d/.test(text2[i2])) {
+        numberStart = numberStart < 0 ? i2 : numberStart;
+        numberEnd = i2 + 1;
+        i2++;
+      }
+      if (numberStart === -1 || numberEnd === -1 || i2 >= n2 || text2[i2] != "}" && text2[i2] != ":") {
+        continue;
+      }
+      const currentTabStop = text2.substring(numberStart, numberEnd);
+      foundLastStop = currentTabStop === "0";
+      if (foundLastStop) {
+        break;
+      }
+      let foundPlaceholder = false;
+      if (text2[i2++] == ":") {
+        while (i2 < n2) {
+          if (text2[i2] == "}") {
+            foundPlaceholder = true;
+            break;
+          }
+          i2++;
+        }
+      }
+      if (Number(currentTabStop) > Number(maxTabStop)) {
+        maxTabStop = Number(currentTabStop);
+        maxTabStopRanges = [{ numberStart, numberEnd }];
+        replaceWithLastStop = !foundPlaceholder;
+      } else if (Number(currentTabStop) === maxTabStop) {
+        maxTabStopRanges.push({ numberStart, numberEnd });
+      }
+    }
+  } catch (e2) {
+  }
+  if (replaceWithLastStop && !foundLastStop) {
+    for (let i3 = 0; i3 < maxTabStopRanges.length; i3++) {
+      const rangeStart = maxTabStopRanges[i3].numberStart;
+      const rangeEnd = maxTabStopRanges[i3].numberEnd;
+      text2 = text2.substr(0, rangeStart) + "0" + text2.substr(rangeEnd);
+    }
+  }
+  return text2;
+}
+function getCurrentLine(document, position) {
+  const offset = document.offsetAt(position);
+  const text2 = document.getText();
+  let start = 0;
+  let end = text2.length;
+  for (let i2 = offset - 1; i2 >= 0; i2--) {
+    if (text2[i2] === "\n") {
+      start = i2 + 1;
+      break;
+    }
+  }
+  for (let i2 = offset; i2 < text2.length; i2++) {
+    if (text2[i2] === "\n") {
+      end = i2;
+      break;
+    }
+  }
+  return text2.substring(start, end);
+}
+function isStyleSheet(syntax) {
+  return syntaxes.stylesheet.includes(syntax);
+}
+function getSyntaxType(syntax) {
+  return isStyleSheet(syntax) ? "stylesheet" : "markup";
+}
+function getDefaultSyntax(syntax) {
+  return isStyleSheet(syntax) ? "css" : "html";
+}
+function getDefaultSnippets(syntax) {
+  const syntaxType = getSyntaxType(syntax);
+  const emptyUserConfig = { type: syntaxType, syntax };
+  const resolvedConfig = resolveConfig(emptyUserConfig);
+  return syntax === "xml" ? {} : resolvedConfig.snippets;
+}
+function getFilters(text2, pos) {
+  let filter;
+  for (let i2 = 0; i2 < maxFilters; i2++) {
+    if (text2.endsWith(`${filterDelimitor}${bemFilterSuffix}`, pos)) {
+      pos -= bemFilterSuffix.length + 1;
+      filter = filter ? bemFilterSuffix + "," + filter : bemFilterSuffix;
+    } else if (text2.endsWith(`${filterDelimitor}${commentFilterSuffix}`, pos)) {
+      pos -= commentFilterSuffix.length + 1;
+      filter = filter ? commentFilterSuffix + "," + filter : commentFilterSuffix;
+    } else if (text2.endsWith(`${filterDelimitor}${trimFilterSuffix}`, pos)) {
+      pos -= trimFilterSuffix.length + 1;
+      filter = filter ? trimFilterSuffix + "," + filter : trimFilterSuffix;
+    } else {
+      break;
+    }
+  }
+  return {
+    pos,
+    filter
+  };
+}
+function extractAbbreviation2(document, position, options) {
+  const currentLine = getCurrentLine(document, position);
+  const currentLineTillPosition = currentLine.substr(0, position.character);
+  const { pos, filter } = getFilters(currentLineTillPosition, position.character);
+  const lengthOccupiedByFilter = filter ? filter.length + 1 : 0;
+  const result = extractAbbreviation(currentLine, pos, options);
+  if (!result) {
+    return;
+  }
+  const rangeToReplace = Range.create(position.line, result.location, position.line, result.location + result.abbreviation.length + lengthOccupiedByFilter);
+  return {
+    abbreviationRange: rangeToReplace,
+    abbreviation: result.abbreviation,
+    filter
+  };
+}
+function extractAbbreviationFromText(text2, syntax) {
+  if (!text2) {
+    return;
+  }
+  const { pos, filter } = getFilters(text2, text2.length);
+  const extractOptions = isStyleSheet(syntax) || syntax === "stylesheet" ? { syntax: "stylesheet", lookAhead: false } : { lookAhead: true };
+  const result = extractAbbreviation(text2, pos, extractOptions);
+  if (!result) {
+    return;
+  }
+  return {
+    abbreviation: result.abbreviation,
+    filter
+  };
+}
+function isAbbreviationValid(syntax, abbreviation2) {
+  if (!abbreviation2) {
+    return false;
+  }
+  if (isStyleSheet(syntax)) {
+    if (abbreviation2.includes("#")) {
+      if (abbreviation2.startsWith("#")) {
+        const hexColorRegex = /^#[\d,a-f,A-F]{1,6}$/;
+        return hexColorRegex.test(abbreviation2);
+      } else if (commonlyUsedTags.includes(abbreviation2.substring(0, abbreviation2.indexOf("#")))) {
+        return false;
+      }
+    }
+    return cssAbbreviationRegex.test(abbreviation2);
+  }
+  if (abbreviation2.startsWith("!")) {
+    return !/[^!]/.test(abbreviation2);
+  }
+  if ((/\(/.test(abbreviation2) || /\)/.test(abbreviation2)) && !/\{[^\}\{]*[\(\)]+[^\}\{]*\}(?:[>\+\*\^]|$)/.test(abbreviation2) && !/\(.*\)[>\+\*\^]/.test(abbreviation2) && !/\[[^\[\]\(\)]+=".*"\]/.test(abbreviation2) && !/[>\+\*\^]\(.*\)/.test(abbreviation2)) {
+    return false;
+  }
+  if (syntax === "jsx") {
+    return jsxAbbreviationStartRegex.test(abbreviation2) && htmlAbbreviationRegex.test(abbreviation2);
+  }
+  if (/^{%|{#|{{/.test(abbreviation2)) {
+    return false;
+  }
+  return htmlAbbreviationStartRegex.test(abbreviation2) && htmlAbbreviationRegex.test(abbreviation2);
+}
+function isExpandedTextNoise(syntax, abbreviation2, expandedText, options) {
+  var _a2, _b;
+  if (isStyleSheet(syntax) && options) {
+    const between = (_a2 = options["stylesheet.between"]) !== null && _a2 !== void 0 ? _a2 : ": ";
+    const after = (_b = options["stylesheet.after"]) !== null && _b !== void 0 ? _b : ";";
+    let endPrefixIndex = abbreviation2.indexOf(between[0], Math.max(abbreviation2.length - between.length, 0));
+    endPrefixIndex = endPrefixIndex >= 0 ? endPrefixIndex : abbreviation2.length;
+    const abbr = abbreviation2.substring(0, endPrefixIndex);
+    return expandedText === `${abbr}${between}\${0}${after}` || expandedText.replace(/\s/g, "") === abbreviation2.replace(/\s/g, "") + after;
+  }
+  if (syntax === "xml" && commonlyUsedTags.some((tag) => tag.startsWith(abbreviation2.toLowerCase()))) {
+    return true;
+  }
+  if (commonlyUsedTags.includes(abbreviation2.toLowerCase()) || markupSnippetKeys.includes(abbreviation2)) {
+    return false;
+  }
+  if (/[-,:]/.test(abbreviation2) && !/--|::/.test(abbreviation2) && !abbreviation2.endsWith(":")) {
+    return false;
+  }
+  if (/^\.{2,}$/.test(abbreviation2)) {
+    return true;
+  }
+  if (abbreviation2 === ".") {
+    return false;
+  }
+  const dotMatches = abbreviation2.match(/^([a-z,A-Z,\d]*)\.$/);
+  if (dotMatches) {
+    if (dotMatches[1] && htmlData2.tags.includes(dotMatches[1])) {
+      return false;
+    }
+    return true;
+  }
+  if (syntax === "jsx" && /^([A-Z][A-Za-z0-9]*)+$/.test(abbreviation2)) {
+    return false;
+  }
+  return expandedText.toLowerCase() === `<${abbreviation2.toLowerCase()}>\${1}</${abbreviation2.toLowerCase()}>`;
+}
+function getExpandOptions(syntax, emmetConfig, filter) {
+  var _a2, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+  emmetConfig = emmetConfig !== null && emmetConfig !== void 0 ? emmetConfig : {};
+  emmetConfig["preferences"] = (_a2 = emmetConfig["preferences"]) !== null && _a2 !== void 0 ? _a2 : {};
+  const preferences = emmetConfig["preferences"];
+  const stylesheetSyntax = isStyleSheet(syntax) ? syntax : "css";
+  const profile = getProfile(syntax, (_b = emmetConfig["syntaxProfiles"]) !== null && _b !== void 0 ? _b : {});
+  const filtersFromProfile = profile && profile["filters"] ? profile["filters"].split(",") : [];
+  const trimmedFilters = filtersFromProfile.map((filterFromProfile) => filterFromProfile.trim());
+  const bemEnabled = filter && filter.split(",").some((x2) => x2.trim() === "bem") || trimmedFilters.includes("bem");
+  const commentEnabled = filter && filter.split(",").some((x2) => x2.trim() === "c") || trimmedFilters.includes("c");
+  const formatters2 = getFormatters(syntax, emmetConfig["preferences"]);
+  const unitAliases = (formatters2 === null || formatters2 === void 0 ? void 0 : formatters2.stylesheet) && formatters2.stylesheet["unitAliases"] || {};
+  const defaultVSCodeOptions = {
+    // inlineElements: string[],
+    // 'output.indent': string,
+    // 'output.baseIndent': string,
+    // 'output.newline': string,
+    // 'output.tagCase': profile['tagCase'],
+    // 'output.attributeCase': profile['attributeCase'],
+    // 'output.attributeQuotes': profile['attributeQuotes'],
+    // 'output.format': profile['format'] ?? true,
+    // 'output.formatLeafNode': boolean,
+    "output.formatSkip": ["html"],
+    "output.formatForce": ["body"],
+    "output.inlineBreak": 0,
+    "output.compactBoolean": false,
+    // 'output.booleanAttributes': string[],
+    "output.reverseAttributes": false,
+    // 'output.selfClosingStyle': profile['selfClosingStyle'],
+    "output.field": emmetSnippetField,
+    // 'output.text': TextOutput,
+    "markup.href": true,
+    "comment.enabled": false,
+    "comment.trigger": ["id", "class"],
+    "comment.before": "",
+    "comment.after": "\n<!-- /[#ID][.CLASS] -->",
+    "bem.enabled": false,
+    "bem.element": "__",
+    "bem.modifier": "_",
+    "jsx.enabled": syntax === "jsx",
+    // 'stylesheet.keywords': string[],
+    // 'stylesheet.unitless': string[],
+    "stylesheet.shortHex": true,
+    "stylesheet.between": syntax === "stylus" ? " " : ": ",
+    "stylesheet.after": syntax === "sass" || syntax === "stylus" ? "" : ";",
+    "stylesheet.intUnit": "px",
+    "stylesheet.floatUnit": "em",
+    "stylesheet.unitAliases": { e: "em", p: "%", x: "ex", r: "rem" },
+    // 'stylesheet.json': boolean,
+    // 'stylesheet.jsonDoubleQuotes': boolean,
+    "stylesheet.fuzzySearchMinScore": 0.3
+  };
+  let userPreferenceOptions = {
+    // inlineElements: string[],
+    // 'output.indent': string,
+    // 'output.baseIndent': string,
+    // 'output.newline': string,
+    "output.tagCase": profile["tagCase"],
+    "output.attributeCase": profile["attributeCase"],
+    "output.attributeQuotes": profile["attributeQuotes"],
+    "output.format": (_c = profile["format"]) !== null && _c !== void 0 ? _c : true,
+    // 'output.formatLeafNode': boolean,
+    "output.formatSkip": preferences["format.noIndentTags"],
+    "output.formatForce": preferences["format.forceIndentationForTags"],
+    "output.inlineBreak": (_d = profile["inlineBreak"]) !== null && _d !== void 0 ? _d : preferences["output.inlineBreak"],
+    "output.compactBoolean": (_e = profile["compactBooleanAttributes"]) !== null && _e !== void 0 ? _e : preferences["profile.allowCompactBoolean"],
+    // 'output.booleanAttributes': string[],
+    "output.reverseAttributes": preferences["output.reverseAttributes"],
+    "output.selfClosingStyle": (_g = (_f = profile["selfClosingStyle"]) !== null && _f !== void 0 ? _f : preferences["output.selfClosingStyle"]) !== null && _g !== void 0 ? _g : getClosingStyle(syntax),
+    "output.field": emmetSnippetField,
+    // 'output.text': TextOutput,
+    // 'markup.href': boolean,
+    "comment.enabled": commentEnabled,
+    "comment.trigger": preferences["filter.commentTrigger"],
+    "comment.before": preferences["filter.commentBefore"],
+    "comment.after": preferences["filter.commentAfter"],
+    "bem.enabled": bemEnabled,
+    "bem.element": (_h = preferences["bem.elementSeparator"]) !== null && _h !== void 0 ? _h : "__",
+    "bem.modifier": (_j = preferences["bem.modifierSeparator"]) !== null && _j !== void 0 ? _j : "_",
+    "jsx.enabled": syntax === "jsx",
+    // 'stylesheet.keywords': string[],
+    // 'stylesheet.unitless': string[],
+    "stylesheet.shortHex": preferences["css.color.short"],
+    "stylesheet.between": preferences[`${stylesheetSyntax}.valueSeparator`],
+    "stylesheet.after": preferences[`${stylesheetSyntax}.propertyEnd`],
+    "stylesheet.intUnit": preferences["css.intUnit"],
+    "stylesheet.floatUnit": preferences["css.floatUnit"],
+    "stylesheet.unitAliases": unitAliases,
+    // 'stylesheet.json': boolean,
+    // 'stylesheet.jsonDoubleQuotes': boolean,
+    "stylesheet.fuzzySearchMinScore": preferences["css.fuzzySearchMinScore"]
+  };
+  if (syntax === "jsx") {
+    const defaultMarkupAttributeOptions = {
+      "class": "className",
+      "class*": "styleName",
+      "for": "htmlFor"
+    };
+    const defaultMarkupValuePrefixOptions = {
+      "class*": "styles"
+    };
+    if (profile["markup.attributes"]) {
+      userPreferenceOptions["markup.attributes"] = Object.assign(Object.assign({}, defaultMarkupAttributeOptions), profile["markup.attributes"]);
+    }
+    if (profile["markup.valuePrefix"]) {
+      userPreferenceOptions["markup.valuePrefix"] = Object.assign(Object.assign({}, defaultMarkupValuePrefixOptions), profile["markup.valuePrefix"]);
+    }
+  }
+  if (syntax === "vue") {
+    const defaultMarkupAttributeOptions = {
+      "class*": ":class"
+    };
+    const defaultMarkupValuePrefixOptions = {
+      "class*": "$style"
+    };
+    if (profile["markup.attributes"]) {
+      userPreferenceOptions["markup.attributes"] = Object.assign(Object.assign({}, defaultMarkupAttributeOptions), profile["markup.attributes"]);
+    }
+    if (profile["markup.valuePrefix"]) {
+      userPreferenceOptions["markup.valuePrefix"] = Object.assign(Object.assign({}, defaultMarkupValuePrefixOptions), profile["markup.valuePrefix"]);
+    }
+  }
+  const combinedOptions = {};
+  [...Object.keys(defaultVSCodeOptions), ...Object.keys(userPreferenceOptions)].forEach((key) => {
+    var _a3;
+    const castKey = key;
+    combinedOptions[castKey] = (_a3 = userPreferenceOptions[castKey]) !== null && _a3 !== void 0 ? _a3 : defaultVSCodeOptions[castKey];
+  });
+  const mergedAliases = Object.assign(Object.assign({}, defaultVSCodeOptions["stylesheet.unitAliases"]), userPreferenceOptions["stylesheet.unitAliases"]);
+  combinedOptions["stylesheet.unitAliases"] = mergedAliases;
+  const type = getSyntaxType(syntax);
+  const variables2 = getVariables(emmetConfig["variables"]);
+  const baseSyntax = getDefaultSyntax(syntax);
+  const snippets2 = type === "stylesheet" ? (_k = customSnippetsRegistry[syntax]) !== null && _k !== void 0 ? _k : customSnippetsRegistry[baseSyntax] : customSnippetsRegistry[syntax];
+  return {
+    type,
+    options: combinedOptions,
+    variables: variables2,
+    snippets: snippets2,
+    syntax,
+    // context: null,
+    text: void 0,
+    maxRepeat: 1e3
+    // cache: null
+  };
+}
+function getClosingStyle(syntax) {
+  switch (syntax) {
+    case "xhtml":
+      return "xhtml";
+    case "xml":
+      return "xml";
+    case "xsl":
+      return "xml";
+    case "jsx":
+      return "xhtml";
+    default:
+      return "html";
+  }
+}
+function parseAbbreviation2(abbreviation2, options) {
+  const resolvedOptions = resolveConfig(options);
+  return options.type === "stylesheet" ? parse3(abbreviation2, resolvedOptions) : parse$1(abbreviation2, resolvedOptions);
+}
+function expandAbbreviation2(abbreviation2, config) {
+  let expandedText;
+  const resolvedConfig = resolveConfig(config);
+  if (config.type === "stylesheet") {
+    if (typeof abbreviation2 === "string") {
+      expandedText = expandAbbreviation(abbreviation2, resolvedConfig);
+    } else {
+      expandedText = css(abbreviation2, resolvedConfig);
+    }
+  } else {
+    if (typeof abbreviation2 === "string") {
+      expandedText = expandAbbreviation(abbreviation2, resolvedConfig);
+    } else {
+      expandedText = stringify(abbreviation2, resolvedConfig);
+    }
+  }
+  return escapeNonTabStopDollar(addFinalTabStop(expandedText));
+}
+function getProfile(syntax, profilesFromSettings) {
+  if (!profilesFromSettings) {
+    profilesFromSettings = {};
+  }
+  const profilesConfig = Object.assign({}, profilesFromFile, profilesFromSettings);
+  const options = profilesConfig[syntax];
+  if (!options || typeof options === "string") {
+    if (options === "xhtml") {
+      return {
+        selfClosingStyle: "xhtml"
+      };
+    }
+    return {};
+  }
+  const newOptions = {};
+  for (const key in options) {
+    switch (key) {
+      case "tag_case":
+        newOptions["tagCase"] = options[key] === "lower" || options[key] === "upper" ? options[key] : "";
+        break;
+      case "attr_case":
+        newOptions["attributeCase"] = options[key] === "lower" || options[key] === "upper" ? options[key] : "";
+        break;
+      case "attr_quotes":
+        newOptions["attributeQuotes"] = options[key];
+        break;
+      case "tag_nl":
+        newOptions["format"] = options[key] === true || options[key] === false ? options[key] : true;
+        break;
+      case "inline_break":
+        newOptions["inlineBreak"] = options[key];
+        break;
+      case "self_closing_tag":
+        if (options[key] === true) {
+          newOptions["selfClosingStyle"] = "xml";
+          break;
+        }
+        if (options[key] === false) {
+          newOptions["selfClosingStyle"] = "html";
+          break;
+        }
+        newOptions["selfClosingStyle"] = options[key];
+        break;
+      case "compact_bool":
+        newOptions["compactBooleanAttributes"] = options[key];
+        break;
+      default:
+        newOptions[key] = options[key];
+        break;
+    }
+  }
+  return newOptions;
+}
+function getVariables(variablesFromSettings) {
+  if (!variablesFromSettings) {
+    return variablesFromFile;
+  }
+  return Object.assign({}, variablesFromFile, variablesFromSettings);
+}
+function getFormatters(syntax, preferences) {
+  if (!preferences || typeof preferences !== "object") {
+    return {};
+  }
+  if (!isStyleSheet(syntax)) {
+    const commentFormatter = {};
+    for (const key in preferences) {
+      switch (key) {
+        case "filter.commentAfter":
+          commentFormatter["after"] = preferences[key];
+          break;
+        case "filter.commentBefore":
+          commentFormatter["before"] = preferences[key];
+          break;
+        case "filter.commentTrigger":
+          commentFormatter["trigger"] = preferences[key];
+          break;
+        default:
+          break;
+      }
+    }
+    return {
+      comment: commentFormatter
+    };
+  }
+  let fuzzySearchMinScore = typeof (preferences === null || preferences === void 0 ? void 0 : preferences["css.fuzzySearchMinScore"]) === "number" ? preferences["css.fuzzySearchMinScore"] : 0.3;
+  if (fuzzySearchMinScore > 1) {
+    fuzzySearchMinScore = 1;
+  } else if (fuzzySearchMinScore < 0) {
+    fuzzySearchMinScore = 0;
+  }
+  const stylesheetFormatter = {
+    "fuzzySearchMinScore": fuzzySearchMinScore
+  };
+  for (const key in preferences) {
+    switch (key) {
+      case "css.floatUnit":
+        stylesheetFormatter["floatUnit"] = preferences[key];
+        break;
+      case "css.intUnit":
+        stylesheetFormatter["intUnit"] = preferences[key];
+        break;
+      case "css.unitAliases":
+        const unitAliases = {};
+        preferences[key].split(",").forEach((alias) => {
+          if (!alias || !alias.trim() || !alias.includes(":")) {
+            return;
+          }
+          const aliasName = alias.substr(0, alias.indexOf(":"));
+          const aliasValue = alias.substr(aliasName.length + 1);
+          if (!aliasName.trim() || !aliasValue) {
+            return;
+          }
+          unitAliases[aliasName.trim()] = aliasValue;
+        });
+        stylesheetFormatter["unitAliases"] = unitAliases;
+        break;
+      case `${syntax}.valueSeparator`:
+        stylesheetFormatter["between"] = preferences[key];
+        break;
+      case `${syntax}.propertyEnd`:
+        stylesheetFormatter["after"] = preferences[key];
+        break;
+      default:
+        break;
+    }
+  }
+  return {
+    stylesheet: stylesheetFormatter
+  };
+}
+function updateExtensionsPath(emmetExtensionsPathSetting, fs, workspaceFolderPaths, homeDir) {
+  return __awaiter(this, void 0, void 0, function* () {
+    resetSettingsFromFile();
+    if (!emmetExtensionsPathSetting.length) {
+      return;
+    }
+    const emmetExtensionsPathUri = [];
+    for (let emmetExtensionsPath of emmetExtensionsPathSetting) {
+      if (typeof emmetExtensionsPath !== "string") {
+        console.warn("The following emmetExtensionsPath isn't a string: " + JSON.stringify(emmetExtensionsPath));
+        continue;
+      }
+      emmetExtensionsPath = emmetExtensionsPath.trim();
+      if (emmetExtensionsPath.length && emmetExtensionsPath[0] === "~") {
+        if (homeDir) {
+          emmetExtensionsPathUri.push(joinPath(homeDir, emmetExtensionsPath.substring(1)));
+        }
+      } else if (!isAbsolutePath(emmetExtensionsPath)) {
+        if (workspaceFolderPaths) {
+          for (const workspacePath of workspaceFolderPaths) {
+            emmetExtensionsPathUri.push(joinPath(workspacePath, emmetExtensionsPath));
+          }
+        }
+      } else {
+        emmetExtensionsPathUri.push(u.file(emmetExtensionsPath));
+      }
+    }
+    for (const uri of emmetExtensionsPathUri) {
+      try {
+        if ((yield fs.stat(uri)).type !== FileType2.Directory) {
+          continue;
+        }
+      } catch (e2) {
+        continue;
+      }
+      const snippetsPath = joinPath(uri, "snippets.json");
+      const profilesPath = joinPath(uri, "syntaxProfiles.json");
+      let decoder;
+      if (typeof globalThis.TextDecoder === "function") {
+        decoder = new globalThis.TextDecoder();
+      } else {
+        decoder = new import_util.TextDecoder();
+      }
+      let snippetsDataStr = "";
+      try {
+        const snippetsData = yield fs.readFile(snippetsPath);
+        snippetsDataStr = decoder.decode(snippetsData);
+      } catch (e2) {
+      }
+      if (snippetsDataStr.length) {
+        try {
+          const snippetsJson = tryParseFile(snippetsPath, snippetsDataStr);
+          if (snippetsJson["variables"]) {
+            updateVariables(snippetsJson["variables"]);
+          }
+          updateSnippets(snippetsJson);
+        } catch (e2) {
+          resetSettingsFromFile();
+          throw e2;
+        }
+      }
+      let profilesDataStr = "";
+      try {
+        const profilesData = yield fs.readFile(profilesPath);
+        profilesDataStr = decoder.decode(profilesData);
+      } catch (e2) {
+      }
+      if (profilesDataStr.length) {
+        try {
+          const profilesJson = tryParseFile(profilesPath, profilesDataStr);
+          updateProfiles(profilesJson);
+        } catch (e2) {
+          resetSettingsFromFile();
+          throw e2;
+        }
+      }
+    }
+  });
+}
+function tryParseFile(strPath, dataStr) {
+  let errors = [];
+  const json = parse2(dataStr, errors);
+  if (errors.length) {
+    throw new Error(`Found error ${printParseErrorCode(errors[0].error)} while parsing the file ${strPath} at offset ${errors[0].offset}`);
+  }
+  return json;
+}
+function updateVariables(varsJson) {
+  if (typeof varsJson === "object" && varsJson) {
+    variablesFromFile = Object.assign({}, variablesFromFile, varsJson);
+  } else {
+    throw new Error(l10n4.t("Invalid emmet.variables field. See https://code.visualstudio.com/docs/editor/emmet#_emmet-configuration for a valid example."));
+  }
+}
+function updateProfiles(profileJson) {
+  if (typeof profileJson === "object" && profileJson) {
+    profilesFromFile = Object.assign({}, profilesFromFile, profileJson);
+  } else {
+    throw new Error(l10n4.t("Invalid syntax profile. See https://code.visualstudio.com/docs/editor/emmet#_emmet-configuration for a valid example."));
+  }
+}
+function updateSnippets(snippetsJson) {
+  if (typeof snippetsJson === "object" && snippetsJson) {
+    Object.keys(snippetsJson).forEach((syntax) => {
+      if (!snippetsJson[syntax]["snippets"]) {
+        return;
+      }
+      const baseSyntax = getDefaultSyntax(syntax);
+      let customSnippets = snippetsJson[syntax]["snippets"];
+      if (snippetsJson[baseSyntax] && snippetsJson[baseSyntax]["snippets"] && baseSyntax !== syntax) {
+        customSnippets = Object.assign({}, snippetsJson[baseSyntax]["snippets"], snippetsJson[syntax]["snippets"]);
+      }
+      if (!isStyleSheet(syntax)) {
+        for (const snippetKey in customSnippets) {
+          if (customSnippets.hasOwnProperty(snippetKey) && customSnippets[snippetKey].startsWith("<") && customSnippets[snippetKey].endsWith(">")) {
+            customSnippets[snippetKey] = `{${customSnippets[snippetKey]}}`;
+          }
+        }
+      } else {
+        const prevSnippetKeys = stylesheetCustomSnippetsKeyCache.get(syntax);
+        const mergedSnippetKeys = Object.assign([], prevSnippetKeys, Object.keys(customSnippets));
+        stylesheetCustomSnippetsKeyCache.set(syntax, mergedSnippetKeys);
+      }
+      const prevSnippetsRegistry = customSnippetsRegistry[syntax];
+      const newSnippets = parseSnippets2(customSnippets);
+      const mergedSnippets = Object.assign({}, prevSnippetsRegistry, newSnippets);
+      customSnippetsRegistry[syntax] = mergedSnippets;
+    });
+  } else {
+    throw new Error(l10n4.t("Invalid snippets file. See https://code.visualstudio.com/docs/editor/emmet#_using-custom-emmet-snippets for a valid example."));
+  }
+}
+function resetSettingsFromFile() {
+  customSnippetsRegistry = {};
+  snippetKeyCache.clear();
+  stylesheetCustomSnippetsKeyCache.clear();
+  profilesFromFile = {};
+  variablesFromFile = {};
+}
+function getEmmetMode(language2, excludedLanguages = []) {
+  if (!language2 || excludedLanguages.includes(language2)) {
+    return;
+  }
+  if (/\b(typescriptreact|javascriptreact|jsx-tags)\b/.test(language2)) {
+    return "jsx";
+  }
+  if (language2 === "sass-indented") {
+    return "sass";
+  }
+  if (language2 === "jade") {
+    return "pug";
+  }
+  if (syntaxes.markup.includes(language2) || syntaxes.stylesheet.includes(language2)) {
+    return language2;
+  }
+}
+var import_util, __awaiter, l10n4, snippetKeyCache, markupSnippetKeys, stylesheetCustomSnippetsKeyCache, htmlAbbreviationStartRegex, jsxAbbreviationStartRegex, cssAbbreviationRegex, htmlAbbreviationRegex, commonlyUsedTags, bemFilterSuffix, filterDelimitor, trimFilterSuffix, commentFilterSuffix, maxFilters, customSnippetsRegistry, variablesFromFile, profilesFromFile, emmetSnippetField;
+var init_emmetHelper = __esm({
+  "node_modules/@vscode/emmet-helper/lib/esm/emmetHelper.js"() {
+    init_main3();
+    import_util = require("util");
+    init_main();
+    init_esm();
+    init_data();
+    init_fileService();
+    init_emmet_es();
+    init_configCompat();
+    __awaiter = function(thisArg, _arguments, P2, generator) {
+      function adopt(value) {
+        return value instanceof P2 ? value : new P2(function(resolve) {
+          resolve(value);
+        });
+      }
+      return new (P2 || (P2 = Promise))(function(resolve, reject) {
+        function fulfilled(value) {
+          try {
+            step(generator.next(value));
+          } catch (e2) {
+            reject(e2);
+          }
+        }
+        function rejected(value) {
+          try {
+            step(generator["throw"](value));
+          } catch (e2) {
+            reject(e2);
+          }
+        }
+        function step(result) {
+          result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
+        }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+      });
+    };
+    try {
+      l10n4 = require("vscode").l10n;
+    } catch (_a2) {
+      l10n4 = {
+        t: (message) => message
+      };
+    }
+    snippetKeyCache = /* @__PURE__ */ new Map();
+    stylesheetCustomSnippetsKeyCache = /* @__PURE__ */ new Map();
+    htmlAbbreviationStartRegex = /^[a-z,A-Z,!,(,[,#,\.\{]/;
+    jsxAbbreviationStartRegex = /^[a-z,A-Z,!,(,[,#,\.]/;
+    cssAbbreviationRegex = /^-?[a-z,A-Z,!,@,#]/;
+    htmlAbbreviationRegex = /[a-z,A-Z\.]/;
+    commonlyUsedTags = [...htmlData2.tags, "lorem"];
+    bemFilterSuffix = "bem";
+    filterDelimitor = "|";
+    trimFilterSuffix = "t";
+    commentFilterSuffix = "c";
+    maxFilters = 3;
+    customSnippetsRegistry = {};
+    variablesFromFile = {};
+    profilesFromFile = {};
+    emmetSnippetField = (index, placeholder) => `\${${index}${placeholder ? ":" + placeholder : ""}}`;
+  }
+});
+
+// src/emmet.js
+var require_emmet = __commonJS({
+  "src/emmet.js"(exports2, module2) {
+    "use strict";
+    var {
+      TokenType: T,
+      ScannerState: S
+    } = (init_htmlLanguageService(), __toCommonJS(htmlLanguageService_exports));
+    var { project, service } = require_html();
+    var TEMPLATES = [
+      "text/html",
+      "text/plain",
+      "text/x-template",
+      "text/template",
+      "text/ng-template"
+    ];
+    var CLOSERS = { "{": "}}", "%": "%}", "#": "#}" };
+    function emmetSyntax(source, offset, projection = project(source)) {
+      for (const [start, end2] of projection.ranges) {
+        if (start >= offset) break;
+        const raw = source.slice(start, end2);
+        const closed = raw.length >= 4 && raw.endsWith(CLOSERS[raw[1]] || "%}");
+        if (offset < end2 || !closed) return;
+      }
+      const scanner = service.createScanner(projection.text);
+      let tag, attribute2, scriptType, previous2;
+      for (let token2 = scanner.scan(); token2 !== T.EOS; token2 = scanner.scan()) {
+        const start = scanner.getTokenOffset();
+        if (start >= offset) break;
+        const end2 = scanner.getTokenEnd();
+        const text3 = scanner.getTokenText();
+        if (token2 === T.StartTag) {
+          tag = text3.toLowerCase();
+          attribute2 = scriptType = void 0;
+        } else if (token2 === T.AttributeName) attribute2 = text3.toLowerCase();
+        else if (token2 === T.AttributeValue && tag === "script" && attribute2 === "type")
+          scriptType = text3.replace(/^["']|["']$/g, "").trim().toLowerCase();
+        previous2 = { token: token2, end: end2, text: text3, state: scanner.getScannerState() };
+      }
+      if (!previous2) return "html";
+      const { token, end, text: text2, state } = previous2;
+      const script = () => scriptType && TEMPLATES.includes(scriptType) ? "html" : void 0;
+      switch (token) {
+        case T.Content:
+          return "html";
+        case T.Styles:
+          return "css";
+        case T.Script:
+          return script();
+        case T.Comment:
+          return;
+        case T.AttributeValue: {
+          if (attribute2 !== "style" || !/^["']/.test(text2)) return;
+          const closed = text2.length > 1 && text2.endsWith(text2[0]);
+          return offset < end || !closed ? "css" : void 0;
+        }
+      }
+      if (offset < end) return;
+      if (state === S.WithinContent) return "html";
+      if (state === S.WithinStyleContent) return "css";
+      if (state === S.WithinScriptContent) return script();
+    }
+    function twigMappings(vscode2) {
+      const levels = [];
+      const add = (config2, key, target) => {
+        const value = config2.inspect("includeLanguages")?.[key];
+        if (value && typeof value === "object" && "twig" in value)
+          levels.push({ config: config2, value, target });
+      };
+      if (vscode2.workspace.workspaceFile)
+        for (const folder of vscode2.workspace.workspaceFolders || [])
+          add(
+            vscode2.workspace.getConfiguration("emmet", folder.uri),
+            "workspaceFolderValue",
+            vscode2.ConfigurationTarget.WorkspaceFolder
+          );
+      const config = vscode2.workspace.getConfiguration("emmet");
+      add(config, "workspaceValue", vscode2.ConfigurationTarget.Workspace);
+      add(config, "globalValue", vscode2.ConfigurationTarget.Global);
+      return levels;
+    }
+    async function removeTwigMapping(vscode2) {
+      for (const { config, value, target } of twigMappings(vscode2)) {
+        const { twig, ...rest } = value;
+        await config.update(
+          "includeLanguages",
+          Object.keys(rest).length ? rest : void 0,
+          target
+        );
+      }
+    }
+    var DISMISSED = "emmetIncludeLanguagesDismissed";
+    var offering = false;
+    async function offerMappingRemoval(vscode2, context) {
+      if (offering || context.globalState.get(DISMISSED) || !twigMappings(vscode2).length)
+        return;
+      offering = true;
+      const remove = "Remove Twig Mapping";
+      const never = "Don't Show Again";
+      const choice2 = await vscode2.window.showInformationMessage(
+        `Twig Language 2 now provides Emmet in Twig files. The "twig" entry in "emmet.includeLanguages" also turns on VS Code's Emmet, which expands text inside Twig tags such as {% if event.show_thumb %}. Remove the entry? Emmet commands such as Wrap with Abbreviation need it.`,
+        remove,
+        never
+      );
+      offering = false;
+      if (choice2 === remove) await removeTwigMapping(vscode2);
+      if (choice2) await context.globalState.update(DISMISSED, true);
+    }
+    function registerEmmet(vscode2, context) {
+      const helper = (init_emmetHelper(), __toCommonJS(emmetHelper_exports));
+      const { TextDocument: TextDocument3 } = (init_main2(), __toCommonJS(main_exports));
+      const provider = {
+        provideCompletionItems(document, position, token) {
+          const emmet = vscode2.workspace.getConfiguration("emmet", document);
+          if (token.isCancellationRequested || emmet.get("showExpandedAbbreviation") === "never" || (emmet.get("excludeLanguages") || []).includes(document.languageId))
+            return;
+          const source = document.getText();
+          const projection = project(source);
+          const syntax = emmetSyntax(
+            source,
+            document.offsetAt(position),
+            projection
+          );
+          if (!syntax) return;
+          const virtual = TextDocument3.create(
+            document.uri.toString(),
+            "html",
+            document.version,
+            projection.text
+          );
+          const result = helper.doComplete(virtual, position, syntax, {
+            showExpandedAbbreviation: emmet.get("showExpandedAbbreviation"),
+            showAbbreviationSuggestions: emmet.get("showAbbreviationSuggestions"),
+            showSuggestionsAsSnippets: emmet.get("showSuggestionsAsSnippets"),
+            syntaxProfiles: { ...emmet.get("syntaxProfiles") || {} },
+            variables: emmet.get("variables"),
+            preferences: { ...emmet.get("preferences") || {} },
+            excludeLanguages: emmet.get("excludeLanguages")
+          });
+          if (!result?.items?.length) return;
+          const snippets2 = emmet.get("showSuggestionsAsSnippets") === true;
+          return new vscode2.CompletionList(
+            result.items.filter((item) => item.textEdit).map((item) => {
+              const completion = new vscode2.CompletionItem(item.label);
+              const { range, newText } = item.textEdit;
+              completion.insertText = new vscode2.SnippetString(newText);
+              completion.range = new vscode2.Range(
+                range.start.line,
+                range.start.character,
+                range.end.line,
+                range.end.character
+              );
+              completion.documentation = item.documentation;
+              completion.detail = item.detail;
+              completion.filterText = item.filterText;
+              completion.sortText = item.sortText;
+              if (snippets2) completion.kind = vscode2.CompletionItemKind.Snippet;
+              return completion;
+            }),
+            true
+          );
+        }
+      };
+      context.subscriptions.push(
+        vscode2.languages.registerCompletionItemProvider(
+          "twig",
+          provider,
+          ..."!.}:*$]/>0123456789"
+        ),
+        vscode2.workspace.onDidChangeConfiguration((event) => {
+          if (event.affectsConfiguration("emmet.includeLanguages"))
+            void offerMappingRemoval(vscode2, context);
+        })
+      );
+      void offerMappingRemoval(vscode2, context);
+    }
+    module2.exports = {
+      emmetSyntax,
+      twigMappings,
+      removeTwigMapping,
+      registerEmmet
+    };
+  }
+});
+
 // src/extension.js
 var vscode = require("vscode");
 var path = require("node:path");
 var manifest = require_package();
 var namespace = manifest.name;
-var label = manifest.displayName;
+var label2 = manifest.displayName;
 var language = manifest.contributes.languages[0].id;
 var snippets = [
   ...Object.values(require_filters()),
@@ -24776,17 +31695,16 @@ var snippets = [
 ];
 var { runFormatter } = require_service();
 var { readOptions, matchesIgnore } = require_settings();
-var {
-  registerCompletions,
-  customDefinitions,
-  insideTwig
-} = require_completions();
+var { registerCompletions, customDefinitions } = require_completions();
 var { registerTemplates } = require_templates();
 function activate(context) {
-  if (language === "twig") require_html().registerHTML(vscode, context);
+  if (language === "twig") {
+    require_html().registerHTML(vscode, context);
+    require_emmet().registerEmmet(vscode, context);
+  }
   const pending = /* @__PURE__ */ new Map();
-  const output = vscode.window.createOutputChannel(label);
-  context.subscriptions.push(output, {
+  const output2 = vscode.window.createOutputChannel(label2);
+  context.subscriptions.push(output2, {
     dispose() {
       for (const request of pending.values()) request.dispose();
       pending.clear();
@@ -24851,12 +31769,12 @@ function activate(context) {
           edit.text
         )
       );
-    } catch (error) {
-      output.appendLine(
-        `Formatting skipped: ${error.message}. No edits applied.`
+    } catch (error2) {
+      output2.appendLine(
+        `Formatting skipped: ${error2.message}. No edits applied.`
       );
       vscode.window.setStatusBarMessage(
-        `Twig: formatting skipped (${error.message})`,
+        `Twig: formatting skipped (${error2.message})`,
         5e3
       );
       return [];
@@ -24887,7 +31805,7 @@ function activate(context) {
     const { document, contentChanges: changes } = event;
     if (document.languageId !== language || event.reason || !changes.length || !changes.every((c2) => /^[{%#]? [}%#]}?$/.test(c2.text)))
       return;
-    const text = document.getText();
+    const text2 = document.getText();
     let shift = 0;
     const offsets = [...changes].sort((a2, b2) => a2.rangeOffset - b2.rangeOffset).map((change) => {
       const offset = change.rangeOffset + shift + change.text.indexOf(" ");
@@ -24895,40 +31813,17 @@ function activate(context) {
       return offset;
     });
     if (offsets.every(
-      (offset) => text[offset - 2] === "{" && text.startsWith(" " + closers[text[offset - 1]], offset)
+      (offset) => text2[offset - 2] === "{" && text2.startsWith(" " + closers[text2[offset - 1]], offset)
     )) {
       armed = { document, version: document.version, offsets };
       setTimeout(() => padDelimiters(vscode.window.activeTextEditor));
     }
   }
-  let inTag = false;
-  function trackTag(editor) {
-    const document = editor?.document;
-    if (!document || document.languageId !== "twig") return;
-    const position = editor.selection.active;
-    const value = editor.selections.length === 1 && insideTwig(
-      document.getText(
-        new vscode.Range(
-          document.positionAt(
-            Math.max(0, document.offsetAt(position) - 4e3)
-          ),
-          position
-        )
-      )
-    );
-    if (value !== inTag)
-      vscode.commands.executeCommand(
-        "setContext",
-        "twig.inTag",
-        inTag = value
-      );
-  }
   context.subscriptions.push(
     vscode.workspace.onDidChangeTextDocument(armDelimiters),
-    vscode.window.onDidChangeTextEditorSelection((event) => {
-      padDelimiters(event.textEditor);
-      trackTag(event.textEditor);
-    }),
+    vscode.window.onDidChangeTextEditorSelection(
+      (event) => padDelimiters(event.textEditor)
+    ),
     vscode.languages.registerDocumentFormattingEditProvider(language, {
       provideDocumentFormattingEdits: (document, options, token) => provideEdits(document, options, token)
     }),

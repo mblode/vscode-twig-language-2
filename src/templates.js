@@ -121,22 +121,6 @@ function registerTemplates(vscode, context, language, configFor) {
       document.positionAt(ref.end),
     );
   context.subscriptions.push(
-    vscode.languages.registerDocumentLinkProvider(language, {
-      async provideDocumentLinks(document, token) {
-        const cache = new Map();
-        const links = [];
-        for (const ref of templateReferences(document.getText())) {
-          if (token.isCancellationRequested) return;
-          const target = await resolve(document, ref.name, cache);
-          if (target) {
-            const link = new vscode.DocumentLink(range(document, ref), target);
-            link.tooltip = "Open template";
-            links.push(link);
-          }
-        }
-        return links;
-      },
-    }),
     vscode.languages.registerDefinitionProvider(language, {
       async provideDefinition(document, position) {
         const offset = document.offsetAt(position);

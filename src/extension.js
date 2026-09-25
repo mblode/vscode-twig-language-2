@@ -12,15 +12,15 @@ const snippets = [
 ];
 const { runFormatter } = require("./formatter/service");
 const { readOptions, matchesIgnore } = require("./formatter/settings");
-const {
-  registerCompletions,
-  customDefinitions,
-  insideTwig,
-} = require("./completions");
+const { registerCompletions, customDefinitions } = require("./completions");
 const { registerTemplates } = require("./templates");
 
 function activate(context) {
-  if (language === "twig") require("./html").registerHTML(vscode, context);
+  // Twig Language keeps the html language ID, where VS Code's HTML and Emmet support apply natively.
+  if (language === "twig") {
+    require("./html").registerHTML(vscode, context);
+    require("./emmet").registerEmmet(vscode, context);
+  }
   const pending = new Map();
   const output = vscode.window.createOutputChannel(label);
   context.subscriptions.push(output, {
@@ -171,38 +171,11 @@ function activate(context) {
     }
   }
 
-  // Lets Tab keybindings leave Twig expressions to snippet placeholders instead of Emmet.
-  let inTag = false;
-  function trackTag(editor) {
-    const document = editor?.document;
-    if (!document || document.languageId !== "twig") return;
-    const position = editor.selection.active;
-    const value =
-      editor.selections.length === 1 &&
-      insideTwig(
-        document.getText(
-          new vscode.Range(
-            document.positionAt(
-              Math.max(0, document.offsetAt(position) - 4000),
-            ),
-            position,
-          ),
-        ),
-      );
-    if (value !== inTag)
-      vscode.commands.executeCommand(
-        "setContext",
-        "twig.inTag",
-        (inTag = value),
-      );
-  }
-
   context.subscriptions.push(
     vscode.workspace.onDidChangeTextDocument(armDelimiters),
-    vscode.window.onDidChangeTextEditorSelection((event) => {
-      padDelimiters(event.textEditor);
-      trackTag(event.textEditor);
-    }),
+    vscode.window.onDidChangeTextEditorSelection((event) =>
+      padDelimiters(event.textEditor),
+    ),
     vscode.languages.registerDocumentFormattingEditProvider(language, {
       provideDocumentFormattingEdits: (document, options, token) =>
         provideEdits(document, options, token),

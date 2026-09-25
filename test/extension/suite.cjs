@@ -323,84 +323,152 @@ exports.run = async () => {
     "links.twig",
     '{% extends "base.html.twig" %}\n{% include("partials/_header.twig") %}\n{% include ["missing.twig", "_layout"] %}\n{% embed "@App/_header.twig" %}{% endembed %}\n',
   );
-  const targets = async () =>
+  const definition = async (line, character) =>
+    (
+      await vscode.commands.executeCommand(
+        "vscode.executeDefinitionProvider",
+        linked.uri,
+        new vscode.Position(line, character),
+      )
+    ).map((d) => path.relative(root, (d.targetUri ?? d.uri).fsPath));
+  assert.deepEqual(
+    await definition(0, 14),
+    [path.join("templates", "base.html.twig")],
+    "go to definition opens extended templates",
+  );
+  assert.deepEqual(await definition(1, 20), [
+    path.join("templates", "partials", "_header.twig"),
+  ]);
+  assert.deepEqual(
+    await definition(2, 30),
+    [path.join("templates", "_layout.twig")],
+    "array entries resolve individually",
+  );
+  assert.deepEqual(
+    await definition(2, 15),
+    [],
+    "unresolvable names have no definition",
+  );
+  assert.deepEqual(
+    await definition(0, 3),
+    [],
+    "tag keywords have no definition",
+  );
+  assert.deepEqual(await definition(3, 14), []);
+  await update("templateNamespaces", { App: "templates/partials" });
+  assert.deepEqual(
+    await definition(3, 14),
+    [path.join("templates", "partials", "_header.twig")],
+    "@Namespace names resolve through templateNamespaces",
+  );
+  await update("templateNamespaces", undefined);
+  assert.equal(
     (
       await vscode.commands.executeCommand(
         "vscode.executeLinkProvider",
         linked.uri,
       )
-    )
-      .filter((l) => l.target?.scheme === "file")
-      .map((l) => path.relative(root, l.target.fsPath));
-  assert.deepEqual(await targets(), [
-    path.join("templates", "base.html.twig"),
-    path.join("templates", "partials", "_header.twig"),
-    path.join("templates", "_layout.twig"),
-  ]);
-  await update("templateNamespaces", { App: "templates/partials" });
-  assert.equal(
-    (await targets())[3],
-    path.join("templates", "partials", "_header.twig"),
-    "@Namespace names resolve through templateNamespaces",
-  );
-  await update("templateNamespaces", undefined);
-  const definitions = await vscode.commands.executeCommand(
-    "vscode.executeDefinitionProvider",
-    linked.uri,
-    new vscode.Position(0, 14),
-  );
-  assert.equal(definitions.length, 1);
-  assert.equal(
-    (definitions[0].targetUri ?? definitions[0].uri).fsPath,
-    path.join(root, "templates/base.html.twig"),
-    "go to definition opens extended templates",
-  );
-  assert.deepEqual(
-    await vscode.commands.executeCommand(
-      "vscode.executeDefinitionProvider",
-      linked.uri,
-      new vscode.Position(2, 15),
-    ),
-    [],
-    "unresolvable names have no definition",
+    ).filter((l) => l.target?.scheme === "file").length,
+    0,
+    "templates open through Go to Definition only, not document links",
   );
 
-  const tab = manifest.contributes.keybindings.find(
-    (k) => k.command === "jumpToNextSnippetPlaceholder",
+  // Without emmet.includeLanguages VS Code's Emmet skips twig; the extension serves it outside Twig tags.
+  const text = (item) => item.insertText?.value ?? item.insertText ?? "";
+  const prefixes = new Set(
+    Object.values(require("../../src/snippets/snippets.json")).map(
+      (s) => s.prefix,
+    ),
   );
-  assert.match(tab.when, /suggestWidgetVisible && twig\.inTag/);
-  await vscode.workspace
-    .getConfiguration("emmet")
-    .update(
-      "includeLanguages",
-      { twig: "html" },
-      vscode.ConfigurationTarget.Workspace,
-    );
-  const emmet = await open("emmet.twig", "");
-  await vscode.window.activeTextEditor.insertSnippet(
-    new vscode.SnippetString("{% if ${1:condition} %}$2{% endif %}\n$0"),
+  const emmetItems = async (doc, position) =>
+    (await complete(doc, position)).filter((i) => !prefixes.has(label(i)));
+  const tag = await open(
+    "emmet.twig",
+    "<div>{% if event.show_thumb %}{% endif %}</div>",
   );
-  await vscode.commands.executeCommand("type", { text: "event.show_thumb" });
-  const abbreviation = await complete(emmet, new vscode.Position(0, 22));
+  const inTag = new vscode.Position(0, 27);
+  assert.deepEqual(
+    (await emmetItems(tag, inTag)).filter((i) => text(i).startsWith("<")),
+    [],
+    "no Emmet expansion inside Twig tags",
+  );
+  const emmetConfig = vscode.workspace.getConfiguration("emmet");
+  await emmetConfig.update(
+    "includeLanguages",
+    { twig: "html", vue: "html" },
+    vscode.ConfigurationTarget.Workspace,
+  );
   assert(
-    abbreviation.some((i) => label(i) === "event.show_thumb"),
-    "Emmet offers an abbreviation inside the Twig tag",
+    await until(async () =>
+      (await emmetItems(tag, inTag)).some((i) => text(i).startsWith("<event")),
+    ),
+    "the includeLanguages mapping makes VS Code's Emmet expand inside Twig tags",
   );
-  await vscode.commands.executeCommand("jumpToNextSnippetPlaceholder");
-  assert.equal(emmet.getText(), "{% if event.show_thumb %}{% endif %}\n");
+  await require("../../src/emmet").removeTwigMapping(vscode);
+  assert.deepEqual(
+    emmetConfig.inspect("includeLanguages").workspaceValue,
+    { vue: "html" },
+    "only the twig mapping is removed",
+  );
+  await emmetConfig.update(
+    "includeLanguages",
+    undefined,
+    vscode.ConfigurationTarget.Workspace,
+  );
+  const abbreviation = await open("abbreviation.twig", "{{ x }}\ndiv.foo");
+  const expansions = (await emmetItems(abbreviation, new vscode.Position(1, 7)))
+    .map(text)
+    .filter((t) => t.startsWith("<"));
+  assert(
+    expansions.some((t) => t.startsWith('<div class="foo">')),
+    `Emmet expands HTML text: ${JSON.stringify(expansions)}`,
+  );
+  assert.equal(expansions.length, 1, "one Emmet provider answers");
+  const styled = await open("style.twig", "<style>\n  a { m10 }\n</style>");
+  assert(
+    (await emmetItems(styled, new vscode.Position(1, 9))).some((i) =>
+      text(i).startsWith("margin: 10px"),
+    ),
+    "Emmet uses CSS abbreviations inside style elements",
+  );
+  await emmetConfig.update(
+    "showExpandedAbbreviation",
+    "never",
+    vscode.ConfigurationTarget.Workspace,
+  );
+  assert(
+    !(await emmetItems(abbreviation, new vscode.Position(1, 7))).some((i) =>
+      text(i).startsWith("<div"),
+    ),
+    "emmet.showExpandedAbbreviation: never is respected",
+  );
+  await emmetConfig.update(
+    "showExpandedAbbreviation",
+    undefined,
+    vscode.ConfigurationTarget.Workspace,
+  );
+  await emmetConfig.update(
+    "excludeLanguages",
+    ["twig"],
+    vscode.ConfigurationTarget.Workspace,
+  );
+  assert(
+    !(await emmetItems(abbreviation, new vscode.Position(1, 7))).some((i) =>
+      text(i).startsWith("<div"),
+    ),
+    "emmet.excludeLanguages is respected",
+  );
+  await emmetConfig.update(
+    "excludeLanguages",
+    undefined,
+    vscode.ConfigurationTarget.Workspace,
+  );
   assert.equal(
-    vscode.window.activeTextEditor.selection.active.character,
-    25,
-    "Tab target moves into the if block",
+    manifest.contributes.keybindings,
+    undefined,
+    "Tab keeps its default behavior",
   );
-  await vscode.workspace
-    .getConfiguration("emmet")
-    .update(
-      "includeLanguages",
-      undefined,
-      vscode.ConfigurationTarget.Workspace,
-    );
   console.log(
-    "VS Code integration: activation, document/range/save formatting, live settings, indentation, ignore, errors, CRLF, hover, auto quotes, snippet settings, custom definitions, template links and snippet Tab inside Twig passed.",
+    "VS Code integration: activation, document/range/save formatting, live settings, indentation, ignore, errors, CRLF, hover, auto quotes, snippet settings, custom definitions, go to template and Emmet outside Twig tags passed.",
   );
 };
