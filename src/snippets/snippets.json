@@ -7,12 +7,14 @@
   "asset": {
     "prefix": "asset",
     "body": "{% set asset = ${1:entry.assetFieldHandle}.one() %}\n\n{% if asset %}\n\t<img src=\"{{ asset.getUrl(\"${2:thumb}\") }}\" width=\"{{ asset.getWidth(\"${2:thumb}\") }}\" height=\"{{ asset.getHeight(\"${2:thumb}\") }}\" alt=\"{{ asset.title }}\">\n{% endif %}",
-    "description": "asset"
+    "description": "asset",
+    "craft": true
   },
   "assets": {
     "prefix": "assets",
     "body": "{% for image in craft.assets()\n\t.sourceId(\"${1:1}\")\n\t.kind(\"${2:image}\")\n\t.limit(${3:10})\n.all() %}\n\t<img src=\"{{ image.url${4:(\"${5:thumb}\")} }}\" width=\"${6:200}\" height=\"${7:200}\" alt=\"{{ image.title }}\">\n{% endfor %}\n$0",
-    "description": "craft.assets"
+    "description": "craft.assets",
+    "craft": true
   },
   "autoescape": {
     "prefix": "autoescape",
@@ -37,97 +39,116 @@
   "cache": {
     "prefix": "cache",
     "body": "{% cache %}\n\t$1\n{% endcache %}\n$0",
-    "description": "cache"
+    "description": "cache",
+    "craft": true
   },
   "case": {
     "prefix": "case",
     "body": "{% case \"${1:value}\" %}\n\t$0",
-    "description": "case"
+    "description": "case",
+    "craft": true
   },
   "children": {
     "prefix": "children",
     "body": "{% children %}$0",
-    "description": "children"
+    "description": "children",
+    "craft": true
   },
   "ceil": {
     "prefix": "ceil",
     "body": "ceil($1)$0",
-    "description": "ceil"
+    "description": "ceil",
+    "craft": true
   },
   "formlogin": {
     "prefix": "formlogin",
     "body": "<form method=\"post\" accept-charset=\"UTF-8\">\n\t{{ csrfInput() }}\n\t<input type=\"hidden\" name=\"action\" value=\"users/login\">\n\n\t<h3><label for=\"loginName\">Username or email</label></h3>\n\t<input id=\"loginName\" type=\"text\" name=\"loginName\"\n\t\tvalue=\"{{ craft.app.user.rememberedUsername }}\">\n\n\t<h3><label for=\"password\">Password</label></h3>\n\t<input id=\"password\" type=\"password\" name=\"password\">\n\n\t<label>\n\t\t<input type=\"checkbox\" name=\"rememberMe\" value=\"1\">\n\t\tRemember me\n\t</label>\n\n\t<input type=\"submit\" value=\"Login\">\n\n\t{% if errorMessage is defined %}\n\t\t<p>{{ errorMessage }}</p>\n\t{% endif %}\n</form>\n\n<p><a href=\"{{ url(\"forgotpassword\") }}\">Forgot your password?</a></p>",
-    "description": "craft.user - example login form"
+    "description": "craft.user - example login form",
+    "craft": true
   },
   "formuserprofile": {
     "prefix": "formuserprofile",
     "body": "<form method=\"post\" accept-charset=\"UTF-8\">\n\t{{ csrfInput() }}\n\t<input type=\"hidden\" name=\"action\" value=\"users/save-user\">\n\t{{ redirectInput(\"users/\"~currentUser.username) }}\n\t<input type=\"hidden\" name=\"userId\" value=\"{{ currentUser.id }}\">\n\n\t<label for=\"location\">Location</label>\n\t<input type=\"text\" id=\"location\" name=\"fields[location]\" value=\"{{ currentUser.location }}\">\n\n\t<label for=\"bio\">Bio</label>\n\t<textarea id=\"bio\" name=\"fields[bio]\">{{ currentUser.bio }}</textarea>\n\n\t<input type=\"submit\" value=\"Save Profile\">\n</form>",
-    "description": "craft.user - example user profile form"
+    "description": "craft.user - example user profile form",
+    "craft": true
   },
   "formuserregistration": {
     "prefix": "formuserregistration",
     "body": "<form method=\"post\" accept-charset=\"UTF-8\">\n\t{{ csrfInput() }}\n\t<input type=\"hidden\" name=\"action\" value=\"users/save-user\">\n\t{{ redirectInput(\"\") }}\n\n\t{% macro errorList(errors) %}\n\t\t{% if errors %}\n\t\t\t<ul class=\"errors\">\n\t\t\t\t{% for error in errors %}\n\t\t\t\t\t<li>{{ error }}</li>\n\t\t\t\t{% endfor %}\n\t\t\t</ul>\n\t\t{% endif %}\n\t{% endmacro %}\n\n\t{% from _self import errorList %}\n\n\t<h3><label for=\"username\">Username</label></h3>\n\t<input id=\"username\" type=\"text\" name=\"username\"\n\t\t{%- if user is defined %} value=\"{{ user.username }}\"{% endif -%}>\n\n\t{% if user is defined %}\n\t\t{{ errorList(user.getErrors(\"username\")) }}\n\t{% endif %}\n\n\t<h3><label for=\"email\">Email</label></h3>\n\t<input id=\"email\" type=\"text\" name=\"email\"\n\t\t{%- if user is defined %} value=\"{{ user.email }}\"{% endif %}>\n\n\t{% if user is defined %}\n\t\t{{ errorList(user.getErrors(\"email\")) }}\n\t{% endif %}\n\n\t<h3><label for=\"password\">Password</label></h3>\n\t<input id=\"password\" type=\"password\" name=\"password\">\n\n\t{% if user is defined %}\n\t\t{{ errorList(user.getErrors(\"password\")) }}\n\t{% endif %}\n\n\t<input type=\"submit\" value=\"Register\">\n</form>",
-    "description": "craft.user - example user registration form"
+    "description": "craft.user - example user registration form",
+    "craft": true
   },
   "formforgotpassword": {
     "prefix": "formforgotpassword",
     "body": "<form method=\"post\" accept-charset=\"UTF-8\">\n\t{{ csrfInput() }}\n\t<input type=\"hidden\" name=\"action\" value=\"users/send-password-reset-email\">\n\t{{ redirectInput(\"\") }}\n\n\t<h3><label for=\"loginName\">Username or email</label></h3>\n\t<input id=\"loginName\" type=\"text\" name=\"loginName\"\n\t\tvalue=\"{% if loginName is defined %}{{ loginName }}{% else %}{{ craft.app.user.rememberedUsername }}{% endif %}\">\n\n\t{% if errors is defined %}\n\t\t<ul class=\"errors\">\n\t\t\t{% for error in errors %}\n\t\t\t\t<li>{{ error }}</li>\n\t\t\t{% endfor %}\n\t\t</ul>\n\t{% endif %}\n\n\t<input type=\"submit\" value=\"Submit\">\n</form>",
-    "description": "craft.user - example forgot password form"
+    "description": "craft.user - example forgot password form",
+    "craft": true
   },
   "formsetpassword": {
     "prefix": "formsetpassword",
     "body": "<form method=\"post\" accept-charset=\"UTF-8\">\n\t{{ csrfInput() }}\n\t<input type=\"hidden\" name=\"action\" value=\"users/set-password\">\n\t<input type=\"hidden\" name=\"code\" value=\"{{ code }}\">\n\t<input type=\"hidden\" name=\"id\" value=\"{{ id }}\">\n\n\t<h3><label for=\"newPassword\">New Password</label></h3>\n\t<input id=\"newPassword\" type=\"password\" name=\"newPassword\">\n\t{% if errors is defined %}\n\t\t<ul class=\"errors\">\n\t\t\t{% for error in errors %}\n\t\t\t\t<li>{{ error }}</li>\n\t\t\t{% endfor %}\n\t\t</ul>\n\t{% endif %}\n\n\t<input type=\"submit\" value=\"Submit\">\n</form>",
-    "description": "craft.user - example set password form"
+    "description": "craft.user - example set password form",
+    "craft": true
   },
   "formsearch": {
     "prefix": "formsearch",
     "body": "<form action=\"{{ url(\"search/results\") }}\">\n\t<input type=\"search\" name=\"q\" placeholder=\"Search\">\n\t<input type=\"submit\" value=\"Go\">\n</form>",
-    "description": "craft.entries - example search form"
+    "description": "craft.entries - example search form",
+    "craft": true
   },
   "formsearchresults": {
     "prefix": "formsearchresults",
     "body": "<h1>Search Results</h1>\n\n{% set query = craft.app.request.getParam(\"q\") %}\n{% set entries = craft.entries.search(query).orderBy(\"score\").all() %}\n\n{% if entries | length %}\n\t<p>{{ entries | length }} results:</p>\n\n\t<ul>\n\t\t{% for entry in entries %}\n\t\t\t<li><a href=\"{{ entry.url }}\">{{ entry.title }}</a></li>\n\t\t{% endfor %}\n\t</ul>\n{% else %}\n\t<p>Your search for \u201c{{ query }}\u201d didn\u2019t return any results.</p>\n{% endif %}",
-    "description": "craft.entries - example search results"
+    "description": "craft.entries - example search results",
+    "craft": true
   },
   "rss": {
     "prefix": "rss",
     "body": "<?xml version=\"1.0\"?>\n<rss version=\"2.0\" xmlns:atom=\"http://www.w3.org/2005/Atom\">\n\t<channel>\n\t\t<title>{{ siteName }}</title>\n\t\t<link>{{ siteUrl }}</link>\n\t\t<atom:link href=\"{{ craft.app.request.absoluteUrl }}\" rel=\"self\" type=\"application/rss+xml\" />\n\t\t<description>{{ globals.siteDescription }}</description>\n\t\t<language>en-us</language>\n\t\t<pubDate>{{ now | rss }}</pubDate>\n\t\t<lastBuildDate>{{ now | rss }}</lastBuildDate>\n\n\t\t{% for entry in craft.entries.all() %}\n\t\t\t<item>\n\t\t\t\t<title>{{ entry.title }}</title>\n\t\t\t\t<link>{{ entry.url }}</link>\n\t\t\t\t<pubDate>{{ entry.postDate | rss }}</pubDate>\n\t\t\t\t<author>{{ entry.author }}</author>\n\t\t\t\t<guid>{{ entry.url }}</guid>\n\t\t\t\t<description><![CDATA[\n\t\t\t\t\t{{ entry.body }}\n\t\t\t\t]]></description>\n\t\t\t</item>\n\t\t{% endfor %}\n\t</channel>\n</rss>",
-    "description": "craft.entries - example rss feed"
+    "description": "craft.entries - example rss feed",
+    "craft": true
   },
   "assetso": {
     "prefix": "assetso",
     "body": "{% set assets = craft.assets({\n\tsourceId: \"${1:1}\",\n\tkind: \"${2:image}\",\n\tlimit: ${3:10}\n}).all() %}\n\n{% for image in assets %}\n\t<img src=\"{{ image.url${4:(\"${5:thumb}\")} }}\" width=\"${6:200}\" height=\"${7:200}\" alt=\"{{ image.title }}\">\n{% endfor %}\n$0",
-    "description": "craft.assets - object syntax"
+    "description": "craft.assets - object syntax",
+    "craft": true
   },
   "categorieso": {
     "prefix": "categorieso",
     "body": "{% set categories = craft.categories({\n\tgroup: \"${1:categoryGroupHandle}\",\n\tlimit: \"${2:11}\"\n}).all() %}\n\n<ul>\n\t{% nav category in categories %}\n\t\t<li>\n\t\t\t<a href=\"{{ category.url }}\">{{ category.title }}</a>\n\t\t\t{% ifchildren %}\n\t\t\t\t<ul>\n\t\t\t\t\t{% children %}\n\t\t\t\t</ul>\n\t\t\t{% endifchildren %}\n\t\t</li>\n\t{% endnav %}\n</ul>",
-    "description": "craft.categories - object syntax"
+    "description": "craft.categories - object syntax",
+    "craft": true
   },
   "categories": {
     "prefix": "categories",
     "body": "<ul>\n\t{% nav category in craft.categories\n\t\t.group(\"${1:categoryGroupHandle}\")\n\t\t.limit(${2:11})\n\t\t.all()\n\t%}\n\t\t<li>\n\t\t\t<a href=\"{{ category.url }}\">{{ category.title }}</a>\n\t\t\t{% ifchildren %}\n\t\t\t\t<ul>\n\t\t\t\t\t{% children %}\n\t\t\t\t</ul>\n\t\t\t{% endifchildren %}\n\t\t</li>\n\t{% endnav %}\n</ul>",
-    "description": "craft.categories"
+    "description": "craft.categories",
+    "craft": true
   },
   "entrieso": {
     "prefix": "entrieso",
     "body": "{% set entries = craft.entries({\n\tsection: \"${1:sectionName}\",\n\tlimit: \"${2:10}\"\n}).all() %}\n\n{% for entry in entries %}\n\t<a href=\"{{ entry.url }}\">{{ entry.title }}</a>\n{% endfor %}\n$0",
-    "description": "craft.entries - object syntax"
+    "description": "craft.entries - object syntax",
+    "craft": true
   },
   "entries": {
     "prefix": "entries",
     "body": "{% for entry in craft.entries\n\t.section(\"${1:sectionName}\")\n\t.limit(${2:10})\n\t.all()\n%}\n\t<a href=\"{{ entry.url }}\">{{ entry.title }}</a>\n{% endfor %}\n$0",
-    "description": "craft.entries"
+    "description": "craft.entries",
+    "craft": true
   },
   "feed": {
     "prefix": "feed",
     "body": "{% set feedUrl = \"${1:http://feeds.feedburner.com/blogandtonic}\" %}\n{% set limit = ${2:10} %}\n{% set items = craft.feeds.getFeedItems(feedUrl, limit).all() %}\n\n{% for item in items %}\n\t<article>\n\t\t<h3><a href=\"{{ item.permalink }}\">{{ item.title }}</a></h3>\n\t\t<p class=\"author\">{{ item.authors[0].name }}</p>\n\t\t<p class=\"date\">{{ item.date }}</p>\n\n\t\t{{ item.summary }}\n\t</article>\n{% endfor %}",
-    "description": "feed"
+    "description": "feed",
+    "craft": true
   },
   "t": {
     "prefix": "t",
     "body": "{{ $1 | t }}$0",
-    "description": "translate with | t"
+    "description": "translate with | t",
+    "craft": true
   },
   "replace": {
     "prefix": "replace",
@@ -147,32 +168,38 @@
   "tagso": {
     "prefix": "tagso",
     "body": "{% set tags = craft.tags({\n\tgroup: \"${1:tagGroupHandle}\"\n}).all() %}\n\n<ul>\n\t{% for tag in tags %}\n\t\t<li>{{ tag }}</a></li>\n\t{% endfor %}\n</ul>\n$0",
-    "description": "craft.tags - object syntax"
+    "description": "craft.tags - object syntax",
+    "craft": true
   },
   "tags": {
     "prefix": "tags",
     "body": "<ul>\n\t{% for tag in craft.tags.group(\"${1:tagGroupHandle}\").all() %}\n\t\t<li>{{ tag }}</li>\n\t{% endfor %}\n</ul>\n$0",
-    "description": "craft.tags"
+    "description": "craft.tags",
+    "craft": true
   },
   "userso": {
     "prefix": "userso",
     "body": "{% set users = craft.users({\n\tgroup: \"${1:userGroupHandle}\"\n}).all() %}\n\n{% for user in users %}\n\t{{ user.firstName }} {{ user.lastName }}\n{% endfor %}\n$0",
-    "description": "craft.users - object syntax"
+    "description": "craft.users - object syntax",
+    "craft": true
   },
   "users": {
     "prefix": "users",
     "body": "{% for user in craft.users.group(\"${1:userGroupHandle}\").all() %}\n\t{{ user.firstName }} {{ user.lastName }}\n{% endfor %}\n$0",
-    "description": "craft.users"
+    "description": "craft.users",
+    "craft": true
   },
   "csrf": {
     "prefix": "csrf",
     "body": "{{ csrfInput() }}\n$0",
-    "description": "csrf"
+    "description": "csrf",
+    "craft": true
   },
   "dd": {
     "prefix": "dd",
     "body": "<pre>\n\t{{ dump($1) }}\n</pre>\n{% exit %}$0",
-    "description": "dump and die"
+    "description": "dump and die",
+    "craft": true
   },
   "do": {
     "prefix": "do",
@@ -182,12 +209,14 @@
   "dojs": {
     "prefix": "dojs",
     "body": "{% do view.registerJsFile \"${1:url}\" %}$0",
-    "description": "do js"
+    "description": "do js",
+    "craft": true
   },
   "docss": {
     "prefix": "docss",
     "body": "{% do view.registerCssFile \"${1:url}\" %}$0",
-    "description": "do css"
+    "description": "do css",
+    "craft": true
   },
   "dump": {
     "prefix": "dump",
@@ -227,7 +256,8 @@
   "endcache": {
     "prefix": "endcache",
     "body": "{% endcache %}$0",
-    "description": "endcache"
+    "description": "endcache",
+    "craft": true
   },
   "endembed": {
     "prefix": "endembed",
@@ -252,17 +282,20 @@
   "endifchildren": {
     "prefix": "endifchildren",
     "body": "{% endifchildren %}$0",
-    "description": "endifchildren"
+    "description": "endifchildren",
+    "craft": true
   },
   "endcss": {
     "prefix": "endcss",
     "body": "{% endcss %}$0",
-    "description": "endcss"
+    "description": "endcss",
+    "craft": true
   },
   "endjs": {
     "prefix": "endjs",
     "body": "{% endjs %}$0",
-    "description": "endjs"
+    "description": "endjs",
+    "craft": true
   },
   "endmacro": {
     "prefix": "endmacro",
@@ -272,7 +305,8 @@
   "endnav": {
     "prefix": "endnav",
     "body": "{% endnav %}$0",
-    "description": "endnav"
+    "description": "endnav",
+    "craft": true
   },
   "endset": {
     "prefix": "endset",
@@ -287,7 +321,8 @@
   "endswitch": {
     "prefix": "endswitch",
     "body": "{% endswitch %}$0",
-    "description": "endswitch"
+    "description": "endswitch",
+    "craft": true
   },
   "endtrans": {
     "prefix": "endtrans",
@@ -302,7 +337,8 @@
   "exit": {
     "prefix": "exit",
     "body": "{% exit ${1:404} %}",
-    "description": "exit"
+    "description": "exit",
+    "craft": true
   },
   "extends": {
     "prefix": "extends",
@@ -322,7 +358,8 @@
   "floor": {
     "prefix": "floor",
     "body": "floor($1)$0",
-    "description": "floor"
+    "description": "floor",
+    "craft": true
   },
   "fore": {
     "prefix": "fore",
@@ -342,12 +379,14 @@
   "endbody": {
     "prefix": "endbody",
     "body": "{{ endBody() }}\n$0",
-    "description": "endBody"
+    "description": "endBody",
+    "craft": true
   },
   "head": {
     "prefix": "head",
     "body": "{{ head() }}\n$0",
-    "description": "head"
+    "description": "head",
+    "craft": true
   },
   "if": {
     "prefix": "if",
@@ -372,7 +411,8 @@
   "ifchildren": {
     "prefix": "ifchildren",
     "body": "{% ifchildren %}\n\t$1\n{% endifchildren %}\n$0",
-    "description": "ifchildren"
+    "description": "ifchildren",
+    "craft": true
   },
   "import": {
     "prefix": "import",
@@ -407,22 +447,26 @@
   "css1": {
     "prefix": "css",
     "body": "{% do view.registerCssFile(\"${1:/resources/css/global.css}\") %}\n$0",
-    "description": "registerCssFile"
+    "description": "registerCssFile",
+    "craft": true
   },
   "js": {
     "prefix": "js",
     "body": "{% js %}\n\t$1\n{% endjs %}\n$0",
-    "description": "js"
+    "description": "js",
+    "craft": true
   },
   "js1": {
     "prefix": "js",
     "body": "{% do view.registerJsFile(\"${1:/resources/js/global.js}\") %}\n$0",
-    "description": "registerJsFile"
+    "description": "registerJsFile",
+    "craft": true
   },
   "css": {
     "prefix": "css",
     "body": "{% css %}\n\t$1\n{% endcss %}\n$0",
-    "description": "css"
+    "description": "css",
+    "craft": true
   },
   "macro": {
     "prefix": "macro",
@@ -432,22 +476,26 @@
   "matrix": {
     "prefix": "matrix",
     "body": "{% for block in ${1:entry.matrixFieldHandle}.all() %}\n\n\t{% if block.type == \"${2:blockHandle}\" %}\n\t\t{{ block.${3:fieldHandle} }}\n\t{% endif %}\n\n\t{% if block.type == \"${4:blockHandle}\" %}\n\t\t{{ block.${5:fieldHandle} }}\n\t{% endif %}\n\n{% endfor %}\n$0",
-    "description": "matrix"
+    "description": "matrix",
+    "craft": true
   },
   "matrixif": {
     "prefix": "matrixif",
     "body": "{% for block in ${1:entry.matrixFieldHandle}.all() %}\n\n\t{% if block.type == \"${2:blockHandle}\" %}\n\t\t{{ block.${3:fieldHandle} }}\n\t{% endif %}\n\n\t{% if block.type == \"${4:blockHandle}\" %}\n\t\t{{ block.${5:fieldHandle} }}\n\t{% endif %}\n\n{% endfor %}\n$0",
-    "description": "matrixif"
+    "description": "matrixif",
+    "craft": true
   },
   "matrixifelse": {
     "prefix": "matrixifelse",
     "body": "{% for block in ${1:entry.matrixFieldHandle}.all() %}\n\n\t{% if block.type == \"${2:blockHandle}\" %}\n\n\t\t{{ block.${3:fieldHandle} }}\n\n\t{% elseif block.type == \"${4:blockHandle}\" %}\n\n\t\t$0\n\t\n\t{% endif %}\n\n{% endfor %}",
-    "description": "matrixifelse"
+    "description": "matrixifelse",
+    "craft": true
   },
   "matrixswitch": {
     "prefix": "matrixswitch",
     "body": "{% for block in ${1:entry.matrixFieldHandle}.all() %}\n\n\t{% switch block.type %}\n\n\t\t{% case \"${2:blockHandle}\" %}\n\n\t\t\t{{ block.${3:fieldHandle} }}\n\n\t\t{% case \"${4:blockHandle}\" %}\n\n\t\t\t$0\n\n\t{% endswitch %}\n\n{% endfor %}",
-    "description": "matrixswitch"
+    "description": "matrixswitch",
+    "craft": true
   },
   "max": {
     "prefix": "max",
@@ -462,56 +510,66 @@
   "nav": {
     "prefix": "nav",
     "body": "{% nav ${1:item} in ${2:items} %}\n\t$3\n{% endnav %}\n$0",
-    "description": "nav"
+    "description": "nav",
+    "craft": true
   },
   "paginate": {
     "prefix": "paginate",
     "body": "{% paginate ${1:elements} as ${2:pageInfo}, ${3:pageEntries} %}\n\n{% for item in ${3:pageEntries} %}\n\t$0\n{% endfor %}\n\n{% if ${2:pageInfo}.prevUrl %}<a href=\"{{ ${2:pageInfo}.prevUrl }}\">Previous Page</a>{% endif %}\n{% if ${2:pageInfo}.nextUrl %}<a href=\"{{ ${2:pageInfo}.nextUrl }}\">Next Page</a>{% endif %}",
-    "description": "paginate simple"
+    "description": "paginate simple",
+    "craft": true
   },
   "paginate1": {
     "prefix": "paginate",
     "body": "{# PAGINATION\n\t\t\nFor this pagination to work properly, we need to be sure to set\nthe paginateBase variable in the template we are including the \npagination in.\n\n{% set paginateBase = \"/blog/p\" %}\n#}\n\n{% if pageInfo.totalPages > 1 %}\n<ul>\n\t{% if pageInfo.currentPage != \"1\" %}\n\t\t<li><a href=\"{{ paginateBase ~ \"1\" }}\">First Page</a></li>\n\t{% endif %}\n\n\t{% if pageInfo.prevUrl %}\n\t\t<li><a href=\"{{ pageInfo.prevUrl }}\">Previous Page</a></li>\n\t{% endif %}\n\n\t{% for pageNumber in 1..pageInfo.totalPages %}\n\t\t<li {% if pageInfo.currentPage == pageNumber %}class=\"active-page\"{% endif %}>\n\t\t\t<a href=\"{{ paginateBase ~ pageNumber }}\">{{ pageNumber }}</a>\n\t\t</li>\n\t{% endfor %}\n\n\t{% if pageInfo.nextUrl %}\n\t\t<li><a href=\"{{ pageInfo.nextUrl }}\">Next Page</a></li>\n\t{% endif %}\n\n\t{% if pageInfo.currentPage != pageInfo.total %}\n\t\t<li><a href=\"{{ paginateBase ~ pageInfo.total }}\">Last Page</a></li>\n\t{% endif %}\n</ul>\n{% endif %}\n$0",
-    "description": "paginate advanced"
+    "description": "paginate advanced",
+    "craft": true
   },
   "redirect": {
     "prefix": "redirect",
     "body": "{% redirect \"${1:template/path or http://straightupcraft.com}\" %}\n$0",
-    "description": "redirect"
+    "description": "redirect",
+    "craft": true
   },
   "getparam": {
     "prefix": "getparam",
     "body": "craft.app.request.getParam(${1:\"Query String or Post Variable Name\"})\n$0",
-    "description": "request getParam"
+    "description": "request getParam",
+    "craft": true
   },
   "getbodyparam": {
     "prefix": "getbodyparam",
     "body": "craft.app.request.getBodyParam(${1:\"postVariableName\"})\n$0",
-    "description": "request getBodyParam"
+    "description": "request getBodyParam",
+    "craft": true
   },
   "getqueryparam": {
     "prefix": "getqueryparam",
     "body": "craft.app.request.getQueryParam(${1:\"queryStringName\"})\n$0",
-    "description": "request getQueryParam"
+    "description": "request getQueryParam",
+    "craft": true
   },
   "getsegment": {
     "prefix": "getsegment",
     "body": "craft.app.request.getSegment(${1:2})\n$0",
-    "description": "request getSegment"
+    "description": "request getSegment",
+    "craft": true
   },
   "requirelogin": {
     "prefix": "requirelogin",
     "body": "{% requireLogin %}\n$0",
-    "description": "requireLogin"
+    "description": "requireLogin",
+    "craft": true
   },
   "requirepermission": {
     "prefix": "requirepermission",
     "body": "{% requirePermission \"${1:spendTheNight}\" %}\n$0",
-    "description": "requirePermission"
+    "description": "requirePermission",
+    "craft": true
   },
   "round": {
     "prefix": "round",
-    "body": "{{ $1 | round(1, 'floor') }}$0",
+    "body": "{{ $1 | round(1, \"floor\") }}$0",
     "description": "round"
   },
   "setb": {
@@ -527,7 +585,8 @@
   "shuffle": {
     "prefix": "shuffle",
     "body": "shuffle($1)$0",
-    "description": "shuffle"
+    "description": "shuffle",
+    "craft": true
   },
   "random": {
     "prefix": "random",
@@ -542,7 +601,8 @@
   "switch": {
     "prefix": "switch",
     "body": "{% switch ${1:variable} %}\n\n\t{% case \"${2:value1}\" %}\n\t\n\n\t{% case \"${3:value2}\" %}\n\t\n\n\t{% default %}\n\t\n\n{% endswitch %}\n$0",
-    "description": "switch"
+    "description": "switch",
+    "craft": true
   },
   "trans": {
     "prefix": "trans",
@@ -552,12 +612,14 @@
   "urla": {
     "prefix": "urla",
     "body": "url(\"${1:path}\", ${2:{foo:\"1\", bar:\"2\"\\}}, ${3:\"http\"}, ${4:false})$0",
-    "description": "url w/ arguments"
+    "description": "url w/ arguments",
+    "craft": true
   },
   "url": {
     "prefix": "url",
     "body": "url(\"${1:path}\")$0",
-    "description": "url"
+    "description": "url",
+    "craft": true
   },
   "use": {
     "prefix": "use",

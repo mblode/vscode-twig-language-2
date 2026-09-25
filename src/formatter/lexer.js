@@ -226,7 +226,7 @@ function scan(source) {
         match &&
         !extra.closing &&
         !extra.selfClosing &&
-        ["script", "style", "pre", "textarea"].includes(extra.name)
+        ["script", "style", "mj-style", "pre", "textarea"].includes(extra.name)
       ) {
         const re = new RegExp("</" + extra.name + "\\s*>", "ig");
         re.lastIndex = end;
@@ -238,7 +238,8 @@ function scan(source) {
           bodyStart: end,
           bodyEnd: close.index,
           closingStart: close.index,
-          kind: extra.name,
+          // MJML's <mj-style> body is CSS.
+          kind: extra.name === "mj-style" ? "style" : extra.name,
         };
         end = re.lastIndex;
         type = "raw";

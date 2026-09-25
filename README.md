@@ -61,7 +61,34 @@ themselves.
 | `formlogin`, `formuserregistration`, `formsearch` | a complete Craft form, CSRF token included |
 
 Hovering a Twig tag, filter, or function shows what it does.
-[`src/snippets/snippets.json`](src/snippets/snippets.json) is the full list.
+[`src/snippets/snippets.json`](src/snippets/snippets.json) is the full list; entries marked `"craft": true` are Craft CMS snippets.
+
+Snippets write Twig strings with double quotes, such as `{% include "template" %}`. Set
+`twig-language-2.snippetQuotes` to `single` for `{% include 'template' %}`; HTML attribute quotes stay
+double. Set `twig-language-2.craftSnippets` to `false` to hide the Craft CMS snippets (`switch`, `nav`,
+`cache`, `entries`, the Craft forms and helpers) and keep the plain Twig ones.
+
+Project-specific tests, filters and functions from your own Twig extensions can be added for completion
+and hover. Any name after `is` or `is not` is highlighted as a test.
+
+```json
+"twig-language-2.customTests": { "numeric": "True when the value is numeric." }
+```
+
+## Template links
+
+Ctrl/Cmd-click or **Go to Definition** on a template name opens it. This works for `include`, `extends`,
+`embed`, `import`, `from` and `use` tags, `include()` and `source()` calls, and arrays of names. Names
+resolve against `twig-language-2.templatePaths` in the workspace folder (`templates`, `views`,
+`src/templates`, then the folder itself), then the current file's folder. Names without an extension
+also try `.twig`, `.html.twig`, `.html` and `index` files, as in Craft. `@Namespace/` names use
+`twig-language-2.templateNamespaces`:
+
+```json
+"twig-language-2.templateNamespaces": { "App": "src/App/templates" }
+```
+
+Names built at runtime, and names that do not match a file, get no link.
 
 ## Formatting
 
@@ -107,6 +134,16 @@ Settings apply immediately and support workspace, folder, and `[twig]` overrides
 | `twig-language-2.embeddedFormatting` | `true` | Format supported JavaScript/CSS bodies with Prettier. |
 | `twig-language-2.ignore` | `[]` | File globs to skip, such as `**/vendor/**`. Supports `*`, `**`, and `?`. |
 | `twig-language-2.formatTimeout` | `5000` | Maximum worker time in milliseconds, from 100 to 30000. |
+| `twig-language-2.craftSnippets` | `true` | Include Craft CMS snippets. |
+| `twig-language-2.snippetQuotes` | `double` | Quote style for Twig strings in snippets: `double` or `single`. |
+| `twig-language-2.templatePaths` | `["templates", "views", "src/templates", "."]` | Template roots for links, relative to the workspace folder or absolute. |
+| `twig-language-2.templateNamespaces` | `{}` | Roots for `@Namespace/` template names. |
+| `twig-language-2.customTests` | `{}` | Custom test names mapped to hover descriptions. |
+| `twig-language-2.customFilters` | `{}` | Custom filter names mapped to hover descriptions. |
+| `twig-language-2.customFunctions` | `{}` | Custom function names mapped to hover descriptions. |
+
+HTML attribute quotes follow VS Code's `html.autoCreateQuotes` and `html.completion.attributeDefaultValue`
+settings, and closing tags follow `html.autoClosingTags`.
 
 ### Migrating from 0.10
 
@@ -127,9 +164,14 @@ To treat plain `.html` files as Twig and get Emmet inside them:
 }
 ```
 
+With Emmet enabled, Tab inside a Twig tag moves to the next snippet placeholder instead of accepting an
+Emmet suggestion, so `{% if event.show_thumb %}` is not expanded to HTML. Press Enter to accept a
+suggestion there.
+
 ## Notes
 
-- HTML completion, hover and closing tags are included.
+- HTML completion, hover, closing tags and attribute quotes are included.
+- MJML `<mj-style>` bodies are highlighted and formatted as CSS in `.mjml.twig` files.
   [Twig Language](https://github.com/mblode/vscode-twig-language) keeps native HTML mode for compatibility.
 - [CHANGELOG.md](CHANGELOG.md) records what changed in each release.
 

@@ -211,7 +211,7 @@ var require_lexer = __commonJS({
               closing: !!match[1],
               selfClosing: /\/\s*>$/.test(source.slice(i, end))
             };
-          if (match && !extra.closing && !extra.selfClosing && ["script", "style", "pre", "textarea"].includes(extra.name)) {
+          if (match && !extra.closing && !extra.selfClosing && ["script", "style", "mj-style", "pre", "textarea"].includes(extra.name)) {
             const re = new RegExp("</" + extra.name + "\\s*>", "ig");
             re.lastIndex = end;
             const close = re.exec(source);
@@ -222,7 +222,8 @@ var require_lexer = __commonJS({
               bodyStart: end,
               bodyEnd: close.index,
               closingStart: close.index,
-              kind: extra.name
+              // MJML's <mj-style> body is CSS.
+              kind: extra.name === "mj-style" ? "style" : extra.name
             };
             end = re.lastIndex;
             type = "raw";
@@ -20320,8 +20321,11 @@ var require_format = __commonJS({
       const last = chunks.length - 1;
       const closing = /\/?\s*>$/.exec(chunks[last]);
       if (!closing) return raw;
-      const end = closing[0].replace(/\s/g, "");
-      chunks[last] = chunks[last].slice(0, -closing[0].length);
+      const unquoted = (chunk2) => /=(?!["'])[^"'\s]*$/.test(chunk2.replace(/\{[{%#][\s\S]*?[}%#]\}/g, "_"));
+      let end = closing[0].replace(/\s/g, "");
+      const before = chunks[last].slice(0, -closing[0].length);
+      if (end === "/>" && before && unquoted(before)) end = ">";
+      chunks[last] = chunks[last].slice(0, -end.length);
       if (!chunks[last]) chunks.pop();
       for (let j = 1; j < chunks.length; j++) {
         if (chunks[j] === "=" || chunks[j].startsWith("=") || chunks[j - 1].endsWith("=")) {
@@ -20329,7 +20333,7 @@ var require_format = __commonJS({
           chunks.splice(j--, 1);
         }
       }
-      const inline = chunks.join(" ") + (end === "/>" && options.spaceClose ? " " : "") + end;
+      const inline = chunks.join(" ") + (end === "/>" && (options.spaceClose || unquoted(chunks[chunks.length - 1] || "")) ? " " : "") + end;
       const indent = indentation(depth, options), inner = indentation(depth + 1, options);
       const multiline = chunks.length > 1 && (options.forceAttribute || /\r?\n/.test(raw) || options.wrap > 0 && depth * options.tabSize + inline.length > options.wrap);
       if (!multiline) return inline;

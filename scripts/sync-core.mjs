@@ -7,7 +7,7 @@ const destination = path.resolve(process.argv[2] || source);
 const manifest = JSON.parse(fs.readFileSync(path.join(destination, 'package.json')));
 if (manifest.publisher !== 'mblode' || !['twig-language', 'twig-language-2', 'pretty-formatter'].includes(manifest.name)) throw new Error('Expected a matching extension checkout');
 const shared = fs.readdirSync(path.join(source, 'src/formatter')).filter(f => f.endsWith('.js')).map(f => 'src/formatter/' + f);
-if (manifest.name !== 'pretty-formatter') shared.push('src/extension.js', 'src/html.js', 'src/syntaxes/twig.tmLanguage', 'src/languages/twig.configuration.json', 'src/snippets/snippets.json');
+if (manifest.name !== 'pretty-formatter') shared.push('src/extension.js', 'src/html.js', 'src/completions.js', 'src/templates.js', 'src/syntaxes/twig.tmLanguage', 'src/languages/twig.configuration.json', 'src/snippets/snippets.json');
 const hashes = {};
 for (const relative of shared) {
   const bytes = fs.readFileSync(path.join(source, relative));

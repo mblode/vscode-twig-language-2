@@ -103,6 +103,24 @@ for (const [name, source, word, scope] of [
     "string.quoted.single.twig",
   ],
   [
+    "Twig 2 #79 custom tests are highlighted",
+    "{% if item is numeric %}\n<p>AFTER</p>",
+    "numeric",
+    "support.function.twig",
+  ],
+  [
+    "negated tests are highlighted",
+    "{% if item is not defined %}\n<p>AFTER</p>",
+    "defined",
+    "support.function.twig",
+  ],
+  [
+    "Twig 1 #45 MJML mj-style body is CSS",
+    '<mj-style inline="inline">\n.a { color: {{ c }}; }\n</mj-style>\n<p>AFTER</p>',
+    "color",
+    "support.type.property-name.css",
+  ],
+  [
     "verbatim protects template-like literals",
     "{% verbatim %}{{ fake }}{% endverbatim %}\n<p>AFTER</p>",
     "{{ fake }}",
@@ -192,7 +210,7 @@ test("closing tags wait for the cursor event and reject superseded changes", () 
       },
     },
     workspace: {
-      getConfiguration: () => ({ get: () => true }),
+      getConfiguration: () => ({ get: (key, fallback) => fallback }),
       onDidChangeTextDocument: (fn) => {
         change = fn;
         return disposable;
@@ -226,4 +244,75 @@ test("closing tags wait for the cursor event and reject superseded changes", () 
   selection({ textEditor: editor });
   assert.equal(inserted.length, 1);
   context.subscriptions.forEach((s) => s.dispose());
+});
+test("Twig 2 #96 typing = after an attribute name inserts quotes", () => {
+  const { registerHTML } = require("../src/html");
+  const inserted = [];
+  let change, selection, source;
+  const make = (text) => {
+    source = text;
+    return TextDocument.create("file:///test.twig", "twig", 1, text);
+  };
+  let d = make("<div class=");
+  const document = {
+    uri: { toString: () => d.uri },
+    languageId: "twig",
+    version: 1,
+    getText: () => source,
+    offsetAt: (p) => d.offsetAt(p),
+    positionAt: (o) => d.positionAt(o),
+  };
+  const editor = {
+    document,
+    selections: [{}],
+    selection: { isEmpty: true, active: { isEqual: () => true } },
+    insertSnippet: (s) => inserted.push(s.value),
+  };
+  const settings = {};
+  const disposable = { dispose() {} };
+  registerHTML(
+    {
+      languages: {
+        registerCompletionItemProvider: () => disposable,
+        registerHoverProvider: () => disposable,
+      },
+      window: {
+        activeTextEditor: editor,
+        onDidChangeTextEditorSelection: (fn) => ((selection = fn), disposable),
+      },
+      workspace: {
+        getConfiguration: () => ({
+          get: (key, fallback) => settings[key] ?? fallback,
+        }),
+        onDidChangeTextDocument: (fn) => ((change = fn), disposable),
+      },
+      SnippetString: class {
+        constructor(value) {
+          this.value = value;
+        }
+      },
+    },
+    { subscriptions: [] },
+  );
+  const type = (text) => {
+    d = make(text);
+    change({
+      document,
+      contentChanges: [
+        { rangeLength: 0, rangeOffset: text.indexOf("="), text: "=" },
+      ],
+    });
+    selection({ textEditor: editor });
+  };
+  type("<div class=");
+  assert.deepEqual(inserted, ['"$1"']);
+  settings["completion.attributeDefaultValue"] = "singlequotes";
+  type("<div class=>");
+  assert.deepEqual(inserted, ['"$1"', "'$1'"]);
+  type("<a href={{ url }}>");
+  type("{% set x = 1 %}");
+  type('<div class="x" id=value>');
+  settings.autoCreateQuotes = false;
+  type("<div class=");
+  assert.equal(inserted.length, 2);
 });

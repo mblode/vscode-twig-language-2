@@ -1,19 +1,21 @@
 {
   "source": "mblode/vscode-twig-language-2",
-  "version": "0.12.2",
+  "version": "0.13.0",
   "files": {
     "src/formatter/embedded.js": "13c42c2f5a0b100ebdc9afe4b4ad87cb47d47e96397113e0b0f2bd3754648e56",
-    "src/formatter/format.js": "ad4db00cc8f3b14b24ca6c9ba8f371a2bf80285e7e4c95005fca19d222acf75e",
-    "src/formatter/lexer.js": "2d6260344f609095edd4a17d021c254cbec90320f1139384147d97b2af7cdf75",
+    "src/formatter/format.js": "30e21c934274aec46b0fc8599e4a13ce2d0169fbfcff8903423c7ad29bf9e11b",
+    "src/formatter/lexer.js": "dd2af04ae591ccfc1445d29a7017c25145e79268a0258a4d74c9ecd053550660",
     "src/formatter/parser.js": "633214a9e7079a14d41e339b133fe7e0afe029a7a8e234d806758302c2b5abd4",
     "src/formatter/preservation.js": "14d34cb7a0aecef3c66375166d199e52e468f92dfd540f73e90bf4a0658666ac",
     "src/formatter/service.js": "02e5346302c2dbe83bb2cc34e326cc648e88b88edd3662fb5d15ba6367779192",
     "src/formatter/settings.js": "72b802871e487083439652e0a7842f32d573829a580f668c375c931c875c57c4",
     "src/formatter/worker.js": "05c9648e0f42c554fc366126d9a1458b9975442b4c09e6abee4b7dfc5539cd9d",
-    "src/extension.js": "bb459cb835b887e1f5f25a7fddb71ab3eba55ec447ab29a622fd696a4b361291",
-    "src/html.js": "e5e64bd8cc979b7895cb03cb56f2a42e2154b9b3742e9e723cc11a3333642b9b",
-    "src/syntaxes/twig.tmLanguage": "4cc88a3eb19d949af86e25fb1c1327ba9777e260ea586c98faed6f3691fca6ef",
+    "src/extension.js": "d40046388ff2c9236ffeafdcc6184ddfc54eb026b1bce5cc005dee2384db98a4",
+    "src/html.js": "6fc4c3d252c392c7295db88e55365d2557a8db9e742ae0bf948dfcba37f0bc84",
+    "src/completions.js": "f605f96b7b5ce4fd31c34f89ba50e59ee96c2b97afb7735e29b892b5c95d5821",
+    "src/templates.js": "23fcc660497605a77f608906b937aaf4a7c87ead2e3ad46ad2704b7122a9006e",
+    "src/syntaxes/twig.tmLanguage": "86eae7ec947805d9487ba8657431542a924fd54a78c736dca91b5f1c26451ad3",
     "src/languages/twig.configuration.json": "8873c7003f803d3e143b9353d03bb1c2f8c04285b4063c83c66c61313803138b",
-    "src/snippets/snippets.json": "4a7991e40b17c4bce212dd63915b8024ce4006cb78b9d98535bbeb31649b8942"
+    "src/snippets/snippets.json": "fb534778313eaac7d6c21495542ebf4ff5333412d4af89e97f1bc7d3b1b9978e"
   }
 }

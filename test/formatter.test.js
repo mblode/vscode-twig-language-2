@@ -192,3 +192,32 @@ test("Twig 2 #124 hash braces keep the author's padding", async () => {
     assert.equal(await format(result, { newLine: false }), result);
   }
 });
+test("Twig 1 #45 MJML mj-style bodies are CSS, not markup", async () => {
+  const source =
+    "<mj-head>\n<mj-style>\n.a {\n  color: {{ c }};\n}\n</mj-style>\n<mj-style>\n.b{color:red}\n</mj-style>\n</mj-head>\n";
+  assert.equal(
+    await format(source, { tabSize: 2 }),
+    "<mj-head>\n  <mj-style>\n.a {\n  color: {{ c }};\n}\n</mj-style>\n  <mj-style>\n    .b {\n      color: red;\n    }\n  </mj-style>\n</mj-head>\n",
+  );
+});
+test("a self-closing slash never joins or leaves an unquoted attribute value", async () => {
+  for (const spaceClose of [false, true]) {
+    const options = { tabSize: 2, spaceClose };
+    assert.equal(
+      await format("<input value=1 />\n", options),
+      "<input value=1 />\n",
+    );
+    assert.equal(
+      await format("<input value={{ x }} />\n", options),
+      "<input value={{ x }} />\n",
+    );
+    assert.equal(
+      await format("<input value=1/>\n", options),
+      "<input value=1/>\n",
+    );
+  }
+  assert.equal(
+    await format('<input value="1" />\n', { tabSize: 2 }),
+    '<input value="1"/>\n',
+  );
+});

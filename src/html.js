@@ -54,6 +54,12 @@ function htmlDocument(document, position) {
   return { virtual, parsed: service.parseHTMLDocument(virtual) };
 }
 function registerHTML(vscode, context) {
+  const attributeValue = (document) => {
+    const value = vscode.workspace
+      .getConfiguration("html", document)
+      .get("completion.attributeDefaultValue", "doublequotes");
+    return ["empty", "singlequotes"].includes(value) ? value : "doublequotes";
+  };
   const range = (r) =>
     new vscode.Range(
       r.start.line,
@@ -73,6 +79,7 @@ function registerHTML(vscode, context) {
             html.virtual,
             position,
             html.parsed,
+            { attributeDefaultValue: attributeValue(document) },
           );
           return new vscode.CompletionList(
             result.items.map((item) => {
@@ -172,7 +179,8 @@ function registerHTML(vscode, context) {
       if (document.languageId !== "twig" || event.contentChanges.length !== 1)
         return;
       const change = event.contentChanges[0];
-      if (change.rangeLength || ![">", "/"].includes(change.text)) return;
+      if (change.rangeLength || ![">", "/", "="].includes(change.text)) return;
+      const quote = change.text === "=";
       const editor = vscode.window.activeTextEditor;
       if (
         !editor ||
@@ -183,17 +191,27 @@ function registerHTML(vscode, context) {
       if (
         !vscode.workspace
           .getConfiguration("html", document)
-          .get("autoClosingTags", true)
+          .get(quote ? "autoCreateQuotes" : "autoClosingTags", true)
       )
         return;
       const position = document.positionAt(change.rangeOffset + 1);
       const html = htmlDocument(document, position);
-      if (!html) return;
-      const completion = service.doTagComplete(
-        html.virtual,
-        position,
-        html.parsed,
-      );
+      // A Twig value right after "=" is invisible to the HTML scanner: href={{ url }}.
+      if (
+        !html ||
+        (quote &&
+          /^\s*\{[{%#]/.test(
+            document
+              .getText()
+              .slice(change.rangeOffset + 1, change.rangeOffset + 200),
+          ))
+      )
+        return;
+      const completion = quote
+        ? service.doQuoteComplete(html.virtual, position, html.parsed, {
+            attributeDefaultValue: attributeValue(document),
+          })
+        : service.doTagComplete(html.virtual, position, html.parsed);
       if (!completion) return;
       const timer = setTimeout(() => clear(document), 1000);
       timer.unref?.();

@@ -7,6 +7,7 @@ const workspace = fs.mkdtempSync(
 );
 runTests({
   version: process.env.VSCODE_VERSION || "1.85.2",
+  vscodeExecutablePath: process.env.VSCODE_EXECUTABLE_PATH,
   extensionDevelopmentPath:
     process.env.TWIG_EXTENSION_PATH || path.resolve(__dirname, "../.."),
   extensionTestsPath: path.resolve(__dirname, "suite.cjs"),

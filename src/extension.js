@@ -12,6 +12,12 @@ const snippets = [
 ];
 const { runFormatter } = require("./formatter/service");
 const { readOptions, matchesIgnore } = require("./formatter/settings");
+const {
+  registerCompletions,
+  customDefinitions,
+  insideTwig,
+} = require("./completions");
+const { registerTemplates } = require("./templates");
 
 function activate(context) {
   if (language === "twig") require("./html").registerHTML(vscode, context);
@@ -28,6 +34,8 @@ function activate(context) {
       uri: document.uri,
       languageId: document.languageId,
     });
+  registerCompletions(vscode, context, language, configFor);
+  registerTemplates(vscode, context, language, configFor);
 
   async function provideEdits(document, options, cancellation, selection) {
     const config = configFor(document);
@@ -163,11 +171,38 @@ function activate(context) {
     }
   }
 
+  // Lets Tab keybindings leave Twig expressions to snippet placeholders instead of Emmet.
+  let inTag = false;
+  function trackTag(editor) {
+    const document = editor?.document;
+    if (!document || document.languageId !== "twig") return;
+    const position = editor.selection.active;
+    const value =
+      editor.selections.length === 1 &&
+      insideTwig(
+        document.getText(
+          new vscode.Range(
+            document.positionAt(
+              Math.max(0, document.offsetAt(position) - 4000),
+            ),
+            position,
+          ),
+        ),
+      );
+    if (value !== inTag)
+      vscode.commands.executeCommand(
+        "setContext",
+        "twig.inTag",
+        (inTag = value),
+      );
+  }
+
   context.subscriptions.push(
     vscode.workspace.onDidChangeTextDocument(armDelimiters),
-    vscode.window.onDidChangeTextEditorSelection((event) =>
-      padDelimiters(event.textEditor),
-    ),
+    vscode.window.onDidChangeTextEditorSelection((event) => {
+      padDelimiters(event.textEditor);
+      trackTag(event.textEditor);
+    }),
     vscode.languages.registerDocumentFormattingEditProvider(language, {
       provideDocumentFormattingEdits: (document, options, token) =>
         provideEdits(document, options, token),
@@ -178,10 +213,18 @@ function activate(context) {
     }),
     vscode.languages.registerHoverProvider(language, {
       provideHover(document, position) {
-        if (!configFor(document).get("hover", true)) return;
+        const config = configFor(document);
+        if (!config.get("hover", true)) return;
         const range = document.getWordRangeAtPosition(position);
         if (!range) return;
         const word = document.getText(range);
+        const custom = customDefinitions(config).find((d) => d.name === word);
+        if (custom)
+          return new vscode.Hover(
+            new vscode.MarkdownString(
+              `**${custom.name}** (custom ${custom.kind})\n\n${custom.description}`,
+            ),
+          );
         const snippet = snippets.find(
           (item) => item.prefix === word || item.hover === word,
         );

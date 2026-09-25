@@ -336,7 +336,7 @@
         </dict>
         <dict>
             <key>begin</key>
-            <string>(?:^\s+)?(&lt;)((?i:style))\b(?![^&gt;]*/&gt;)</string>
+            <string>(?:^\s+)?(&lt;)((?i:style|mj-style))\b(?![^&gt;]*/&gt;)</string>
             <key>captures</key>
             <dict>
                 <key>1</key>
@@ -356,7 +356,7 @@
                 </dict>
             </dict>
             <key>end</key>
-            <string>(&lt;/)((?i:style))(&gt;)(?:\s*\n)?</string>
+            <string>(&lt;/)((?i:style|mj-style))(&gt;)(?:\s*\n)?</string>
             <key>name</key>
             <string>source.css.embedded.html</string>
             <key>patterns</key>
@@ -377,7 +377,7 @@
                         </dict>
                     </dict>
                     <key>end</key>
-                    <string>(?=&lt;/(?i:style))</string>
+                    <string>(?=&lt;/(?i:style|mj-style))</string>
                     <key>patterns</key>
                     <array>
                         <dict>
@@ -1644,7 +1644,7 @@
                 </dict>
             </dict>
             <key>match</key>
-            <string>(?&lt;=is\s)(?:(not)\s+)?(defined|empty|even|iterable|odd|null|same\s+as)</string>
+            <string>(?&lt;=[^a-zA-Z0-9_\x{7f}-\x{ff}.$]is\s|[^a-zA-Z0-9_\x{7f}-\x{ff}.$]is\snot\s)(?:(not)\s+)?(same\s+as|divisible\s+by|has\s+(?:every|some)|[a-zA-Z_\x{7f}-\x{ff}][a-zA-Z0-9_\x{7f}-\x{ff}]*)</string>
         </dict>
         <key>twig-macros</key>
         <dict>

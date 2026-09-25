@@ -2,6 +2,7 @@ const vscode = require("vscode");
 const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const path = require("node:path");
+const manifest = require("../../package.json");
 exports.run = async () => {
   const extension = vscode.extensions.getExtension("mblode.twig-language-2");
   assert(extension, "extension must be installed");
@@ -135,7 +136,20 @@ exports.run = async () => {
   await apply(saving, [
     vscode.TextEdit.insert(new vscode.Position(0, 3), "{{other}}"),
   ]);
-  assert(await saving.save());
+  // Newer VS Code can apply the formatOnSave update after the first save; re-dirty and retry only that race.
+  for (let i = 0; i < 20; i++) {
+    if (!saving.isDirty)
+      await apply(saving, [
+        vscode.TextEdit.insert(saving.positionAt(saving.getText().length), " "),
+      ]);
+    assert(await saving.save());
+    if (
+      (await fs.readFile(saving.uri.fsPath, "utf8")) ===
+      "<p>{{ other }}{{ value }}</p>\n"
+    )
+      break;
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
   assert.equal(
     await fs.readFile(saving.uri.fsPath, "utf8"),
     "<p>{{ other }}{{ value }}</p>\n",
@@ -196,7 +210,197 @@ exports.run = async () => {
       "workbench.action.revertAndCloseActiveEditor",
     );
   }
+  const label = (item) =>
+    typeof item.label === "string" ? item.label : item.label.label;
+  const complete = async (doc, position) =>
+    (
+      await vscode.commands.executeCommand(
+        "vscode.executeCompletionItemProvider",
+        doc.uri,
+        position,
+      )
+    ).items;
+  const until = async (check) => {
+    const deadline = Date.now() + 3000;
+    while (!(await check()) && Date.now() < deadline)
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    return check();
+  };
+  assert.equal(
+    completions.items.find((i) => label(i) === "class").insertText.value,
+    'class="$1"',
+    "attribute completion inserts quotes",
+  );
+  const quotes = await open("quotes.twig", "<div class");
+  vscode.window.activeTextEditor.selection = new vscode.Selection(0, 10, 0, 10);
+  await vscode.commands.executeCommand("type", { text: "=" });
+  assert(
+    await until(() => quotes.getText() === '<div class=""'),
+    `typing = creates attribute quotes: ${quotes.getText()}`,
+  );
+  await vscode.commands.executeCommand("type", { text: "x" });
+  assert.equal(
+    quotes.getText(),
+    '<div class="x"',
+    "cursor is inside the quotes",
+  );
+  const html = vscode.workspace.getConfiguration("html");
+  await html.update(
+    "autoCreateQuotes",
+    false,
+    vscode.ConfigurationTarget.Workspace,
+  );
+  const unquoted = await open("unquoted.twig", "<div id");
+  vscode.window.activeTextEditor.selection = new vscode.Selection(0, 7, 0, 7);
+  await vscode.commands.executeCommand("type", { text: "=" });
+  await new Promise((resolve) => setTimeout(resolve, 200));
+  assert.equal(
+    unquoted.getText(),
+    "<div id=",
+    "html.autoCreateQuotes is respected",
+  );
+  await html.update(
+    "autoCreateQuotes",
+    undefined,
+    vscode.ConfigurationTarget.Workspace,
+  );
+
+  const snippetDoc = await open("snippets.twig", "sw");
+  const end = new vscode.Position(0, 2);
+  const snippet = (items, prefix) =>
+    items.find(
+      (i) =>
+        label(i) === prefix && i.kind === vscode.CompletionItemKind.Snippet,
+    );
+  assert(
+    snippet(await complete(snippetDoc, end), "switch"),
+    "Craft snippets are on by default",
+  );
+  const inc = snippet(await complete(snippetDoc, end), "inc");
+  assert.equal(inc.insertText.value, '{% include "${1:template}" %}$0');
+  await update("craftSnippets", false);
+  const core = await complete(snippetDoc, end);
+  assert(!snippet(core, "switch"), "craftSnippets: false hides Craft snippets");
+  assert(snippet(core, "if"), "core snippets remain");
+  await update("craftSnippets", undefined);
+  await update("snippetQuotes", "single");
+  assert.equal(
+    snippet(await complete(snippetDoc, end), "inc").insertText.value,
+    "{% include '${1:template}' %}$0",
+  );
+  await update("snippetQuotes", undefined);
+  await update("customTests", { numeric: "True for numeric values." });
+  const customDoc = await open(
+    "custom-test.twig",
+    "{% if x is numeric %}{% endif %}",
+  );
+  assert(
+    (await complete(customDoc, new vscode.Position(0, 13))).some(
+      (i) => label(i) === "numeric",
+    ),
+    "custom tests complete inside Twig",
+  );
+  const customHover = await vscode.commands.executeCommand(
+    "vscode.executeHoverProvider",
+    customDoc.uri,
+    new vscode.Position(0, 13),
+  );
+  assert(
+    customHover.some((h) =>
+      h.contents.some((c) =>
+        (c.value ?? c).includes("True for numeric values."),
+      ),
+    ),
+    "custom tests have hover documentation",
+  );
+  await update("customTests", undefined);
+
+  await fs.mkdir(path.join(root, "templates/partials"), { recursive: true });
+  await fs.writeFile(path.join(root, "templates/base.html.twig"), "");
+  await fs.writeFile(path.join(root, "templates/partials/_header.twig"), "");
+  await fs.writeFile(path.join(root, "templates/_layout.twig"), "");
+  const linked = await open(
+    "links.twig",
+    '{% extends "base.html.twig" %}\n{% include("partials/_header.twig") %}\n{% include ["missing.twig", "_layout"] %}\n{% embed "@App/_header.twig" %}{% endembed %}\n',
+  );
+  const targets = async () =>
+    (
+      await vscode.commands.executeCommand(
+        "vscode.executeLinkProvider",
+        linked.uri,
+      )
+    )
+      .filter((l) => l.target?.scheme === "file")
+      .map((l) => path.relative(root, l.target.fsPath));
+  assert.deepEqual(await targets(), [
+    path.join("templates", "base.html.twig"),
+    path.join("templates", "partials", "_header.twig"),
+    path.join("templates", "_layout.twig"),
+  ]);
+  await update("templateNamespaces", { App: "templates/partials" });
+  assert.equal(
+    (await targets())[3],
+    path.join("templates", "partials", "_header.twig"),
+    "@Namespace names resolve through templateNamespaces",
+  );
+  await update("templateNamespaces", undefined);
+  const definitions = await vscode.commands.executeCommand(
+    "vscode.executeDefinitionProvider",
+    linked.uri,
+    new vscode.Position(0, 14),
+  );
+  assert.equal(definitions.length, 1);
+  assert.equal(
+    (definitions[0].targetUri ?? definitions[0].uri).fsPath,
+    path.join(root, "templates/base.html.twig"),
+    "go to definition opens extended templates",
+  );
+  assert.deepEqual(
+    await vscode.commands.executeCommand(
+      "vscode.executeDefinitionProvider",
+      linked.uri,
+      new vscode.Position(2, 15),
+    ),
+    [],
+    "unresolvable names have no definition",
+  );
+
+  const tab = manifest.contributes.keybindings.find(
+    (k) => k.command === "jumpToNextSnippetPlaceholder",
+  );
+  assert.match(tab.when, /suggestWidgetVisible && twig\.inTag/);
+  await vscode.workspace
+    .getConfiguration("emmet")
+    .update(
+      "includeLanguages",
+      { twig: "html" },
+      vscode.ConfigurationTarget.Workspace,
+    );
+  const emmet = await open("emmet.twig", "");
+  await vscode.window.activeTextEditor.insertSnippet(
+    new vscode.SnippetString("{% if ${1:condition} %}$2{% endif %}\n$0"),
+  );
+  await vscode.commands.executeCommand("type", { text: "event.show_thumb" });
+  const abbreviation = await complete(emmet, new vscode.Position(0, 22));
+  assert(
+    abbreviation.some((i) => label(i) === "event.show_thumb"),
+    "Emmet offers an abbreviation inside the Twig tag",
+  );
+  await vscode.commands.executeCommand("jumpToNextSnippetPlaceholder");
+  assert.equal(emmet.getText(), "{% if event.show_thumb %}{% endif %}\n");
+  assert.equal(
+    vscode.window.activeTextEditor.selection.active.character,
+    25,
+    "Tab target moves into the if block",
+  );
+  await vscode.workspace
+    .getConfiguration("emmet")
+    .update(
+      "includeLanguages",
+      undefined,
+      vscode.ConfigurationTarget.Workspace,
+    );
   console.log(
-    "VS Code integration: activation, document/range/save formatting, live settings, indentation, ignore, errors, CRLF and hover passed.",
+    "VS Code integration: activation, document/range/save formatting, live settings, indentation, ignore, errors, CRLF, hover, auto quotes, snippet settings, custom definitions, template links and snippet Tab inside Twig passed.",
   );
 };

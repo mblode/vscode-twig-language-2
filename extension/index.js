@@ -49,7 +49,7 @@ var require_package = __commonJS({
       name: "twig-language-2",
       displayName: "Twig Language 2",
       description: "Snippets, Syntax Highlighting, Hover, and Formatting for Twig",
-      version: "0.12.2",
+      version: "0.13.0",
       publisher: "mblode",
       license: "MIT",
       author: {
@@ -113,12 +113,6 @@ var require_package = __commonJS({
               "source.js": "javascript",
               "source.ts": "typescript"
             }
-          }
-        ],
-        snippets: [
-          {
-            language: "twig",
-            path: "./src/snippets/snippets.json"
           }
         ],
         configuration: {
@@ -452,9 +446,88 @@ var require_package = __commonJS({
               maximum: 3e4,
               description: "Maximum formatting time in milliseconds. Timeout cancels the worker and returns no edits.",
               scope: "language-overridable"
+            },
+            "twig-language-2.craftSnippets": {
+              type: "boolean",
+              default: true,
+              description: "Include Craft CMS snippets such as entries, switch, nav, cache and the Craft forms.",
+              scope: "language-overridable"
+            },
+            "twig-language-2.snippetQuotes": {
+              type: "string",
+              enum: [
+                "double",
+                "single"
+              ],
+              default: "double",
+              description: "Quote style for Twig strings inserted by snippets. HTML attribute quotes are unchanged.",
+              scope: "language-overridable"
+            },
+            "twig-language-2.templatePaths": {
+              type: "array",
+              items: {
+                type: "string"
+              },
+              default: [
+                "templates",
+                "views",
+                "src/templates",
+                "."
+              ],
+              markdownDescription: "Template roots for Ctrl/Cmd-click and Go to Definition on `include`, `extends`, `embed`, `import`, `from`, `use`, `include()` and `source()` names. Relative paths resolve against the workspace folder. The current file's folder is always searched last.",
+              scope: "resource"
+            },
+            "twig-language-2.templateNamespaces": {
+              type: "object",
+              additionalProperties: {
+                type: [
+                  "string",
+                  "array"
+                ],
+                items: {
+                  type: "string"
+                }
+              },
+              default: {},
+              markdownDescription: 'Twig namespace roots for `@Namespace/name.twig` template names, for example `{ "App": "src/App/templates" }`.',
+              scope: "resource"
+            },
+            "twig-language-2.customTests": {
+              type: "object",
+              additionalProperties: {
+                type: "string"
+              },
+              default: {},
+              markdownDescription: 'Project-specific Twig tests for completion and hover, mapped to a description. Example: `{ "numeric": "True when the value is numeric." }`.',
+              scope: "language-overridable"
+            },
+            "twig-language-2.customFilters": {
+              type: "object",
+              additionalProperties: {
+                type: "string"
+              },
+              default: {},
+              markdownDescription: 'Project-specific Twig filters for completion and hover, mapped to a description. Example: `{ "price": "Formats a number as a price." }`.',
+              scope: "language-overridable"
+            },
+            "twig-language-2.customFunctions": {
+              type: "object",
+              additionalProperties: {
+                type: "string"
+              },
+              default: {},
+              markdownDescription: 'Project-specific Twig functions for completion and hover, mapped to a description. Example: `{ "svg": "Inlines an SVG file." }`.',
+              scope: "language-overridable"
             }
           }
-        }
+        },
+        keybindings: [
+          {
+            key: "tab",
+            command: "jumpToNextSnippetPlaceholder",
+            when: "editorTextFocus && editorLangId == twig && inSnippetMode && hasNextTabstop && suggestWidgetVisible && twig.inTag"
+          }
+        ]
       },
       capabilities: {
         untrustedWorkspaces: {
@@ -1048,6 +1121,1165 @@ var require_settings = __commonJS({
       });
     }
     module2.exports = { readOptions: readOptions2, matchesIgnore: matchesIgnore2 };
+  }
+});
+
+// src/snippets/snippets.json
+var require_snippets = __commonJS({
+  "src/snippets/snippets.json"(exports2, module2) {
+    module2.exports = {
+      apply: {
+        prefix: "apply",
+        body: "{% apply %}\n	$0\n{% endapply %}",
+        description: "apply"
+      },
+      asset: {
+        prefix: "asset",
+        body: '{% set asset = ${1:entry.assetFieldHandle}.one() %}\n\n{% if asset %}\n	<img src="{{ asset.getUrl("${2:thumb}") }}" width="{{ asset.getWidth("${2:thumb}") }}" height="{{ asset.getHeight("${2:thumb}") }}" alt="{{ asset.title }}">\n{% endif %}',
+        description: "asset",
+        craft: true
+      },
+      assets: {
+        prefix: "assets",
+        body: '{% for image in craft.assets()\n	.sourceId("${1:1}")\n	.kind("${2:image}")\n	.limit(${3:10})\n.all() %}\n	<img src="{{ image.url${4:("${5:thumb}")} }}" width="${6:200}" height="${7:200}" alt="{{ image.title }}">\n{% endfor %}\n$0',
+        description: "craft.assets",
+        craft: true
+      },
+      autoescape: {
+        prefix: "autoescape",
+        body: '{% autoescape "${1:type}" %}\n	$0\n{% endautoescape %}',
+        description: "autoescape"
+      },
+      blockb: {
+        prefix: "blockb",
+        body: "{% block ${1:name} %}\n	$0\n{% endblock %}",
+        description: "block (block)"
+      },
+      block: {
+        prefix: "block",
+        body: "{% block ${1:name} %}$0{% endblock %}",
+        description: "block"
+      },
+      blockf: {
+        prefix: "blockf",
+        body: '{{ block("${1:name}") }}$0',
+        description: "blockf"
+      },
+      cache: {
+        prefix: "cache",
+        body: "{% cache %}\n	$1\n{% endcache %}\n$0",
+        description: "cache",
+        craft: true
+      },
+      case: {
+        prefix: "case",
+        body: '{% case "${1:value}" %}\n	$0',
+        description: "case",
+        craft: true
+      },
+      children: {
+        prefix: "children",
+        body: "{% children %}$0",
+        description: "children",
+        craft: true
+      },
+      ceil: {
+        prefix: "ceil",
+        body: "ceil($1)$0",
+        description: "ceil",
+        craft: true
+      },
+      formlogin: {
+        prefix: "formlogin",
+        body: '<form method="post" accept-charset="UTF-8">\n	{{ csrfInput() }}\n	<input type="hidden" name="action" value="users/login">\n\n	<h3><label for="loginName">Username or email</label></h3>\n	<input id="loginName" type="text" name="loginName"\n		value="{{ craft.app.user.rememberedUsername }}">\n\n	<h3><label for="password">Password</label></h3>\n	<input id="password" type="password" name="password">\n\n	<label>\n		<input type="checkbox" name="rememberMe" value="1">\n		Remember me\n	</label>\n\n	<input type="submit" value="Login">\n\n	{% if errorMessage is defined %}\n		<p>{{ errorMessage }}</p>\n	{% endif %}\n</form>\n\n<p><a href="{{ url("forgotpassword") }}">Forgot your password?</a></p>',
+        description: "craft.user - example login form",
+        craft: true
+      },
+      formuserprofile: {
+        prefix: "formuserprofile",
+        body: '<form method="post" accept-charset="UTF-8">\n	{{ csrfInput() }}\n	<input type="hidden" name="action" value="users/save-user">\n	{{ redirectInput("users/"~currentUser.username) }}\n	<input type="hidden" name="userId" value="{{ currentUser.id }}">\n\n	<label for="location">Location</label>\n	<input type="text" id="location" name="fields[location]" value="{{ currentUser.location }}">\n\n	<label for="bio">Bio</label>\n	<textarea id="bio" name="fields[bio]">{{ currentUser.bio }}</textarea>\n\n	<input type="submit" value="Save Profile">\n</form>',
+        description: "craft.user - example user profile form",
+        craft: true
+      },
+      formuserregistration: {
+        prefix: "formuserregistration",
+        body: '<form method="post" accept-charset="UTF-8">\n	{{ csrfInput() }}\n	<input type="hidden" name="action" value="users/save-user">\n	{{ redirectInput("") }}\n\n	{% macro errorList(errors) %}\n		{% if errors %}\n			<ul class="errors">\n				{% for error in errors %}\n					<li>{{ error }}</li>\n				{% endfor %}\n			</ul>\n		{% endif %}\n	{% endmacro %}\n\n	{% from _self import errorList %}\n\n	<h3><label for="username">Username</label></h3>\n	<input id="username" type="text" name="username"\n		{%- if user is defined %} value="{{ user.username }}"{% endif -%}>\n\n	{% if user is defined %}\n		{{ errorList(user.getErrors("username")) }}\n	{% endif %}\n\n	<h3><label for="email">Email</label></h3>\n	<input id="email" type="text" name="email"\n		{%- if user is defined %} value="{{ user.email }}"{% endif %}>\n\n	{% if user is defined %}\n		{{ errorList(user.getErrors("email")) }}\n	{% endif %}\n\n	<h3><label for="password">Password</label></h3>\n	<input id="password" type="password" name="password">\n\n	{% if user is defined %}\n		{{ errorList(user.getErrors("password")) }}\n	{% endif %}\n\n	<input type="submit" value="Register">\n</form>',
+        description: "craft.user - example user registration form",
+        craft: true
+      },
+      formforgotpassword: {
+        prefix: "formforgotpassword",
+        body: '<form method="post" accept-charset="UTF-8">\n	{{ csrfInput() }}\n	<input type="hidden" name="action" value="users/send-password-reset-email">\n	{{ redirectInput("") }}\n\n	<h3><label for="loginName">Username or email</label></h3>\n	<input id="loginName" type="text" name="loginName"\n		value="{% if loginName is defined %}{{ loginName }}{% else %}{{ craft.app.user.rememberedUsername }}{% endif %}">\n\n	{% if errors is defined %}\n		<ul class="errors">\n			{% for error in errors %}\n				<li>{{ error }}</li>\n			{% endfor %}\n		</ul>\n	{% endif %}\n\n	<input type="submit" value="Submit">\n</form>',
+        description: "craft.user - example forgot password form",
+        craft: true
+      },
+      formsetpassword: {
+        prefix: "formsetpassword",
+        body: '<form method="post" accept-charset="UTF-8">\n	{{ csrfInput() }}\n	<input type="hidden" name="action" value="users/set-password">\n	<input type="hidden" name="code" value="{{ code }}">\n	<input type="hidden" name="id" value="{{ id }}">\n\n	<h3><label for="newPassword">New Password</label></h3>\n	<input id="newPassword" type="password" name="newPassword">\n	{% if errors is defined %}\n		<ul class="errors">\n			{% for error in errors %}\n				<li>{{ error }}</li>\n			{% endfor %}\n		</ul>\n	{% endif %}\n\n	<input type="submit" value="Submit">\n</form>',
+        description: "craft.user - example set password form",
+        craft: true
+      },
+      formsearch: {
+        prefix: "formsearch",
+        body: '<form action="{{ url("search/results") }}">\n	<input type="search" name="q" placeholder="Search">\n	<input type="submit" value="Go">\n</form>',
+        description: "craft.entries - example search form",
+        craft: true
+      },
+      formsearchresults: {
+        prefix: "formsearchresults",
+        body: '<h1>Search Results</h1>\n\n{% set query = craft.app.request.getParam("q") %}\n{% set entries = craft.entries.search(query).orderBy("score").all() %}\n\n{% if entries | length %}\n	<p>{{ entries | length }} results:</p>\n\n	<ul>\n		{% for entry in entries %}\n			<li><a href="{{ entry.url }}">{{ entry.title }}</a></li>\n		{% endfor %}\n	</ul>\n{% else %}\n	<p>Your search for \u201C{{ query }}\u201D didn\u2019t return any results.</p>\n{% endif %}',
+        description: "craft.entries - example search results",
+        craft: true
+      },
+      rss: {
+        prefix: "rss",
+        body: '<?xml version="1.0"?>\n<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">\n	<channel>\n		<title>{{ siteName }}</title>\n		<link>{{ siteUrl }}</link>\n		<atom:link href="{{ craft.app.request.absoluteUrl }}" rel="self" type="application/rss+xml" />\n		<description>{{ globals.siteDescription }}</description>\n		<language>en-us</language>\n		<pubDate>{{ now | rss }}</pubDate>\n		<lastBuildDate>{{ now | rss }}</lastBuildDate>\n\n		{% for entry in craft.entries.all() %}\n			<item>\n				<title>{{ entry.title }}</title>\n				<link>{{ entry.url }}</link>\n				<pubDate>{{ entry.postDate | rss }}</pubDate>\n				<author>{{ entry.author }}</author>\n				<guid>{{ entry.url }}</guid>\n				<description><![CDATA[\n					{{ entry.body }}\n				]]></description>\n			</item>\n		{% endfor %}\n	</channel>\n</rss>',
+        description: "craft.entries - example rss feed",
+        craft: true
+      },
+      assetso: {
+        prefix: "assetso",
+        body: '{% set assets = craft.assets({\n	sourceId: "${1:1}",\n	kind: "${2:image}",\n	limit: ${3:10}\n}).all() %}\n\n{% for image in assets %}\n	<img src="{{ image.url${4:("${5:thumb}")} }}" width="${6:200}" height="${7:200}" alt="{{ image.title }}">\n{% endfor %}\n$0',
+        description: "craft.assets - object syntax",
+        craft: true
+      },
+      categorieso: {
+        prefix: "categorieso",
+        body: '{% set categories = craft.categories({\n	group: "${1:categoryGroupHandle}",\n	limit: "${2:11}"\n}).all() %}\n\n<ul>\n	{% nav category in categories %}\n		<li>\n			<a href="{{ category.url }}">{{ category.title }}</a>\n			{% ifchildren %}\n				<ul>\n					{% children %}\n				</ul>\n			{% endifchildren %}\n		</li>\n	{% endnav %}\n</ul>',
+        description: "craft.categories - object syntax",
+        craft: true
+      },
+      categories: {
+        prefix: "categories",
+        body: '<ul>\n	{% nav category in craft.categories\n		.group("${1:categoryGroupHandle}")\n		.limit(${2:11})\n		.all()\n	%}\n		<li>\n			<a href="{{ category.url }}">{{ category.title }}</a>\n			{% ifchildren %}\n				<ul>\n					{% children %}\n				</ul>\n			{% endifchildren %}\n		</li>\n	{% endnav %}\n</ul>',
+        description: "craft.categories",
+        craft: true
+      },
+      entrieso: {
+        prefix: "entrieso",
+        body: '{% set entries = craft.entries({\n	section: "${1:sectionName}",\n	limit: "${2:10}"\n}).all() %}\n\n{% for entry in entries %}\n	<a href="{{ entry.url }}">{{ entry.title }}</a>\n{% endfor %}\n$0',
+        description: "craft.entries - object syntax",
+        craft: true
+      },
+      entries: {
+        prefix: "entries",
+        body: '{% for entry in craft.entries\n	.section("${1:sectionName}")\n	.limit(${2:10})\n	.all()\n%}\n	<a href="{{ entry.url }}">{{ entry.title }}</a>\n{% endfor %}\n$0',
+        description: "craft.entries",
+        craft: true
+      },
+      feed: {
+        prefix: "feed",
+        body: '{% set feedUrl = "${1:http://feeds.feedburner.com/blogandtonic}" %}\n{% set limit = ${2:10} %}\n{% set items = craft.feeds.getFeedItems(feedUrl, limit).all() %}\n\n{% for item in items %}\n	<article>\n		<h3><a href="{{ item.permalink }}">{{ item.title }}</a></h3>\n		<p class="author">{{ item.authors[0].name }}</p>\n		<p class="date">{{ item.date }}</p>\n\n		{{ item.summary }}\n	</article>\n{% endfor %}',
+        description: "feed",
+        craft: true
+      },
+      t: {
+        prefix: "t",
+        body: "{{ $1 | t }}$0",
+        description: "translate with | t",
+        craft: true
+      },
+      replace: {
+        prefix: "replace",
+        body: '{{ ${1:$TM_SELECTED_TEXT} | replace("search", "replace") }}$0',
+        description: 'replace with | replace("search", "replace")'
+      },
+      replacex: {
+        prefix: "replacex",
+        body: '{{ ${1:$TM_SELECTED_TEXT} | replace("/(search)/i", "replace") }}$0',
+        description: 'replace regex with | replace("/(search)/i", "replace")'
+      },
+      split: {
+        prefix: "split",
+        body: '{{ ${1:$TM_SELECTED_TEXT} | split("\\n") }}$0',
+        description: 'split on | split ("\\n")'
+      },
+      tagso: {
+        prefix: "tagso",
+        body: '{% set tags = craft.tags({\n	group: "${1:tagGroupHandle}"\n}).all() %}\n\n<ul>\n	{% for tag in tags %}\n		<li>{{ tag }}</a></li>\n	{% endfor %}\n</ul>\n$0',
+        description: "craft.tags - object syntax",
+        craft: true
+      },
+      tags: {
+        prefix: "tags",
+        body: '<ul>\n	{% for tag in craft.tags.group("${1:tagGroupHandle}").all() %}\n		<li>{{ tag }}</li>\n	{% endfor %}\n</ul>\n$0',
+        description: "craft.tags",
+        craft: true
+      },
+      userso: {
+        prefix: "userso",
+        body: '{% set users = craft.users({\n	group: "${1:userGroupHandle}"\n}).all() %}\n\n{% for user in users %}\n	{{ user.firstName }} {{ user.lastName }}\n{% endfor %}\n$0',
+        description: "craft.users - object syntax",
+        craft: true
+      },
+      users: {
+        prefix: "users",
+        body: '{% for user in craft.users.group("${1:userGroupHandle}").all() %}\n	{{ user.firstName }} {{ user.lastName }}\n{% endfor %}\n$0',
+        description: "craft.users",
+        craft: true
+      },
+      csrf: {
+        prefix: "csrf",
+        body: "{{ csrfInput() }}\n$0",
+        description: "csrf",
+        craft: true
+      },
+      dd: {
+        prefix: "dd",
+        body: "<pre>\n	{{ dump($1) }}\n</pre>\n{% exit %}$0",
+        description: "dump and die",
+        craft: true
+      },
+      do: {
+        prefix: "do",
+        body: "{% do $1 %}$0",
+        description: "do"
+      },
+      dojs: {
+        prefix: "dojs",
+        body: '{% do view.registerJsFile "${1:url}" %}$0',
+        description: "do js",
+        craft: true
+      },
+      docss: {
+        prefix: "docss",
+        body: '{% do view.registerCssFile "${1:url}" %}$0',
+        description: "do css",
+        craft: true
+      },
+      dump: {
+        prefix: "dump",
+        body: "<pre>\n	{{ dump($1) }}\n</pre>",
+        description: "dump"
+      },
+      else: {
+        prefix: "else",
+        body: "{% else %}\n	$0",
+        description: "else"
+      },
+      elseif: {
+        prefix: "elseif",
+        body: "{% elseif %}\n	$0",
+        description: "elseif"
+      },
+      embed: {
+        prefix: "embed",
+        body: '{% embed "${1:template}" %}\n	$0\n{% endembed %}',
+        description: "embed"
+      },
+      endapply: {
+        prefix: "endapply",
+        body: "{% endapply %}$0",
+        description: "endapply"
+      },
+      endautoescape: {
+        prefix: "endautoescape",
+        body: "{% endautoescape %}$0",
+        description: "endautoescape"
+      },
+      endblock: {
+        prefix: "endblock",
+        body: "{% endblock %}$0",
+        description: "endblock"
+      },
+      endcache: {
+        prefix: "endcache",
+        body: "{% endcache %}$0",
+        description: "endcache",
+        craft: true
+      },
+      endembed: {
+        prefix: "endembed",
+        body: "{% endembed %}$0",
+        description: "endembed"
+      },
+      endfilter: {
+        prefix: "endfilter",
+        body: "{% endfilter %}$0",
+        description: "endfilter"
+      },
+      endfor: {
+        prefix: "endfor",
+        body: "{% endfor %}$0",
+        description: "endfor"
+      },
+      endif: {
+        prefix: "endif",
+        body: "{% endif %}$0",
+        description: "endif"
+      },
+      endifchildren: {
+        prefix: "endifchildren",
+        body: "{% endifchildren %}$0",
+        description: "endifchildren",
+        craft: true
+      },
+      endcss: {
+        prefix: "endcss",
+        body: "{% endcss %}$0",
+        description: "endcss",
+        craft: true
+      },
+      endjs: {
+        prefix: "endjs",
+        body: "{% endjs %}$0",
+        description: "endjs",
+        craft: true
+      },
+      endmacro: {
+        prefix: "endmacro",
+        body: "{% endmacro %}$0",
+        description: "endmacro"
+      },
+      endnav: {
+        prefix: "endnav",
+        body: "{% endnav %}$0",
+        description: "endnav",
+        craft: true
+      },
+      endset: {
+        prefix: "endset",
+        body: "{% endset %}$0",
+        description: "endset"
+      },
+      endspaceless: {
+        prefix: "endspaceless",
+        body: "{% endspaceless %}$0",
+        description: "endspaceless"
+      },
+      endswitch: {
+        prefix: "endswitch",
+        body: "{% endswitch %}$0",
+        description: "endswitch",
+        craft: true
+      },
+      endtrans: {
+        prefix: "endtrans",
+        body: "{% endtrans %}$0",
+        description: "endtrans"
+      },
+      endverbatim: {
+        prefix: "endverbatim",
+        body: "{% endverbatim %}$0",
+        description: "endverbatim"
+      },
+      exit: {
+        prefix: "exit",
+        body: "{% exit ${1:404} %}",
+        description: "exit",
+        craft: true
+      },
+      extends: {
+        prefix: "extends",
+        body: '{% extends "${1:template}" %}$0',
+        description: "extends"
+      },
+      filterb: {
+        prefix: "filterb",
+        body: "{% filter ${1:name} %}\n	$0\n{% endfilter %}",
+        description: "filter (block)"
+      },
+      filter: {
+        prefix: "filter",
+        body: "{% filter ${1:name} %}$0{% endfilter %}",
+        description: "filter"
+      },
+      floor: {
+        prefix: "floor",
+        body: "floor($1)$0",
+        description: "floor",
+        craft: true
+      },
+      fore: {
+        prefix: "fore",
+        body: "{% for ${1:item} in ${2:items} %}\n	$3\n{% else %}\n	$0\n{% endfor %}",
+        description: "for ... else"
+      },
+      for: {
+        prefix: "for",
+        body: "{% for ${1:item} in ${2:items} %}\n	$0\n{% endfor %}",
+        description: "for"
+      },
+      from: {
+        prefix: "from",
+        body: '{% from "${1:template}" import "${2:macro}" %}$0',
+        description: "from"
+      },
+      endbody: {
+        prefix: "endbody",
+        body: "{{ endBody() }}\n$0",
+        description: "endBody",
+        craft: true
+      },
+      head: {
+        prefix: "head",
+        body: "{{ head() }}\n$0",
+        description: "head",
+        craft: true
+      },
+      if: {
+        prefix: "if",
+        body: "{% if ${1:condition} %}$2{% endif %}\n$0",
+        description: "if"
+      },
+      ifb: {
+        prefix: "ifb",
+        body: "{% if ${1:condition} %}\n	$0\n{% endif %}",
+        description: "if (block)"
+      },
+      ife: {
+        prefix: "ife",
+        body: "{% if ${1:condition} %}\n	$2\n{% else %}\n	$0\n{% endif %}",
+        description: "if ... else"
+      },
+      if1: {
+        prefix: "if",
+        body: "{% if ${1:condition} %}$0{% endif %}",
+        description: "if"
+      },
+      ifchildren: {
+        prefix: "ifchildren",
+        body: "{% ifchildren %}\n	$1\n{% endifchildren %}\n$0",
+        description: "ifchildren",
+        craft: true
+      },
+      import: {
+        prefix: "import",
+        body: '{% import "${1:template}" as ${2:name} %}$0',
+        description: "import"
+      },
+      importself: {
+        prefix: "importself",
+        body: "{% import _self as ${1:name} %}$0",
+        description: "importself"
+      },
+      inckv: {
+        prefix: "inckv",
+        body: '{% include "${1:template}" with {\n	${2:key}: ${3:"${4:value}"}\n} %}\n$0',
+        description: "include w/ key/value"
+      },
+      include: {
+        prefix: "include",
+        body: '{% include "${1:template}" %}$0',
+        description: "include"
+      },
+      inc: {
+        prefix: "inc",
+        body: '{% include "${1:template}" %}$0',
+        description: "inc"
+      },
+      incp: {
+        prefix: "incp",
+        body: '{% include "${1:template}"${2: with ${3:params} }%}$0',
+        description: "include w/ params"
+      },
+      css1: {
+        prefix: "css",
+        body: '{% do view.registerCssFile("${1:/resources/css/global.css}") %}\n$0',
+        description: "registerCssFile",
+        craft: true
+      },
+      js: {
+        prefix: "js",
+        body: "{% js %}\n	$1\n{% endjs %}\n$0",
+        description: "js",
+        craft: true
+      },
+      js1: {
+        prefix: "js",
+        body: '{% do view.registerJsFile("${1:/resources/js/global.js}") %}\n$0',
+        description: "registerJsFile",
+        craft: true
+      },
+      css: {
+        prefix: "css",
+        body: "{% css %}\n	$1\n{% endcss %}\n$0",
+        description: "css",
+        craft: true
+      },
+      macro: {
+        prefix: "macro",
+        body: "{% macro ${1:name}(${2:params}) %}\n	$0\n{% endmacro %}",
+        description: "macro"
+      },
+      matrix: {
+        prefix: "matrix",
+        body: '{% for block in ${1:entry.matrixFieldHandle}.all() %}\n\n	{% if block.type == "${2:blockHandle}" %}\n		{{ block.${3:fieldHandle} }}\n	{% endif %}\n\n	{% if block.type == "${4:blockHandle}" %}\n		{{ block.${5:fieldHandle} }}\n	{% endif %}\n\n{% endfor %}\n$0',
+        description: "matrix",
+        craft: true
+      },
+      matrixif: {
+        prefix: "matrixif",
+        body: '{% for block in ${1:entry.matrixFieldHandle}.all() %}\n\n	{% if block.type == "${2:blockHandle}" %}\n		{{ block.${3:fieldHandle} }}\n	{% endif %}\n\n	{% if block.type == "${4:blockHandle}" %}\n		{{ block.${5:fieldHandle} }}\n	{% endif %}\n\n{% endfor %}\n$0',
+        description: "matrixif",
+        craft: true
+      },
+      matrixifelse: {
+        prefix: "matrixifelse",
+        body: '{% for block in ${1:entry.matrixFieldHandle}.all() %}\n\n	{% if block.type == "${2:blockHandle}" %}\n\n		{{ block.${3:fieldHandle} }}\n\n	{% elseif block.type == "${4:blockHandle}" %}\n\n		$0\n	\n	{% endif %}\n\n{% endfor %}',
+        description: "matrixifelse",
+        craft: true
+      },
+      matrixswitch: {
+        prefix: "matrixswitch",
+        body: '{% for block in ${1:entry.matrixFieldHandle}.all() %}\n\n	{% switch block.type %}\n\n		{% case "${2:blockHandle}" %}\n\n			{{ block.${3:fieldHandle} }}\n\n		{% case "${4:blockHandle}" %}\n\n			$0\n\n	{% endswitch %}\n\n{% endfor %}',
+        description: "matrixswitch",
+        craft: true
+      },
+      max: {
+        prefix: "max",
+        body: "max(${1:$2, $3})$0",
+        description: "max"
+      },
+      min: {
+        prefix: "min",
+        body: "min(${1:$2, $3})$0",
+        description: "min"
+      },
+      nav: {
+        prefix: "nav",
+        body: "{% nav ${1:item} in ${2:items} %}\n	$3\n{% endnav %}\n$0",
+        description: "nav",
+        craft: true
+      },
+      paginate: {
+        prefix: "paginate",
+        body: '{% paginate ${1:elements} as ${2:pageInfo}, ${3:pageEntries} %}\n\n{% for item in ${3:pageEntries} %}\n	$0\n{% endfor %}\n\n{% if ${2:pageInfo}.prevUrl %}<a href="{{ ${2:pageInfo}.prevUrl }}">Previous Page</a>{% endif %}\n{% if ${2:pageInfo}.nextUrl %}<a href="{{ ${2:pageInfo}.nextUrl }}">Next Page</a>{% endif %}',
+        description: "paginate simple",
+        craft: true
+      },
+      paginate1: {
+        prefix: "paginate",
+        body: '{# PAGINATION\n		\nFor this pagination to work properly, we need to be sure to set\nthe paginateBase variable in the template we are including the \npagination in.\n\n{% set paginateBase = "/blog/p" %}\n#}\n\n{% if pageInfo.totalPages > 1 %}\n<ul>\n	{% if pageInfo.currentPage != "1" %}\n		<li><a href="{{ paginateBase ~ "1" }}">First Page</a></li>\n	{% endif %}\n\n	{% if pageInfo.prevUrl %}\n		<li><a href="{{ pageInfo.prevUrl }}">Previous Page</a></li>\n	{% endif %}\n\n	{% for pageNumber in 1..pageInfo.totalPages %}\n		<li {% if pageInfo.currentPage == pageNumber %}class="active-page"{% endif %}>\n			<a href="{{ paginateBase ~ pageNumber }}">{{ pageNumber }}</a>\n		</li>\n	{% endfor %}\n\n	{% if pageInfo.nextUrl %}\n		<li><a href="{{ pageInfo.nextUrl }}">Next Page</a></li>\n	{% endif %}\n\n	{% if pageInfo.currentPage != pageInfo.total %}\n		<li><a href="{{ paginateBase ~ pageInfo.total }}">Last Page</a></li>\n	{% endif %}\n</ul>\n{% endif %}\n$0',
+        description: "paginate advanced",
+        craft: true
+      },
+      redirect: {
+        prefix: "redirect",
+        body: '{% redirect "${1:template/path or http://straightupcraft.com}" %}\n$0',
+        description: "redirect",
+        craft: true
+      },
+      getparam: {
+        prefix: "getparam",
+        body: 'craft.app.request.getParam(${1:"Query String or Post Variable Name"})\n$0',
+        description: "request getParam",
+        craft: true
+      },
+      getbodyparam: {
+        prefix: "getbodyparam",
+        body: 'craft.app.request.getBodyParam(${1:"postVariableName"})\n$0',
+        description: "request getBodyParam",
+        craft: true
+      },
+      getqueryparam: {
+        prefix: "getqueryparam",
+        body: 'craft.app.request.getQueryParam(${1:"queryStringName"})\n$0',
+        description: "request getQueryParam",
+        craft: true
+      },
+      getsegment: {
+        prefix: "getsegment",
+        body: "craft.app.request.getSegment(${1:2})\n$0",
+        description: "request getSegment",
+        craft: true
+      },
+      requirelogin: {
+        prefix: "requirelogin",
+        body: "{% requireLogin %}\n$0",
+        description: "requireLogin",
+        craft: true
+      },
+      requirepermission: {
+        prefix: "requirepermission",
+        body: '{% requirePermission "${1:spendTheNight}" %}\n$0',
+        description: "requirePermission",
+        craft: true
+      },
+      round: {
+        prefix: "round",
+        body: '{{ $1 | round(1, "floor") }}$0',
+        description: "round"
+      },
+      setb: {
+        prefix: "setb",
+        body: "{% set ${1:var} %}\n	$0\n{% endset %}",
+        description: "set (block)"
+      },
+      set: {
+        prefix: "set",
+        body: "{% set ${1:var} = ${2:value} %}$0",
+        description: "set"
+      },
+      shuffle: {
+        prefix: "shuffle",
+        body: "shuffle($1)$0",
+        description: "shuffle",
+        craft: true
+      },
+      random: {
+        prefix: "random",
+        body: "random($1)$0",
+        description: "random"
+      },
+      spaceless: {
+        prefix: "spaceless",
+        body: "{% spaceless %}\n	$0\n{% endspaceless %}",
+        description: "spaceless"
+      },
+      switch: {
+        prefix: "switch",
+        body: '{% switch ${1:variable} %}\n\n	{% case "${2:value1}" %}\n	\n\n	{% case "${3:value2}" %}\n	\n\n	{% default %}\n	\n\n{% endswitch %}\n$0',
+        description: "switch",
+        craft: true
+      },
+      trans: {
+        prefix: "trans",
+        body: "{% trans %}$0{% endtrans %}",
+        description: "trans"
+      },
+      urla: {
+        prefix: "urla",
+        body: 'url("${1:path}", ${2:{foo:"1", bar:"2"\\}}, ${3:"http"}, ${4:false})$0',
+        description: "url w/ arguments",
+        craft: true
+      },
+      url: {
+        prefix: "url",
+        body: 'url("${1:path}")$0',
+        description: "url",
+        craft: true
+      },
+      use: {
+        prefix: "use",
+        body: '{% use "${1:template}" %}$0',
+        description: "use"
+      },
+      verbatim: {
+        prefix: "verbatim",
+        body: "{% verbatim %}\n	$0\n{% endverbatim %}",
+        description: "verbatim"
+      },
+      with: {
+        prefix: "with",
+        body: "{% with %}\n	$0\n{% endwith %}",
+        description: "with"
+      },
+      withb: {
+        prefix: "withb",
+        body: "{% with { ${1:foo}: ${2:bar} } %}\n	$0\n{% endwith %}",
+        description: "with (with variables)"
+      },
+      endwith: {
+        prefix: "endwith",
+        body: "{% endwith %}$0",
+        description: "endwith"
+      }
+    };
+  }
+});
+
+// src/completions.js
+var require_completions = __commonJS({
+  "src/completions.js"(exports2, module2) {
+    "use strict";
+    var snippets2 = require_snippets();
+    var KINDS = {
+      customTests: "test",
+      customFilters: "filter",
+      customFunctions: "function"
+    };
+    var swap = (text) => text.replace(/"([^"']*)"/g, "'$1'");
+    var singleQuotes = (text) => /\{[{%]/.test(text) ? text.replace(/\{[{%][\s\S]*?[%}]\}/g, swap) : swap(text);
+    var cache = /* @__PURE__ */ new Map();
+    function snippetList(craft = true, quotes = "double") {
+      const key = `${craft}|${quotes}`;
+      if (!cache.has(key))
+        cache.set(
+          key,
+          Object.values(snippets2).filter((s2) => craft || !s2.craft).map(
+            ({ prefix, body, description }) => quotes === "single" ? {
+              prefix,
+              body: singleQuotes(body),
+              description: swap(description)
+            } : { prefix, body, description }
+          )
+        );
+      return cache.get(key);
+    }
+    function customDefinitions2(config) {
+      return Object.entries(KINDS).flatMap(
+        ([setting, kind]) => Object.entries(config.get(setting, {}) || {}).map(
+          ([name, description]) => ({
+            name,
+            kind,
+            description: typeof description === "string" ? description : ""
+          })
+        )
+      );
+    }
+    function preview(body) {
+      let text = body.replace(/\$\d+/g, "");
+      while (/\$\{\d+:([^{}]*)\}/.test(text))
+        text = text.replace(/\$\{\d+:([^{}]*)\}/g, "$1");
+      return text;
+    }
+    function insideTwig2(before) {
+      const open = Math.max(
+        ...["{{", "{%", "{#"].map((d2) => before.lastIndexOf(d2))
+      );
+      return open >= 0 && Math.max(...["}}", "%}", "#}"].map((d2) => before.lastIndexOf(d2))) < open;
+    }
+    function registerCompletions2(vscode2, context, language2, configFor) {
+      context.subscriptions.push(
+        vscode2.languages.registerCompletionItemProvider(language2, {
+          provideCompletionItems(document, position) {
+            const config = configFor(document);
+            const items = snippetList(
+              config.get("craftSnippets", true),
+              config.get("snippetQuotes", "double")
+            ).map(({ prefix, body, description }) => {
+              const item = new vscode2.CompletionItem(
+                { label: prefix, description },
+                vscode2.CompletionItemKind.Snippet
+              );
+              item.insertText = new vscode2.SnippetString(body);
+              item.documentation = new vscode2.MarkdownString().appendCodeblock(
+                preview(body),
+                "twig"
+              );
+              return item;
+            });
+            const before = document.getText(
+              new vscode2.Range(
+                document.positionAt(
+                  Math.max(0, document.offsetAt(position) - 4e3)
+                ),
+                position
+              )
+            );
+            if (insideTwig2(before))
+              for (const { name, kind, description } of customDefinitions2(config)) {
+                const item = new vscode2.CompletionItem(
+                  { label: name, description: `custom ${kind}` },
+                  vscode2.CompletionItemKind.Function
+                );
+                item.documentation = new vscode2.MarkdownString(description);
+                items.push(item);
+              }
+            return items;
+          }
+        })
+      );
+    }
+    module2.exports = {
+      snippetList,
+      customDefinitions: customDefinitions2,
+      insideTwig: insideTwig2,
+      registerCompletions: registerCompletions2
+    };
+  }
+});
+
+// src/formatter/lexer.js
+var require_lexer = __commonJS({
+  "src/formatter/lexer.js"(exports2, module2) {
+    "use strict";
+    var SyntaxError = class extends Error {
+      constructor(message, offset) {
+        super(`${message} at offset ${offset}`);
+        this.name = "TwigFormatError";
+        this.offset = offset;
+      }
+    };
+    var twigStart = (source, i2) => source[i2] === "{" && ["{", "%", "#"].includes(source[i2 + 1]);
+    var word = /^[\p{L}_][\p{L}\p{N}_]*/u;
+    function quotedEnd(source, start) {
+      const quote = source[start];
+      let i2 = start + 1;
+      while (i2 < source.length) {
+        if (source[i2] === "\\") {
+          i2 += 2;
+          continue;
+        }
+        if (source[i2] === quote) return i2 + 1;
+        if (quote === '"' && source.startsWith("#{", i2)) {
+          let depth = 1;
+          i2 += 2;
+          while (i2 < source.length && depth) {
+            if (source[i2] === '"' || source[i2] === "'") i2 = quotedEnd(source, i2);
+            else if (source[i2++] === "{") depth++;
+            else if (source[i2 - 1] === "}") depth--;
+          }
+          if (depth) throw new SyntaxError("Unclosed string interpolation", start);
+          continue;
+        }
+        i2++;
+      }
+      throw new SyntaxError("Unclosed string", start);
+    }
+    function twigEnd(source, start) {
+      const close = source[start + 1] === "{" ? "}}" : source[start + 1] === "%" ? "%}" : "#}";
+      if (close === "#}") {
+        const end = source.indexOf(close, start + 2);
+        if (end < 0) throw new SyntaxError("Unclosed Twig comment", start);
+        return end + 2;
+      }
+      const stack = [];
+      let i2 = start + 2;
+      while (i2 < source.length) {
+        if (!stack.length && source.startsWith(close, i2)) return i2 + 2;
+        const c2 = source[i2];
+        if (c2 === '"' || c2 === "'") {
+          i2 = quotedEnd(source, i2);
+          continue;
+        }
+        if (c2 === "#") {
+          const newline = source.indexOf("\n", i2);
+          if (newline < 0) throw new SyntaxError("Unclosed Twig line comment", i2);
+          i2 = newline + 1;
+          continue;
+        }
+        if ("([{".includes(c2)) stack.push(c2);
+        else if (")]}".includes(c2)) {
+          if (stack.pop() !== { ")": "(", "]": "[", "}": "{" }[c2])
+            throw new SyntaxError("Unbalanced Twig expression", i2);
+        }
+        i2++;
+      }
+      throw new SyntaxError("Unclosed Twig expression", start);
+    }
+    function expressionParts(source) {
+      const parts = [];
+      let i2 = 0;
+      while (i2 < source.length) {
+        const start = i2;
+        const c2 = source[i2];
+        let kind = "symbol";
+        if (/\s/.test(c2)) {
+          while (/\s/.test(source[i2] || "") && i2 < source.length) i2++;
+          kind = "space";
+        } else if (c2 === '"' || c2 === "'") {
+          i2 = quotedEnd(source, i2);
+          kind = "string";
+        } else if (c2 === "#") {
+          i2 = source.indexOf("\n", i2);
+          if (i2 < 0) i2 = source.length;
+          kind = "comment";
+        } else {
+          const match = source.slice(i2).match(/^b-(?:and|or|xor)\b/) || source.slice(i2).match(word) || source.slice(i2).match(/^\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/);
+          if (match) {
+            i2 += match[0].length;
+            kind = "word";
+          } else {
+            const op = [
+              "<=>",
+              "===",
+              "!==",
+              "...",
+              "=>",
+              "==",
+              "!=",
+              "<=",
+              ">=",
+              "??",
+              "?:",
+              "**",
+              "//",
+              "..",
+              "?.",
+              "&&",
+              "||"
+            ].find((x2) => source.startsWith(x2, i2));
+            i2 += op ? op.length : 1;
+          }
+        }
+        parts.push({ kind, text: source.slice(start, i2), start, end: i2 });
+      }
+      return parts;
+    }
+    function twigInfo(raw) {
+      const left = /^[{][{%#][-~]?/.exec(raw)[0];
+      const right = /[-~]?[}%#][}]$/.exec(raw)[0];
+      const body = raw.slice(left.length, -right.length);
+      const parts = expressionParts(body);
+      const atoms = parts.filter((x2) => x2.kind !== "space" && x2.kind !== "comment");
+      return { left, right, body, parts, atoms, name: atoms[0]?.text || "" };
+    }
+    function htmlEnd(source, start) {
+      let i2 = start + 1;
+      let quote = null;
+      while (i2 < source.length) {
+        if (twigStart(source, i2)) {
+          i2 = twigEnd(source, i2);
+          continue;
+        }
+        const c2 = source[i2++];
+        if (quote) {
+          if (c2 === quote) quote = null;
+        } else if (c2 === '"' || c2 === "'") quote = c2;
+        else if (c2 === ">") return i2;
+      }
+      throw new SyntaxError("Unclosed HTML tag", start);
+    }
+    function scan(source) {
+      const tokens = [];
+      const push = (type, start, end, extra = {}) => tokens.push({ type, start, end, raw: source.slice(start, end), ...extra });
+      let i2 = 0;
+      let textStart = 0;
+      while (i2 < source.length) {
+        let type, end, extra = {};
+        if (twigStart(source, i2)) {
+          end = twigEnd(source, i2);
+          type = source[i2 + 1] === "#" ? "comment" : source[i2 + 1] === "%" ? "tag" : "output";
+          if (type === "tag") {
+            extra.info = twigInfo(source.slice(i2, end));
+            const literal = ["verbatim", "raw"].includes(extra.info.name);
+            const customEmbedded = [
+              "js",
+              "css",
+              "scss",
+              "javascript",
+              "includejs",
+              "includecss"
+            ].includes(extra.info.name);
+            if (literal || customEmbedded) {
+              const re = new RegExp(
+                "\\{%[-~]?\\s*end" + extra.info.name + "\\s*[-~]?%\\}",
+                "g"
+              );
+              re.lastIndex = end;
+              const close = re.exec(source);
+              if (!close && literal)
+                throw new SyntaxError("Unclosed raw Twig block", i2);
+              if (close) {
+                end = re.lastIndex;
+                type = "raw";
+                extra.kind = literal ? "verbatim" : "twig-embedded";
+              }
+            }
+          }
+        } else if (source.startsWith("<!--", i2)) {
+          const at = source.indexOf("-->", i2 + 4);
+          if (at < 0) throw new SyntaxError("Unclosed HTML comment", i2);
+          end = at + 3;
+          type = "comment";
+        } else if (source.startsWith("<![CDATA[", i2)) {
+          const at = source.indexOf("]]>", i2 + 9);
+          if (at < 0) throw new SyntaxError("Unclosed CDATA", i2);
+          end = at + 3;
+          type = "raw";
+        } else if (source.startsWith("<?", i2)) {
+          const at = source.indexOf("?>", i2 + 2);
+          if (at < 0) throw new SyntaxError("Unclosed processing instruction", i2);
+          end = at + 2;
+          type = "raw";
+        } else if (/^<\/?[a-zA-Z][\w:.-]*(?=[\s/>])|^<![a-zA-Z]/.test(source.slice(i2))) {
+          end = htmlEnd(source, i2);
+          type = "html";
+          const match = /^<(\/?)([\w:.-]+)/.exec(source.slice(i2, end));
+          if (match)
+            extra = {
+              name: match[2].toLowerCase(),
+              closing: !!match[1],
+              selfClosing: /\/\s*>$/.test(source.slice(i2, end))
+            };
+          if (match && !extra.closing && !extra.selfClosing && ["script", "style", "mj-style", "pre", "textarea"].includes(extra.name)) {
+            const re = new RegExp("</" + extra.name + "\\s*>", "ig");
+            re.lastIndex = end;
+            const close = re.exec(source);
+            if (!close) throw new SyntaxError(`Unclosed ${extra.name} element`, i2);
+            extra = {
+              ...extra,
+              openingEnd: end,
+              bodyStart: end,
+              bodyEnd: close.index,
+              closingStart: close.index,
+              // MJML's <mj-style> body is CSS.
+              kind: extra.name === "mj-style" ? "style" : extra.name
+            };
+            end = re.lastIndex;
+            type = "raw";
+          }
+        }
+        if (type === "comment" && /(?:twig|prettier|parse)-ignore-start/.test(source.slice(i2, end))) {
+          const marker = /(?:twig|prettier|parse)-ignore-start/.exec(source.slice(i2, end))[0].replace("start", "end");
+          const closing = new RegExp(
+            "(?:\\{#\\s*" + marker + "\\s*#\\}|<!--\\s*" + marker + "\\s*-->)",
+            "g"
+          );
+          closing.lastIndex = end;
+          const match = closing.exec(source);
+          if (!match) throw new SyntaxError("Unclosed formatter ignore region", i2);
+          end = closing.lastIndex;
+          type = "raw";
+          extra.kind = "ignore";
+        }
+        if (type) {
+          if (textStart < i2) push("text", textStart, i2);
+          push(type, i2, end, extra);
+          i2 = end;
+          textStart = i2;
+        } else i2++;
+      }
+      if (textStart < source.length) push("text", textStart, source.length);
+      return tokens;
+    }
+    module2.exports = {
+      scan,
+      twigEnd,
+      twigStart,
+      twigInfo,
+      expressionParts,
+      quotedEnd,
+      SyntaxError
+    };
+  }
+});
+
+// src/templates.js
+var require_templates = __commonJS({
+  "src/templates.js"(exports2, module2) {
+    "use strict";
+    var { twigStart, twigEnd } = require_lexer();
+    var TAG = /^\{%[-~]?\s*(include|extends|embed|import|from|use)\b/;
+    var CALL = /(?<![\w.$])(?:include|source)\s*\(/g;
+    var TOKEN = /(["'])((?:\\[\s\S]|(?!\1)[^\\])*)\1|([[({])|([\])}])|(,)|\b(with|only|ignore|import|as)\b/g;
+    function names(raw, from, call, offset, found) {
+      const stack = [];
+      TOKEN.lastIndex = from;
+      for (let m2; m2 = TOKEN.exec(raw); ) {
+        if (m2[1]) {
+          if (!stack.includes("{") && m2[2] && !/[\\\n]|#\{/.test(m2[2]) && !/~\s*$/.test(raw.slice(0, m2.index)) && !/^\s*~/.test(raw.slice(TOKEN.lastIndex)))
+            found.set(offset + m2.index + 1, {
+              start: offset + m2.index + 1,
+              end: offset + m2.index + 1 + m2[2].length,
+              name: m2[2]
+            });
+        } else if (m2[3]) stack.push(m2[3]);
+        else if (m2[4]) {
+          if (!stack.length) return;
+          stack.pop();
+        } else if (!stack.length && (m2[5] ? call : !call)) return;
+      }
+    }
+    function templateReferences(source) {
+      const found = /* @__PURE__ */ new Map();
+      for (let i2 = 0; i2 < source.length; i2++) {
+        if (!twigStart(source, i2)) continue;
+        let end;
+        try {
+          end = twigEnd(source, i2);
+        } catch {
+          end = source.indexOf(
+            source[i2 + 1] === "{" ? "}}" : source[i2 + 1] + "}",
+            i2 + 2
+          );
+          end = end < 0 ? source.length : end + 2;
+        }
+        const raw = source.slice(i2, end);
+        if (/^\{%[-~]?\s*verbatim\b/.test(raw)) {
+          const close = /\{%[-~]?\s*endverbatim\s*[-~]?%\}/g;
+          close.lastIndex = end;
+          end = close.exec(source) ? close.lastIndex : source.length;
+        } else if (raw[1] !== "#") {
+          const tag = TAG.exec(raw);
+          if (tag) names(raw, tag[0].length, false, i2, found);
+          for (const call of raw.matchAll(CALL))
+            names(raw, call.index + call[0].length, true, i2, found);
+        }
+        i2 = end - 1;
+      }
+      return [...found.values()];
+    }
+    function templateCandidates(name, roots, namespaces, join) {
+      let bases = roots;
+      const namespace2 = /^@([\w-]+)\/(.*)$/.exec(name);
+      if (namespace2) {
+        bases = [].concat(namespaces[namespace2[1]] || []);
+        name = namespace2[2];
+      }
+      name = name.replace(/^\.?\/+/, "");
+      if (!name) return [];
+      const suffixes = /\.[^/]+$/.test(name) ? [""] : ["", ".twig", ".html.twig", ".html", "/index.twig", "/index.html"];
+      return bases.flatMap(
+        (base) => suffixes.map((suffix) => join(base, name + suffix))
+      );
+    }
+    function registerTemplates2(vscode2, context, language2, configFor) {
+      async function resolve(document, name, cache) {
+        const config = configFor(document);
+        const folder = vscode2.workspace.getWorkspaceFolder(document.uri)?.uri;
+        const root = (value) => /^([a-zA-Z]:)?[\\/]/.test(value) ? vscode2.Uri.file(value) : folder && vscode2.Uri.joinPath(folder, value);
+        const roots = [
+          ...config.get("templatePaths", []).map(root),
+          vscode2.Uri.joinPath(document.uri, "..")
+        ].filter(Boolean);
+        const namespaces = {};
+        for (const [key, value] of Object.entries(
+          config.get("templateNamespaces", {}) || {}
+        ))
+          namespaces[key.replace(/^@/, "")] = [].concat(value).map(root).filter(Boolean);
+        for (const uri of templateCandidates(
+          name,
+          roots,
+          namespaces,
+          (base, path2) => vscode2.Uri.joinPath(base, path2)
+        )) {
+          const key = uri.toString();
+          if (key === document.uri.toString()) continue;
+          if (!cache.has(key))
+            cache.set(
+              key,
+              Promise.resolve(vscode2.workspace.fs.stat(uri)).then(
+                (stat) => (stat.type & vscode2.FileType.File) !== 0,
+                () => false
+              )
+            );
+          if (await cache.get(key)) return uri;
+        }
+      }
+      const range = (document, ref) => new vscode2.Range(
+        document.positionAt(ref.start),
+        document.positionAt(ref.end)
+      );
+      context.subscriptions.push(
+        vscode2.languages.registerDocumentLinkProvider(language2, {
+          async provideDocumentLinks(document, token) {
+            const cache = /* @__PURE__ */ new Map();
+            const links = [];
+            for (const ref of templateReferences(document.getText())) {
+              if (token.isCancellationRequested) return;
+              const target = await resolve(document, ref.name, cache);
+              if (target) {
+                const link = new vscode2.DocumentLink(range(document, ref), target);
+                link.tooltip = "Open template";
+                links.push(link);
+              }
+            }
+            return links;
+          }
+        }),
+        vscode2.languages.registerDefinitionProvider(language2, {
+          async provideDefinition(document, position) {
+            const offset = document.offsetAt(position);
+            const ref = templateReferences(document.getText()).find(
+              (r2) => r2.start <= offset && offset <= r2.end
+            );
+            const target = ref && await resolve(document, ref.name, /* @__PURE__ */ new Map());
+            if (target)
+              return [
+                {
+                  originSelectionRange: range(document, ref),
+                  targetUri: target,
+                  targetRange: new vscode2.Range(0, 0, 0, 0)
+                }
+              ];
+          }
+        })
+      );
+    }
+    module2.exports = { templateReferences, templateCandidates, registerTemplates: registerTemplates2 };
   }
 });
 
@@ -23335,261 +24567,6 @@ var init_htmlLanguageService = __esm({
   }
 });
 
-// src/formatter/lexer.js
-var require_lexer = __commonJS({
-  "src/formatter/lexer.js"(exports2, module2) {
-    "use strict";
-    var SyntaxError = class extends Error {
-      constructor(message, offset) {
-        super(`${message} at offset ${offset}`);
-        this.name = "TwigFormatError";
-        this.offset = offset;
-      }
-    };
-    var twigStart = (source, i2) => source[i2] === "{" && ["{", "%", "#"].includes(source[i2 + 1]);
-    var word = /^[\p{L}_][\p{L}\p{N}_]*/u;
-    function quotedEnd(source, start) {
-      const quote = source[start];
-      let i2 = start + 1;
-      while (i2 < source.length) {
-        if (source[i2] === "\\") {
-          i2 += 2;
-          continue;
-        }
-        if (source[i2] === quote) return i2 + 1;
-        if (quote === '"' && source.startsWith("#{", i2)) {
-          let depth = 1;
-          i2 += 2;
-          while (i2 < source.length && depth) {
-            if (source[i2] === '"' || source[i2] === "'") i2 = quotedEnd(source, i2);
-            else if (source[i2++] === "{") depth++;
-            else if (source[i2 - 1] === "}") depth--;
-          }
-          if (depth) throw new SyntaxError("Unclosed string interpolation", start);
-          continue;
-        }
-        i2++;
-      }
-      throw new SyntaxError("Unclosed string", start);
-    }
-    function twigEnd(source, start) {
-      const close = source[start + 1] === "{" ? "}}" : source[start + 1] === "%" ? "%}" : "#}";
-      if (close === "#}") {
-        const end = source.indexOf(close, start + 2);
-        if (end < 0) throw new SyntaxError("Unclosed Twig comment", start);
-        return end + 2;
-      }
-      const stack = [];
-      let i2 = start + 2;
-      while (i2 < source.length) {
-        if (!stack.length && source.startsWith(close, i2)) return i2 + 2;
-        const c2 = source[i2];
-        if (c2 === '"' || c2 === "'") {
-          i2 = quotedEnd(source, i2);
-          continue;
-        }
-        if (c2 === "#") {
-          const newline = source.indexOf("\n", i2);
-          if (newline < 0) throw new SyntaxError("Unclosed Twig line comment", i2);
-          i2 = newline + 1;
-          continue;
-        }
-        if ("([{".includes(c2)) stack.push(c2);
-        else if (")]}".includes(c2)) {
-          if (stack.pop() !== { ")": "(", "]": "[", "}": "{" }[c2])
-            throw new SyntaxError("Unbalanced Twig expression", i2);
-        }
-        i2++;
-      }
-      throw new SyntaxError("Unclosed Twig expression", start);
-    }
-    function expressionParts(source) {
-      const parts = [];
-      let i2 = 0;
-      while (i2 < source.length) {
-        const start = i2;
-        const c2 = source[i2];
-        let kind = "symbol";
-        if (/\s/.test(c2)) {
-          while (/\s/.test(source[i2] || "") && i2 < source.length) i2++;
-          kind = "space";
-        } else if (c2 === '"' || c2 === "'") {
-          i2 = quotedEnd(source, i2);
-          kind = "string";
-        } else if (c2 === "#") {
-          i2 = source.indexOf("\n", i2);
-          if (i2 < 0) i2 = source.length;
-          kind = "comment";
-        } else {
-          const match = source.slice(i2).match(/^b-(?:and|or|xor)\b/) || source.slice(i2).match(word) || source.slice(i2).match(/^\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/);
-          if (match) {
-            i2 += match[0].length;
-            kind = "word";
-          } else {
-            const op = [
-              "<=>",
-              "===",
-              "!==",
-              "...",
-              "=>",
-              "==",
-              "!=",
-              "<=",
-              ">=",
-              "??",
-              "?:",
-              "**",
-              "//",
-              "..",
-              "?.",
-              "&&",
-              "||"
-            ].find((x2) => source.startsWith(x2, i2));
-            i2 += op ? op.length : 1;
-          }
-        }
-        parts.push({ kind, text: source.slice(start, i2), start, end: i2 });
-      }
-      return parts;
-    }
-    function twigInfo(raw) {
-      const left = /^[{][{%#][-~]?/.exec(raw)[0];
-      const right = /[-~]?[}%#][}]$/.exec(raw)[0];
-      const body = raw.slice(left.length, -right.length);
-      const parts = expressionParts(body);
-      const atoms = parts.filter((x2) => x2.kind !== "space" && x2.kind !== "comment");
-      return { left, right, body, parts, atoms, name: atoms[0]?.text || "" };
-    }
-    function htmlEnd(source, start) {
-      let i2 = start + 1;
-      let quote = null;
-      while (i2 < source.length) {
-        if (twigStart(source, i2)) {
-          i2 = twigEnd(source, i2);
-          continue;
-        }
-        const c2 = source[i2++];
-        if (quote) {
-          if (c2 === quote) quote = null;
-        } else if (c2 === '"' || c2 === "'") quote = c2;
-        else if (c2 === ">") return i2;
-      }
-      throw new SyntaxError("Unclosed HTML tag", start);
-    }
-    function scan(source) {
-      const tokens = [];
-      const push = (type, start, end, extra = {}) => tokens.push({ type, start, end, raw: source.slice(start, end), ...extra });
-      let i2 = 0;
-      let textStart = 0;
-      while (i2 < source.length) {
-        let type, end, extra = {};
-        if (twigStart(source, i2)) {
-          end = twigEnd(source, i2);
-          type = source[i2 + 1] === "#" ? "comment" : source[i2 + 1] === "%" ? "tag" : "output";
-          if (type === "tag") {
-            extra.info = twigInfo(source.slice(i2, end));
-            const literal = ["verbatim", "raw"].includes(extra.info.name);
-            const customEmbedded = [
-              "js",
-              "css",
-              "scss",
-              "javascript",
-              "includejs",
-              "includecss"
-            ].includes(extra.info.name);
-            if (literal || customEmbedded) {
-              const re = new RegExp(
-                "\\{%[-~]?\\s*end" + extra.info.name + "\\s*[-~]?%\\}",
-                "g"
-              );
-              re.lastIndex = end;
-              const close = re.exec(source);
-              if (!close && literal)
-                throw new SyntaxError("Unclosed raw Twig block", i2);
-              if (close) {
-                end = re.lastIndex;
-                type = "raw";
-                extra.kind = literal ? "verbatim" : "twig-embedded";
-              }
-            }
-          }
-        } else if (source.startsWith("<!--", i2)) {
-          const at = source.indexOf("-->", i2 + 4);
-          if (at < 0) throw new SyntaxError("Unclosed HTML comment", i2);
-          end = at + 3;
-          type = "comment";
-        } else if (source.startsWith("<![CDATA[", i2)) {
-          const at = source.indexOf("]]>", i2 + 9);
-          if (at < 0) throw new SyntaxError("Unclosed CDATA", i2);
-          end = at + 3;
-          type = "raw";
-        } else if (source.startsWith("<?", i2)) {
-          const at = source.indexOf("?>", i2 + 2);
-          if (at < 0) throw new SyntaxError("Unclosed processing instruction", i2);
-          end = at + 2;
-          type = "raw";
-        } else if (/^<\/?[a-zA-Z][\w:.-]*(?=[\s/>])|^<![a-zA-Z]/.test(source.slice(i2))) {
-          end = htmlEnd(source, i2);
-          type = "html";
-          const match = /^<(\/?)([\w:.-]+)/.exec(source.slice(i2, end));
-          if (match)
-            extra = {
-              name: match[2].toLowerCase(),
-              closing: !!match[1],
-              selfClosing: /\/\s*>$/.test(source.slice(i2, end))
-            };
-          if (match && !extra.closing && !extra.selfClosing && ["script", "style", "pre", "textarea"].includes(extra.name)) {
-            const re = new RegExp("</" + extra.name + "\\s*>", "ig");
-            re.lastIndex = end;
-            const close = re.exec(source);
-            if (!close) throw new SyntaxError(`Unclosed ${extra.name} element`, i2);
-            extra = {
-              ...extra,
-              openingEnd: end,
-              bodyStart: end,
-              bodyEnd: close.index,
-              closingStart: close.index,
-              kind: extra.name
-            };
-            end = re.lastIndex;
-            type = "raw";
-          }
-        }
-        if (type === "comment" && /(?:twig|prettier|parse)-ignore-start/.test(source.slice(i2, end))) {
-          const marker = /(?:twig|prettier|parse)-ignore-start/.exec(source.slice(i2, end))[0].replace("start", "end");
-          const closing = new RegExp(
-            "(?:\\{#\\s*" + marker + "\\s*#\\}|<!--\\s*" + marker + "\\s*-->)",
-            "g"
-          );
-          closing.lastIndex = end;
-          const match = closing.exec(source);
-          if (!match) throw new SyntaxError("Unclosed formatter ignore region", i2);
-          end = closing.lastIndex;
-          type = "raw";
-          extra.kind = "ignore";
-        }
-        if (type) {
-          if (textStart < i2) push("text", textStart, i2);
-          push(type, i2, end, extra);
-          i2 = end;
-          textStart = i2;
-        } else i2++;
-      }
-      if (textStart < source.length) push("text", textStart, source.length);
-      return tokens;
-    }
-    module2.exports = {
-      scan,
-      twigEnd,
-      twigStart,
-      twigInfo,
-      expressionParts,
-      quotedEnd,
-      SyntaxError
-    };
-  }
-});
-
 // src/html.js
 var require_html = __commonJS({
   "src/html.js"(exports2, module2) {
@@ -23642,6 +24619,10 @@ var require_html = __commonJS({
       return { virtual, parsed: service.parseHTMLDocument(virtual) };
     }
     function registerHTML(vscode2, context) {
+      const attributeValue = (document) => {
+        const value = vscode2.workspace.getConfiguration("html", document).get("completion.attributeDefaultValue", "doublequotes");
+        return ["empty", "singlequotes"].includes(value) ? value : "doublequotes";
+      };
       const range = (r2) => new vscode2.Range(
         r2.start.line,
         r2.start.character,
@@ -23659,7 +24640,8 @@ var require_html = __commonJS({
               const result = service.doComplete(
                 html.virtual,
                 position,
-                html.parsed
+                html.parsed,
+                { attributeDefaultValue: attributeValue(document) }
               );
               return new vscode2.CompletionList(
                 result.items.map((item) => {
@@ -23742,20 +24724,22 @@ var require_html = __commonJS({
           if (document.languageId !== "twig" || event.contentChanges.length !== 1)
             return;
           const change = event.contentChanges[0];
-          if (change.rangeLength || ![">", "/"].includes(change.text)) return;
+          if (change.rangeLength || ![">", "/", "="].includes(change.text)) return;
+          const quote = change.text === "=";
           const editor = vscode2.window.activeTextEditor;
           if (!editor || editor.document !== document || editor.selections.length !== 1)
             return;
-          if (!vscode2.workspace.getConfiguration("html", document).get("autoClosingTags", true))
+          if (!vscode2.workspace.getConfiguration("html", document).get(quote ? "autoCreateQuotes" : "autoClosingTags", true))
             return;
           const position = document.positionAt(change.rangeOffset + 1);
           const html = htmlDocument(document, position);
-          if (!html) return;
-          const completion = service.doTagComplete(
-            html.virtual,
-            position,
-            html.parsed
-          );
+          if (!html || quote && /^\s*\{[{%#]/.test(
+            document.getText().slice(change.rangeOffset + 1, change.rangeOffset + 200)
+          ))
+            return;
+          const completion = quote ? service.doQuoteComplete(html.virtual, position, html.parsed, {
+            attributeDefaultValue: attributeValue(document)
+          }) : service.doTagComplete(html.virtual, position, html.parsed);
           if (!completion) return;
           const timer = setTimeout(() => clear(document), 1e3);
           timer.unref?.();
@@ -23792,6 +24776,12 @@ var snippets = [
 ];
 var { runFormatter } = require_service();
 var { readOptions, matchesIgnore } = require_settings();
+var {
+  registerCompletions,
+  customDefinitions,
+  insideTwig
+} = require_completions();
+var { registerTemplates } = require_templates();
 function activate(context) {
   if (language === "twig") require_html().registerHTML(vscode, context);
   const pending = /* @__PURE__ */ new Map();
@@ -23806,6 +24796,8 @@ function activate(context) {
     uri: document.uri,
     languageId: document.languageId
   });
+  registerCompletions(vscode, context, language, configFor);
+  registerTemplates(vscode, context, language, configFor);
   async function provideEdits(document, options, cancellation, selection) {
     const config = configFor(document);
     if (!config.get("formatting", true) || cancellation.isCancellationRequested)
@@ -23909,11 +24901,34 @@ function activate(context) {
       setTimeout(() => padDelimiters(vscode.window.activeTextEditor));
     }
   }
+  let inTag = false;
+  function trackTag(editor) {
+    const document = editor?.document;
+    if (!document || document.languageId !== "twig") return;
+    const position = editor.selection.active;
+    const value = editor.selections.length === 1 && insideTwig(
+      document.getText(
+        new vscode.Range(
+          document.positionAt(
+            Math.max(0, document.offsetAt(position) - 4e3)
+          ),
+          position
+        )
+      )
+    );
+    if (value !== inTag)
+      vscode.commands.executeCommand(
+        "setContext",
+        "twig.inTag",
+        inTag = value
+      );
+  }
   context.subscriptions.push(
     vscode.workspace.onDidChangeTextDocument(armDelimiters),
-    vscode.window.onDidChangeTextEditorSelection(
-      (event) => padDelimiters(event.textEditor)
-    ),
+    vscode.window.onDidChangeTextEditorSelection((event) => {
+      padDelimiters(event.textEditor);
+      trackTag(event.textEditor);
+    }),
     vscode.languages.registerDocumentFormattingEditProvider(language, {
       provideDocumentFormattingEdits: (document, options, token) => provideEdits(document, options, token)
     }),
@@ -23922,10 +24937,20 @@ function activate(context) {
     }),
     vscode.languages.registerHoverProvider(language, {
       provideHover(document, position) {
-        if (!configFor(document).get("hover", true)) return;
+        const config = configFor(document);
+        if (!config.get("hover", true)) return;
         const range = document.getWordRangeAtPosition(position);
         if (!range) return;
         const word = document.getText(range);
+        const custom = customDefinitions(config).find((d2) => d2.name === word);
+        if (custom)
+          return new vscode.Hover(
+            new vscode.MarkdownString(
+              `**${custom.name}** (custom ${custom.kind})
+
+${custom.description}`
+            )
+          );
         const snippet = snippets.find(
           (item) => item.prefix === word || item.hover === word
         );

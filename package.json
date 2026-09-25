@@ -2,7 +2,7 @@
   "name": "twig-language-2",
   "displayName": "Twig Language 2",
   "description": "Snippets, Syntax Highlighting, Hover, and Formatting for Twig",
-  "version": "0.12.2",
+  "version": "0.13.0",
   "publisher": "mblode",
   "license": "MIT",
   "author": {
@@ -66,12 +66,6 @@
           "source.js": "javascript",
           "source.ts": "typescript"
         }
-      }
-    ],
-    "snippets": [
-      {
-        "language": "twig",
-        "path": "./src/snippets/snippets.json"
       }
     ],
     "configuration": {
@@ -405,9 +399,88 @@
           "maximum": 30000,
           "description": "Maximum formatting time in milliseconds. Timeout cancels the worker and returns no edits.",
           "scope": "language-overridable"
+        },
+        "twig-language-2.craftSnippets": {
+          "type": "boolean",
+          "default": true,
+          "description": "Include Craft CMS snippets such as entries, switch, nav, cache and the Craft forms.",
+          "scope": "language-overridable"
+        },
+        "twig-language-2.snippetQuotes": {
+          "type": "string",
+          "enum": [
+            "double",
+            "single"
+          ],
+          "default": "double",
+          "description": "Quote style for Twig strings inserted by snippets. HTML attribute quotes are unchanged.",
+          "scope": "language-overridable"
+        },
+        "twig-language-2.templatePaths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "templates",
+            "views",
+            "src/templates",
+            "."
+          ],
+          "markdownDescription": "Template roots for Ctrl/Cmd-click and Go to Definition on `include`, `extends`, `embed`, `import`, `from`, `use`, `include()` and `source()` names. Relative paths resolve against the workspace folder. The current file's folder is always searched last.",
+          "scope": "resource"
+        },
+        "twig-language-2.templateNamespaces": {
+          "type": "object",
+          "additionalProperties": {
+            "type": [
+              "string",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "default": {},
+          "markdownDescription": "Twig namespace roots for `@Namespace/name.twig` template names, for example `{ \"App\": \"src/App/templates\" }`.",
+          "scope": "resource"
+        },
+        "twig-language-2.customTests": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "default": {},
+          "markdownDescription": "Project-specific Twig tests for completion and hover, mapped to a description. Example: `{ \"numeric\": \"True when the value is numeric.\" }`.",
+          "scope": "language-overridable"
+        },
+        "twig-language-2.customFilters": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "default": {},
+          "markdownDescription": "Project-specific Twig filters for completion and hover, mapped to a description. Example: `{ \"price\": \"Formats a number as a price.\" }`.",
+          "scope": "language-overridable"
+        },
+        "twig-language-2.customFunctions": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "default": {},
+          "markdownDescription": "Project-specific Twig functions for completion and hover, mapped to a description. Example: `{ \"svg\": \"Inlines an SVG file.\" }`.",
+          "scope": "language-overridable"
         }
       }
-    }
+    },
+    "keybindings": [
+      {
+        "key": "tab",
+        "command": "jumpToNextSnippetPlaceholder",
+        "when": "editorTextFocus && editorLangId == twig && inSnippetMode && hasNextTabstop && suggestWidgetVisible && twig.inTag"
+      }
+    ]
   },
   "capabilities": {
     "untrustedWorkspaces": {

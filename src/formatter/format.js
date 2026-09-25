@@ -159,8 +159,13 @@ function formatHtml(raw, depth, options) {
   const last = chunks.length - 1;
   const closing = /\/?\s*>$/.exec(chunks[last]);
   if (!closing) return raw;
-  const end = closing[0].replace(/\s/g, "");
-  chunks[last] = chunks[last].slice(0, -closing[0].length);
+  // In HTML a "/" touching an unquoted value is part of that value: value=1/>.
+  const unquoted = (chunk) =>
+    /=(?!["'])[^"'\s]*$/.test(chunk.replace(/\{[{%#][\s\S]*?[}%#]\}/g, "_"));
+  let end = closing[0].replace(/\s/g, "");
+  const before = chunks[last].slice(0, -closing[0].length);
+  if (end === "/>" && before && unquoted(before)) end = ">";
+  chunks[last] = chunks[last].slice(0, -end.length);
   if (!chunks[last]) chunks.pop();
   // A whitespace token around '=' belongs to the same attribute, not its own line.
   for (let j = 1; j < chunks.length; j++) {
@@ -174,7 +179,12 @@ function formatHtml(raw, depth, options) {
     }
   }
   const inline =
-    chunks.join(" ") + (end === "/>" && options.spaceClose ? " " : "") + end;
+    chunks.join(" ") +
+    (end === "/>" &&
+    (options.spaceClose || unquoted(chunks[chunks.length - 1] || ""))
+      ? " "
+      : "") +
+    end;
   const indent = indentation(depth, options),
     inner = indentation(depth + 1, options);
   const multiline =

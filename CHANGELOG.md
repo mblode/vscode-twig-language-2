@@ -1,3 +1,13 @@
+## 0.13.0
+
+- Ctrl/Cmd-click and Go to Definition on template names in `include`, `extends`, `embed`, `import`, `from`, `use`, `include()` and `source()`, resolved through the new `templatePaths` and `templateNamespaces` settings (#108).
+- Add `craftSnippets` to hide Craft CMS snippets such as `switch` (#80) and `snippetQuotes` for single-quoted Twig strings in snippets (#63). Snippets are now provided as completions so these settings apply immediately; they no longer appear in **Insert Snippet**. The `round` snippet now uses double quotes like the rest.
+- Insert attribute quotes after typing `=`, following `html.autoCreateQuotes` and `html.completion.attributeDefaultValue` (#96).
+- Tab inside a Twig tag moves to the next snippet placeholder instead of accepting an Emmet suggestion (#85).
+- Highlight any test name after `is` / `is not`, including `is not defined`, and add `customTests`, `customFilters` and `customFunctions` for completion and hover (#79).
+- Highlight and format MJML `<mj-style>` bodies as CSS.
+- Keep a space between an unquoted attribute value and `/>`: `<input value=1 />` no longer becomes `value=1/>`, which HTML reads as `value="1/"`.
+
 ## 0.12.2
 
 - Keep the author's padding inside hash braces, so `with { "content": "x" }` is no longer tightened to `{"content": "x"}` (#124).

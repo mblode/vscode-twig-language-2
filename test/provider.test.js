@@ -28,6 +28,9 @@ test("provider discards stale results, cancels superseded requests and releases 
       },
       registerDocumentRangeFormattingEditProvider: () => ({ dispose() {} }),
       registerHoverProvider: () => ({ dispose() {} }),
+      registerCompletionItemProvider: () => ({ dispose() {} }),
+      registerDocumentLinkProvider: () => ({ dispose() {} }),
+      registerDefinitionProvider: () => ({ dispose() {} }),
     },
     EndOfLine: { CRLF: 2 },
     Position: class {
