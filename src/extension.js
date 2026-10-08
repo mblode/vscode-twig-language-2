@@ -13,7 +13,10 @@ const snippets = [
 const { runFormatter } = require("./formatter/service");
 const { readOptions, matchesIgnore } = require("./formatter/settings");
 const { registerCompletions, customDefinitions } = require("./completions");
-const { registerTemplates } = require("./templates");
+const {
+  registerTemplates,
+  registerTemplateCompletions,
+} = require("./templates");
 
 function activate(context) {
   // Twig Language keeps the html language ID, where VS Code's HTML and Emmet support apply natively.
@@ -23,6 +26,8 @@ function activate(context) {
   }
   const pending = new Map();
   const output = vscode.window.createOutputChannel(label);
+  if (language === "twig")
+    registerTemplateCompletions(vscode, context, output, namespace);
   context.subscriptions.push(output, {
     dispose() {
       for (const request of pending.values()) request.dispose();

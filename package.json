@@ -471,6 +471,12 @@
           "default": {},
           "markdownDescription": "Project-specific Twig functions for completion and hover, mapped to a description. Example: `{ \"svg\": \"Inlines an SVG file.\" }`.",
           "scope": "language-overridable"
+        },
+        "twig-language-2.ideTwigConfigPath": {
+          "type": "string",
+          "default": "ide-twig.json",
+          "description": "Path to ide-twig.json relative to the workspace folder. Set to an empty string to disable Twig template completion.",
+          "scope": "resource"
         }
       }
     }
