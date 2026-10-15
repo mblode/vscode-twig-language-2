@@ -9,6 +9,17 @@ exports.run = async () => {
   await extension.activate();
   assert(extension.isActive);
   const root = vscode.workspace.workspaceFolders[0].uri.fsPath;
+  await fs.mkdir(path.join(root, "templates/component"), { recursive: true });
+  await fs.writeFile(
+    path.join(root, "ide-twig.json"),
+    JSON.stringify({
+      namespaces: [{ namespace: "App", path: "templates/component" }],
+    }),
+  );
+  await fs.writeFile(
+    path.join(root, "templates/component/card.html.twig"),
+    "card",
+  );
   async function open(name, source) {
     const file = path.join(root, name);
     await fs.writeFile(file, source);
@@ -172,6 +183,28 @@ exports.run = async () => {
     completions.items.some((i) => i.label === "class"),
     "HTML attribute completion is available in Twig mode",
   );
+  const template = await open(
+    "template-completion.twig",
+    '{% include "@App/ca" %}',
+  );
+  const templatePosition = new vscode.Position(
+    0,
+    template.getText().indexOf("ca") + 2,
+  );
+  const templateCompletions = await vscode.commands.executeCommand(
+    "vscode.executeCompletionItemProvider",
+    template.uri,
+    templatePosition,
+  );
+  const templateItem = templateCompletions.items.find(
+    (item) => item.label === "@App/card.html.twig",
+  );
+  assert(templateItem, "Namespaced template completion is available");
+  assert.equal(
+    templateItem.range.start.character,
+    template.getText().indexOf("@"),
+  );
+  assert.equal(templateItem.range.end.character, templatePosition.character);
   const closing = await open("closing.twig", "<section");
   vscode.window.activeTextEditor.selection = new vscode.Selection(0, 8, 0, 8);
   await vscode.commands.executeCommand("type", { text: ">" });

@@ -518,6 +518,12 @@ var require_package = __commonJS({
               default: {},
               markdownDescription: 'Project-specific Twig functions for completion and hover, mapped to a description. Example: `{ "svg": "Inlines an SVG file." }`.',
               scope: "language-overridable"
+            },
+            "twig-language-2.ideTwigConfigPath": {
+              type: "string",
+              default: "ide-twig.json",
+              description: "Path to ide-twig.json relative to the workspace folder. Set to an empty string to disable Twig template completion.",
+              scope: "resource"
             }
           }
         }
@@ -2135,31 +2141,52 @@ var require_lexer = __commonJS({
 var require_templates = __commonJS({
   "src/templates.js"(exports2, module2) {
     "use strict";
-    var { twigStart, twigEnd } = require_lexer();
+    var path2 = require("node:path");
+    var { twigStart, twigEnd, expressionParts } = require_lexer();
     var TAG = /^\{%[-~]?\s*(include|extends|embed|import|from|use)\b/;
-    var CALL = /(?<![\w.$])(?:include|source)\s*\(/g;
-    var TOKEN = /(["'])((?:\\[\s\S]|(?!\1)[^\\])*)\1|([[({])|([\])}])|(,)|\b(with|only|ignore|import|as)\b/g;
-    function names(raw, from, call, offset, found) {
-      const stack = [];
-      TOKEN.lastIndex = from;
-      for (let m2; m2 = TOKEN.exec(raw); ) {
-        if (m2[1]) {
-          if (!stack.includes("{") && m2[2] && !/[\\\n]|#\{/.test(m2[2]) && !/~\s*$/.test(raw.slice(0, m2.index)) && !/^\s*~/.test(raw.slice(TOKEN.lastIndex)))
-            found.set(offset + m2.index + 1, {
-              start: offset + m2.index + 1,
-              end: offset + m2.index + 1 + m2[2].length,
-              name: m2[2]
+    function templateParts(raw) {
+      let end = raw.length;
+      while (true) {
+        try {
+          const parts = expressionParts(raw.slice(0, end));
+          if (end < raw.length)
+            parts.push({
+              kind: "string",
+              text: raw.slice(end),
+              start: end,
+              end: raw.length,
+              incomplete: true
             });
-        } else if (m2[3]) stack.push(m2[3]);
-        else if (m2[4]) {
-          if (!stack.length) return;
-          stack.pop();
-        } else if (!stack.length && (m2[5] ? call : !call)) return;
+          return parts;
+        } catch (error2) {
+          end = error2.offset;
+        }
       }
     }
-    function templateReferences(source) {
+    function names(parts, from, call, offset, found) {
+      const stack = [];
+      for (let i2 = from; i2 < parts.length; i2++) {
+        const part = parts[i2];
+        if (part.kind === "string") {
+          const name = part.text.slice(1, part.incomplete ? void 0 : -1);
+          if (!stack.includes("{") && !/[\\\r\n]|#\{|%\}|\}\}/.test(name) && parts[i2 - 1]?.text !== "~" && parts[i2 + 1]?.text !== "~")
+            found.set(offset + part.start + 1, {
+              start: offset + part.start + 1,
+              end: offset + part.start + 1 + name.length,
+              name,
+              incomplete: !!part.incomplete
+            });
+        } else if (["[", "(", "{"].includes(part.text)) stack.push(part.text);
+        else if (["]", ")", "}"].includes(part.text)) {
+          if (!stack.length) return;
+          stack.pop();
+        } else if (!stack.length && (call ? part.text === "," : /^(with|only|ignore|import|as)$/.test(part.text)))
+          return;
+      }
+    }
+    function templateStrings(source, limit = source.length) {
       const found = /* @__PURE__ */ new Map();
-      for (let i2 = 0; i2 < source.length; i2++) {
+      for (let i2 = 0; i2 < limit; i2++) {
         if (!twigStart(source, i2)) continue;
         let end;
         try {
@@ -2172,19 +2199,36 @@ var require_templates = __commonJS({
           end = end < 0 ? source.length : end + 2;
         }
         const raw = source.slice(i2, end);
-        if (/^\{%[-~]?\s*verbatim\b/.test(raw)) {
-          const close = /\{%[-~]?\s*endverbatim\s*[-~]?%\}/g;
+        const literal2 = /^\{%[-~]?\s*(raw|verbatim)\b/.exec(raw);
+        if (literal2) {
+          const close = new RegExp(
+            `\\{%[-~]?\\s*end${literal2[1]}\\s*[-~]?%\\}`,
+            "g"
+          );
           close.lastIndex = end;
           end = close.exec(source) ? close.lastIndex : source.length;
         } else if (raw[1] !== "#") {
+          const body = raw.slice(2).replace(/[-~]?[}%]\}$/, "");
+          const parts = templateParts(body).filter(
+            (part) => part.kind !== "space" && part.kind !== "comment"
+          );
           const tag = TAG.exec(raw);
-          if (tag) names(raw, tag[0].length, false, i2, found);
-          for (const call of raw.matchAll(CALL))
-            names(raw, call.index + call[0].length, true, i2, found);
+          if (tag) {
+            const from = parts.findIndex((part) => part.start >= tag[0].length - 2);
+            if (from >= 0 && !(tag[1] === "include" && parts[from].text === "("))
+              names(parts, from, false, i2 + 2, found);
+          }
+          for (let index = 0; index < parts.length - 1; index++) {
+            if (parts[index].kind === "word" && /^(include|source)$/.test(parts[index].text) && parts[index + 1].text === "(" && ![".", "?.", "$"].includes(parts[index - 1]?.text))
+              names(parts, index + 2, true, i2 + 2, found);
+          }
         }
         i2 = end - 1;
       }
       return [...found.values()];
+    }
+    function templateReferences(source) {
+      return templateStrings(source).filter((ref) => !ref.incomplete && ref.name).map(({ start, end, name }) => ({ start, end, name }));
     }
     function templateCandidates(name, roots, namespaces, join) {
       let bases = roots;
@@ -2218,7 +2262,7 @@ var require_templates = __commonJS({
           name,
           roots,
           namespaces,
-          (base, path2) => vscode2.Uri.joinPath(base, path2)
+          (base, path3) => vscode2.Uri.joinPath(base, path3)
         )) {
           const key = uri.toString();
           if (key === document.uri.toString()) continue;
@@ -2257,7 +2301,222 @@ var require_templates = __commonJS({
         })
       );
     }
-    module2.exports = { templateReferences, templateCandidates, registerTemplates: registerTemplates2 };
+    var DEFAULT_CONFIG_PATH = "ide-twig.json";
+    function validNamespaceEntry(entry) {
+      return entry && (entry.namespace === void 0 || typeof entry.namespace === "string") && typeof entry.path === "string" && entry.path.length > 0;
+    }
+    function configEntries(value) {
+      return Array.isArray(value?.namespaces) ? value.namespaces.filter(validNamespaceEntry) : [];
+    }
+    function templateReference(namespace2, root, uri) {
+      const relative = path2.posix.relative(root.path, uri.path).replaceAll("\\", "/");
+      return namespace2 ? `@${namespace2}/${relative}` : relative;
+    }
+    function templateStringContext(source, offset) {
+      const ref = templateStrings(source, offset).find(
+        (ref2) => ref2.start <= offset && offset <= ref2.end
+      );
+      if (ref) return { start: ref.start, end: ref.incomplete ? offset : ref.end };
+    }
+    function registerTemplateCompletions2(vscode2, context, output2, namespace2) {
+      const folders = /* @__PURE__ */ new Map();
+      const settingPath = (folder) => vscode2.workspace.getConfiguration(namespace2, folder.uri).get("ideTwigConfigPath", DEFAULT_CONFIG_PATH);
+      const updateRootWatchers = (state, roots) => {
+        const directories = new Map(
+          roots.map((entry) => [entry.uri.toString(), entry.uri])
+        );
+        for (const [key, watcher] of state.rootWatchers) {
+          if (directories.has(key)) continue;
+          watcher.dispose();
+          state.rootWatchers.delete(key);
+        }
+        for (const [key, root] of directories) {
+          if (state.rootWatchers.has(key)) continue;
+          const watcher = vscode2.workspace.createFileSystemWatcher(
+            new vscode2.RelativePattern(root, "**/*.twig")
+          );
+          const refresh2 = () => void load(state, state.configured);
+          watcher.onDidCreate(refresh2);
+          watcher.onDidDelete(refresh2);
+          state.rootWatchers.set(key, watcher);
+        }
+      };
+      const load = async (state, configured) => {
+        const version = ++state.loadVersion;
+        const isCurrent = () => version === state.loadVersion && !state.disposed;
+        if (!isCurrent()) return;
+        if (!configured) {
+          updateRootWatchers(state, []);
+          state.items = [];
+          return;
+        }
+        const configUri = vscode2.Uri.joinPath(state.folder.uri, configured);
+        let value;
+        try {
+          value = JSON.parse(
+            Buffer.from(await vscode2.workspace.fs.readFile(configUri)).toString()
+          );
+        } catch (error2) {
+          if (!isCurrent()) return;
+          if (error2?.code !== "FileNotFound")
+            output2.appendLine(
+              `Template completion config skipped: ${error2.message}`
+            );
+          updateRootWatchers(state, []);
+          state.items = [];
+          return;
+        }
+        if (!isCurrent()) return;
+        const configDirectory = configUri.with({
+          path: path2.posix.dirname(configUri.path)
+        });
+        const entries = configEntries(value);
+        const roots = entries.map((entry) => ({
+          ...entry,
+          uri: vscode2.Uri.joinPath(configDirectory, entry.path)
+        }));
+        updateRootWatchers(state, roots);
+        const results = /* @__PURE__ */ new Map();
+        const scans = /* @__PURE__ */ new Map();
+        for (const entry of roots) {
+          const key = entry.uri.toString();
+          if (!scans.has(key)) {
+            let files;
+            try {
+              files = await vscode2.workspace.findFiles(
+                new vscode2.RelativePattern(entry.uri, "**/*.twig"),
+                null
+              );
+            } catch (error2) {
+              if (!isCurrent()) return;
+              output2.appendLine(`Template directory skipped: ${error2.message}`);
+              files = [];
+            }
+            if (!isCurrent()) return;
+            scans.set(key, files);
+          }
+          for (const uri of scans.get(key)) {
+            const label3 = templateReference(entry.namespace, entry.uri, uri);
+            if (!results.has(label3)) results.set(label3, { label: label3, uri });
+          }
+        }
+        if (!isCurrent()) return;
+        state.items = [...results.values()];
+      };
+      const watchConfig = (state, configured) => {
+        if (state.configured === configured) return;
+        state.configWatcher?.dispose();
+        state.configWatcher = void 0;
+        state.configured = configured;
+        if (!configured || state.disposed) return;
+        const watcher = vscode2.workspace.createFileSystemWatcher(
+          new vscode2.RelativePattern(state.folder.uri, configured)
+        );
+        state.configWatcher = watcher;
+        watcher.onDidCreate(state.reload);
+        watcher.onDidChange(state.reload);
+        watcher.onDidDelete(state.reload);
+      };
+      const refresh = (state) => {
+        const configured = settingPath(state.folder);
+        watchConfig(state, configured);
+        void load(state, configured);
+      };
+      const createState = (folder) => {
+        const state = {
+          folder,
+          items: [],
+          rootWatchers: /* @__PURE__ */ new Map(),
+          loadVersion: 0,
+          configured: void 0,
+          disposed: false,
+          reload: () => refresh(state),
+          dispose() {
+            state.disposed = true;
+            state.loadVersion++;
+            updateRootWatchers(state, []);
+            state.configWatcher?.dispose();
+          }
+        };
+        folders.set(folder.uri.toString(), state);
+        state.reload();
+        return state;
+      };
+      const stateFor = (document) => {
+        const folder = vscode2.workspace.getWorkspaceFolder(document.uri);
+        if (!folder) return;
+        let state = folders.get(folder.uri.toString());
+        if (!state) state = createState(folder);
+        return state;
+      };
+      const provider = vscode2.languages.registerCompletionItemProvider(
+        "twig",
+        {
+          provideCompletionItems(document, position, token) {
+            if (token.isCancellationRequested) return;
+            const context2 = templateStringContext(
+              document.getText(),
+              document.offsetAt(position)
+            );
+            if (!context2) return;
+            const state = stateFor(document);
+            if (!state) return;
+            const range = new vscode2.Range(
+              document.positionAt(context2.start),
+              document.positionAt(context2.end)
+            );
+            return new vscode2.CompletionList(
+              state.items.map((item) => {
+                const completion = new vscode2.CompletionItem(
+                  item.label,
+                  vscode2.CompletionItemKind.File
+                );
+                completion.range = range;
+                completion.detail = vscode2.workspace.asRelativePath(
+                  item.uri,
+                  false
+                );
+                return completion;
+              })
+            );
+          }
+        },
+        '"',
+        "'"
+      );
+      context.subscriptions.push(provider);
+      for (const folder of vscode2.workspace.workspaceFolders || [])
+        createState(folder);
+      context.subscriptions.push(
+        vscode2.workspace.onDidChangeConfiguration((event) => {
+          if (!event.affectsConfiguration(`${namespace2}.ideTwigConfigPath`)) return;
+          for (const state of folders.values()) state.reload();
+        }),
+        vscode2.workspace.onDidChangeWorkspaceFolders((event) => {
+          for (const folder of event.removed) {
+            const key = folder.uri.toString();
+            folders.get(key)?.dispose();
+            folders.delete(key);
+          }
+          for (const folder of event.added) createState(folder);
+        }),
+        {
+          dispose() {
+            for (const state of folders.values()) state.dispose();
+            folders.clear();
+          }
+        }
+      );
+    }
+    module2.exports = {
+      templateReferences,
+      templateCandidates,
+      registerTemplates: registerTemplates2,
+      configEntries,
+      templateReference,
+      templateStringContext,
+      registerTemplateCompletions: registerTemplateCompletions2
+    };
   }
 });
 
@@ -24740,7 +24999,7 @@ var require_html = __commonJS({
   }
 });
 
-// node_modules/@vscode/emmet-helper/node_modules/jsonc-parser/lib/esm/impl/scanner.js
+// node_modules/jsonc-parser/lib/esm/impl/scanner.js
 function createScanner2(text2, ignoreTrivia) {
   if (ignoreTrivia === void 0) {
     ignoreTrivia = false;
@@ -25097,20 +25356,20 @@ function isDigit(ch) {
   return ch >= 48 && ch <= 57;
 }
 var init_scanner = __esm({
-  "node_modules/@vscode/emmet-helper/node_modules/jsonc-parser/lib/esm/impl/scanner.js"() {
+  "node_modules/jsonc-parser/lib/esm/impl/scanner.js"() {
     "use strict";
   }
 });
 
-// node_modules/@vscode/emmet-helper/node_modules/jsonc-parser/lib/esm/impl/format.js
+// node_modules/jsonc-parser/lib/esm/impl/format.js
 var init_format = __esm({
-  "node_modules/@vscode/emmet-helper/node_modules/jsonc-parser/lib/esm/impl/format.js"() {
+  "node_modules/jsonc-parser/lib/esm/impl/format.js"() {
     "use strict";
     init_scanner();
   }
 });
 
-// node_modules/@vscode/emmet-helper/node_modules/jsonc-parser/lib/esm/impl/parser.js
+// node_modules/jsonc-parser/lib/esm/impl/parser.js
 function parse(text2, errors, options) {
   if (errors === void 0) {
     errors = [];
@@ -25445,7 +25704,7 @@ function visit(text2, visitor, options) {
 }
 var ParseOptions;
 var init_parser = __esm({
-  "node_modules/@vscode/emmet-helper/node_modules/jsonc-parser/lib/esm/impl/parser.js"() {
+  "node_modules/jsonc-parser/lib/esm/impl/parser.js"() {
     "use strict";
     init_scanner();
     (function(ParseOptions2) {
@@ -25456,16 +25715,16 @@ var init_parser = __esm({
   }
 });
 
-// node_modules/@vscode/emmet-helper/node_modules/jsonc-parser/lib/esm/impl/edit.js
+// node_modules/jsonc-parser/lib/esm/impl/edit.js
 var init_edit = __esm({
-  "node_modules/@vscode/emmet-helper/node_modules/jsonc-parser/lib/esm/impl/edit.js"() {
+  "node_modules/jsonc-parser/lib/esm/impl/edit.js"() {
     "use strict";
     init_format();
     init_parser();
   }
 });
 
-// node_modules/@vscode/emmet-helper/node_modules/jsonc-parser/lib/esm/main.js
+// node_modules/jsonc-parser/lib/esm/main.js
 function printParseErrorCode(code2) {
   switch (code2) {
     case 1:
@@ -25505,7 +25764,7 @@ function printParseErrorCode(code2) {
 }
 var parse2;
 var init_main3 = __esm({
-  "node_modules/@vscode/emmet-helper/node_modules/jsonc-parser/lib/esm/main.js"() {
+  "node_modules/jsonc-parser/lib/esm/main.js"() {
     "use strict";
     init_format();
     init_edit();
@@ -31696,7 +31955,10 @@ var snippets = [
 var { runFormatter } = require_service();
 var { readOptions, matchesIgnore } = require_settings();
 var { registerCompletions, customDefinitions } = require_completions();
-var { registerTemplates } = require_templates();
+var {
+  registerTemplates,
+  registerTemplateCompletions
+} = require_templates();
 function activate(context) {
   if (language === "twig") {
     require_html().registerHTML(vscode, context);
@@ -31704,6 +31966,8 @@ function activate(context) {
   }
   const pending = /* @__PURE__ */ new Map();
   const output2 = vscode.window.createOutputChannel(label2);
+  if (language === "twig")
+    registerTemplateCompletions(vscode, context, output2, namespace);
   context.subscriptions.push(output2, {
     dispose() {
       for (const request of pending.values()) request.dispose();
