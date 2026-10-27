@@ -1,0 +1,40 @@
+{
+  "scopeName": "markdown.twig.codeblock",
+  "injectionSelector": "L:text.html.markdown - (markup.fenced_code.block.markdown, markup.raw.block.markdown, markup.inline.raw.string.markdown)",
+  "patterns": [
+    {
+      "name": "markup.fenced_code.block.markdown",
+      "begin": "(?=(^|\\G)( {0,3})((`|~)\\4{2,})\\s*(?i:(twig)((\\s+|:|,|\\{|\\?)[^`]*)?$))",
+      "end": "(^|\\G)(\\2|\\s{0,3})(\\3\\4*)\\s*$",
+      "endCaptures": {
+        "3": {
+          "name": "punctuation.definition.markdown"
+        }
+      },
+      "patterns": [
+        {
+          "begin": "(^|\\G)( {0,3})((`|~)\\4{2,})\\s*(?i:(twig)((\\s+|:|,|\\{|\\?)[^`]*)?$)",
+          "while": "(^|\\G)(?!(\\2|\\s{0,3})\\3\\4*\\s*$)",
+          "contentName": "meta.embedded.block.twig",
+          "patterns": [
+            {
+              "include": "text.html.twig"
+            }
+          ],
+          "beginCaptures": {
+            "3": {
+              "name": "punctuation.definition.markdown"
+            },
+            "5": {
+              "name": "fenced_code.block.language.markdown"
+            },
+            "6": {
+              "name": "fenced_code.block.language.attributes.markdown"
+            }
+          }
+        }
+      ],
+      "comment": "The outer rule owns the closing fence. The inner while rule unwinds unfinished Twig/HTML scopes only at a matching fence."
+    }
+  ]
+}

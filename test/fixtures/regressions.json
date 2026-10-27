@@ -452,5 +452,19 @@
     "refs": [
       "https://marketplace.visualstudio.com/items?itemName=mblode.twig-language&ssr=false#review-details"
     ]
+  },
+  {
+    "id": "issue-128-twig-attributes",
+    "source": "{%- block form_row_render -%}\n    <div{% with {attr: row_attr} %}{{ block('attributes') }}{% endwith %}>\n        {{- form_label(form) -}}\n        {{- form_widget(form, widget_attr) -}}\n    </div>\n{%- endblock form_row_render -%}\n",
+    "refs": [
+      "https://github.com/mblode/vscode-twig-language-2/issues/128"
+    ]
+  },
+  {
+    "id": "issue-128-form-outputs",
+    "source": "{{ form_start(form) }}\n    {{ form_widget(form) }}\n    <div class=\"actions\">\n        <button type=\"submit\">Save</button>\n    </div>\n{{ form_end(form) }}\n",
+    "refs": [
+      "https://github.com/mblode/vscode-twig-language-2/issues/128"
+    ]
   }
 ]

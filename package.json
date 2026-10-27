@@ -2,7 +2,7 @@
   "name": "twig-language-2",
   "displayName": "Twig Language 2",
   "description": "Snippets, Syntax Highlighting, Hover, and Formatting for Twig",
-  "version": "0.13.1",
+  "version": "0.13.2",
   "publisher": "mblode",
   "license": "MIT",
   "author": {
@@ -65,6 +65,16 @@
           "source.css.scss": "scss",
           "source.js": "javascript",
           "source.ts": "typescript"
+        }
+      },
+      {
+        "scopeName": "markdown.twig.codeblock",
+        "path": "./src/syntaxes/markdown-twig.tmLanguage.json",
+        "injectTo": [
+          "text.html.markdown"
+        ],
+        "embeddedLanguages": {
+          "meta.embedded.block.twig": "twig"
         }
       }
     ],

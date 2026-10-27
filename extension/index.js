@@ -49,7 +49,7 @@ var require_package = __commonJS({
       name: "twig-language-2",
       displayName: "Twig Language 2",
       description: "Snippets, Syntax Highlighting, Hover, and Formatting for Twig",
-      version: "0.13.1",
+      version: "0.13.2",
       publisher: "mblode",
       license: "MIT",
       author: {
@@ -112,6 +112,16 @@ var require_package = __commonJS({
               "source.css.scss": "scss",
               "source.js": "javascript",
               "source.ts": "typescript"
+            }
+          },
+          {
+            scopeName: "markdown.twig.codeblock",
+            path: "./src/syntaxes/markdown-twig.tmLanguage.json",
+            injectTo: [
+              "text.html.markdown"
+            ],
+            embeddedLanguages: {
+              "meta.embedded.block.twig": "twig"
             }
           }
         ],
@@ -2068,7 +2078,9 @@ var require_lexer = __commonJS({
           if (at < 0) throw new SyntaxError("Unclosed processing instruction", i2);
           end = at + 2;
           type = "raw";
-        } else if (/^<\/?[a-zA-Z][\w:.-]*(?=[\s/>])|^<![a-zA-Z]/.test(source.slice(i2))) {
+        } else if (/^<\/?[a-zA-Z][\w:.-]*(?=[\s/>]|\{[{%#])|^<![a-zA-Z]/.test(
+          source.slice(i2)
+        )) {
           end = htmlEnd(source, i2);
           type = "html";
           const match = /^<(\/?)([\w:.-]+)/.exec(source.slice(i2, end));

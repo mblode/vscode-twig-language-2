@@ -275,6 +275,69 @@ function layout(tokens, opaque = []) {
   });
 }
 
+// Output calls can render containers (for example Symfony's form_start()).
+// Infer only indentation introduced after a standalone output, and keep that
+// offset until the source dedents or leaves the enclosing structural scope.
+function preserveOutputIndentation(tokens, source, options, opaque) {
+  const frames = [];
+  let previous;
+  return tokens.map((token) => {
+    if (isOpaque(opaque, token.start)) {
+      previous = undefined;
+      return token;
+    }
+    const content =
+      token.type === "text"
+        ? token.start + token.raw.search(/\S/)
+        : token.start;
+    if (content < token.start) return token;
+    const lineStart = source.lastIndexOf("\n", content - 1) + 1;
+    const prefix = source.slice(lineStart, content);
+    if (/^[\t ]*$/.test(prefix)) {
+      const width = [...prefix].reduce(
+        (column, char) =>
+          char === "\t"
+            ? column + options.tabSize - (column % options.tabSize)
+            : column + 1,
+        0,
+      );
+      while (
+        frames.length &&
+        ((width <= frames[frames.length - 1].width &&
+          token.depth === frames[frames.length - 1].depth) ||
+          token.depth < frames[frames.length - 1].depth)
+      )
+        frames.pop();
+      if (
+        previous?.output &&
+        width > previous.width &&
+        token.depth === previous.depth
+      ) {
+        frames.push({
+          width: previous.width,
+          depth: token.depth,
+          offset: Math.floor((width - previous.width) / options.tabSize),
+        });
+      }
+      const lineEnd = source.indexOf("\n", token.end);
+      previous = {
+        width,
+        depth: token.depth,
+        output:
+          token.type === "output" &&
+          !/[\r\n]/.test(token.raw) &&
+          /^[\t \r]*$/.test(
+            source.slice(token.end, lineEnd < 0 ? source.length : lineEnd),
+          ),
+      };
+    }
+    return {
+      ...token,
+      depth: token.depth + frames.reduce((sum, frame) => sum + frame.offset, 0),
+    };
+  });
+}
+
 function minimalEdit(source, start, end, text) {
   const original = source.slice(start, end);
   if (original === text) return null;
@@ -332,7 +395,12 @@ async function formatEdits(source, input = {}, range) {
   const tree = parse(source);
   if (tree.lexicalError) throw tree.lexicalError;
   if (tree.diagnostics.length) return [];
-  const tokens = layout(tree.tokens, tree.opaque);
+  const tokens = preserveOutputIndentation(
+    layout(tree.tokens, tree.opaque),
+    source,
+    options,
+    tree.opaque,
+  );
   const eol = options.eol || (source.includes("\r\n") ? "\r\n" : "\n");
   options.eol = eol;
   const edits = [];
