@@ -221,3 +221,59 @@ test("a self-closing slash never joins or leaves an unquoted attribute value", a
     '<input value="1"/>\n',
   );
 });
+
+for (const fixture of fixtures.filter((f) => f.id.startsWith("issue-128"))) {
+  test(`${fixture.id} preserves reported indentation`, async () => {
+    const options = { tabSize: 4, insertSpaces: true, wrap: 120 };
+    assert.equal(await format(fixture.source, options), fixture.source);
+    assert.deepEqual(await formatEdits(fixture.source, options), []);
+  });
+}
+
+test("output indentation is scoped while ordinary indentation is corrected", async () => {
+  const options = { tabSize: 4 };
+  for (const [source, expected] of [
+    [
+      "<div>\n        <p>Text</p>\n</div>\n",
+      "<div>\n    <p>Text</p>\n</div>\n",
+    ],
+    [
+      "{% if x %}\n        {{ value }}\n{% endif %}\n",
+      "{% if x %}\n    {{ value }}\n{% endif %}\n",
+    ],
+    [
+      "{{ start() }}\n    <div>\n<p>Text</p>\n    </div>\n{{ end() }}\n",
+      "{{ start() }}\n    <div>\n        <p>Text</p>\n    </div>\n{{ end() }}\n",
+    ],
+    [
+      "{% if x %}\n    {{ start() }}\n        {{ value }}\n{% endif %}\n<p>Tail</p>\n",
+      "{% if x %}\n    {{ start() }}\n        {{ value }}\n{% endif %}\n<p>Tail</p>\n",
+    ],
+    [
+      "{{ start() }} text\n    <p>Text</p>\n",
+      "{{ start() }} text\n<p>Text</p>\n",
+    ],
+  ]) {
+    const result = await format(source, options);
+    assert.equal(result, expected);
+    assert.equal(await format(result, options), result);
+  }
+});
+
+test("output containers retain tabs, CRLF, wrapped attributes and selection context", async () => {
+  const source =
+    '{{ start() }}\r\n\t<div title="a" class="b">\r\n\t\t{{ value }}\r\n\t</div>\r\n{{ end() }}\r\n';
+  const options = { tabSize: 4, insertSpaces: false, forceAttribute: true };
+  const expected =
+    '{{ start() }}\r\n\t<div\r\n\t\ttitle="a"\r\n\t\tclass="b"\r\n\t>\r\n\t\t{{ value }}\r\n\t</div>\r\n{{ end() }}\r\n';
+  assert.equal(await format(source, options), expected);
+  assert.equal(await format(expected, options), expected);
+  const range = {
+    start: source.indexOf("\t<div"),
+    end: source.indexOf("\r\n{{ end"),
+  };
+  assert.equal(
+    applyEdits(source, await formatEdits(source, options, range)),
+    expected,
+  );
+});

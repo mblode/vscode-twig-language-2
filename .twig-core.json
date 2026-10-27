@@ -3,8 +3,8 @@
   "version": "0.13.1",
   "files": {
     "src/formatter/embedded.js": "13c42c2f5a0b100ebdc9afe4b4ad87cb47d47e96397113e0b0f2bd3754648e56",
-    "src/formatter/format.js": "30e21c934274aec46b0fc8599e4a13ce2d0169fbfcff8903423c7ad29bf9e11b",
-    "src/formatter/lexer.js": "dd2af04ae591ccfc1445d29a7017c25145e79268a0258a4d74c9ecd053550660",
+    "src/formatter/format.js": "5f9131320f20143085964533052d3a991f6c9920cbebf14564f97630d4c1faa4",
+    "src/formatter/lexer.js": "c529f49e071abf9485ca351fb49d3064b7a4dcd09fbc1285451af08304dbdb7d",
     "src/formatter/parser.js": "633214a9e7079a14d41e339b133fe7e0afe029a7a8e234d806758302c2b5abd4",
     "src/formatter/preservation.js": "14d34cb7a0aecef3c66375166d199e52e468f92dfd540f73e90bf4a0658666ac",
     "src/formatter/service.js": "02e5346302c2dbe83bb2cc34e326cc648e88b88edd3662fb5d15ba6367779192",

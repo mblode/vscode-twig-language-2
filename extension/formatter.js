@@ -201,7 +201,9 @@ var require_lexer = __commonJS({
           if (at < 0) throw new SyntaxError2("Unclosed processing instruction", i);
           end = at + 2;
           type = "raw";
-        } else if (/^<\/?[a-zA-Z][\w:.-]*(?=[\s/>])|^<![a-zA-Z]/.test(source.slice(i))) {
+        } else if (/^<\/?[a-zA-Z][\w:.-]*(?=[\s/>]|\{[{%#])|^<![a-zA-Z]/.test(
+          source.slice(i)
+        )) {
           end = htmlEnd(source, i);
           type = "html";
           const match = /^<(\/?)([\w:.-]+)/.exec(source.slice(i, end));
@@ -20399,6 +20401,47 @@ var require_format = __commonJS({
         return { ...token, depth: Math.max(0, indent) };
       });
     }
+    function preserveOutputIndentation(tokens, source, options, opaque) {
+      const frames = [];
+      let previous;
+      return tokens.map((token) => {
+        if (isOpaque(opaque, token.start)) {
+          previous = void 0;
+          return token;
+        }
+        const content = token.type === "text" ? token.start + token.raw.search(/\S/) : token.start;
+        if (content < token.start) return token;
+        const lineStart = source.lastIndexOf("\n", content - 1) + 1;
+        const prefix = source.slice(lineStart, content);
+        if (/^[\t ]*$/.test(prefix)) {
+          const width = [...prefix].reduce(
+            (column, char) => char === "	" ? column + options.tabSize - column % options.tabSize : column + 1,
+            0
+          );
+          while (frames.length && (width <= frames[frames.length - 1].width && token.depth === frames[frames.length - 1].depth || token.depth < frames[frames.length - 1].depth))
+            frames.pop();
+          if (previous?.output && width > previous.width && token.depth === previous.depth) {
+            frames.push({
+              width: previous.width,
+              depth: token.depth,
+              offset: Math.floor((width - previous.width) / options.tabSize)
+            });
+          }
+          const lineEnd = source.indexOf("\n", token.end);
+          previous = {
+            width,
+            depth: token.depth,
+            output: token.type === "output" && !/[\r\n]/.test(token.raw) && /^[\t \r]*$/.test(
+              source.slice(token.end, lineEnd < 0 ? source.length : lineEnd)
+            )
+          };
+        }
+        return {
+          ...token,
+          depth: token.depth + frames.reduce((sum, frame) => sum + frame.offset, 0)
+        };
+      });
+    }
     function minimalEdit(source, start, end, text) {
       const original = source.slice(start, end);
       if (original === text) return null;
@@ -20435,7 +20478,12 @@ var require_format = __commonJS({
       const tree = parse(source);
       if (tree.lexicalError) throw tree.lexicalError;
       if (tree.diagnostics.length) return [];
-      const tokens = layout(tree.tokens, tree.opaque);
+      const tokens = preserveOutputIndentation(
+        layout(tree.tokens, tree.opaque),
+        source,
+        options,
+        tree.opaque
+      );
       const eol = options.eol || (source.includes("\r\n") ? "\r\n" : "\n");
       options.eol = eol;
       const edits = [];

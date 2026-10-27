@@ -98,3 +98,15 @@ test("ignore globs match directories and normalized Windows paths without regex 
   assert(matchesIgnore(["a[1].twig"], ["a[1].twig"]));
   assert(!matchesIgnore(["*.twig"], ["nested/file.twig"]));
 });
+
+for (const fixture of require("./fixtures/regressions.json").filter((f) =>
+  f.id.startsWith("issue-128"),
+)) {
+  test(`${fixture.id} is unchanged through the formatter worker`, async () => {
+    const options = { tabSize: 4, insertSpaces: true, wrap: 120 };
+    assert.deepEqual(
+      await runFormatter(worker, fixture.source, options).promise,
+      [],
+    );
+  });
+}

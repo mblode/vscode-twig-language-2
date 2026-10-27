@@ -2078,7 +2078,9 @@ var require_lexer = __commonJS({
           if (at < 0) throw new SyntaxError("Unclosed processing instruction", i2);
           end = at + 2;
           type = "raw";
-        } else if (/^<\/?[a-zA-Z][\w:.-]*(?=[\s/>])|^<![a-zA-Z]/.test(source.slice(i2))) {
+        } else if (/^<\/?[a-zA-Z][\w:.-]*(?=[\s/>]|\{[{%#])|^<![a-zA-Z]/.test(
+          source.slice(i2)
+        )) {
           end = htmlEnd(source, i2);
           type = "html";
           const match = /^<(\/?)([\w:.-]+)/.exec(source.slice(i2, end));

@@ -211,7 +211,9 @@ function scan(source) {
       end = at + 2;
       type = "raw";
     } else if (
-      /^<\/?[a-zA-Z][\w:.-]*(?=[\s/>])|^<![a-zA-Z]/.test(source.slice(i))
+      /^<\/?[a-zA-Z][\w:.-]*(?=[\s/>]|\{[{%#])|^<![a-zA-Z]/.test(
+        source.slice(i),
+      )
     ) {
       end = htmlEnd(source, i);
       type = "html";

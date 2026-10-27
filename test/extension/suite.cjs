@@ -44,6 +44,21 @@ exports.run = async () => {
     [],
     "unchanged document must not receive replacements",
   );
+  await update("wrap", 120);
+  for (const fixture of require("../fixtures/regressions.json").filter((f) =>
+    f.id.startsWith("issue-128"),
+  )) {
+    const reported = await open(`${fixture.id}.twig`, fixture.source);
+    assert.deepEqual(
+      await edits(reported, { tabSize: 4, insertSpaces: true }),
+      [],
+    );
+    assert.deepEqual(
+      await edits(reported, { tabSize: 4, insertSpaces: true }),
+      [],
+    );
+  }
+  await update("wrap", 0);
   await update("indentStyle", "tab");
   await apply(doc, await edits(doc));
   assert(
