@@ -1,6 +1,6 @@
 {
   "source": "mblode/vscode-twig-language-2",
-  "version": "0.13.1",
+  "version": "0.13.2",
   "files": {
     "src/formatter/embedded.js": "13c42c2f5a0b100ebdc9afe4b4ad87cb47d47e96397113e0b0f2bd3754648e56",
     "src/formatter/format.js": "5f9131320f20143085964533052d3a991f6c9920cbebf14564f97630d4c1faa4",

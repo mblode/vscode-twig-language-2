@@ -1,5 +1,6 @@
-## Unreleased
+## 0.13.2
 
+- Preserve intentional indentation beneath Twig calls that render HTML containers, and recognize Twig expressions directly after HTML tag names (#128).
 - Highlight Twig fenced code blocks in Markdown source view (#130).
 
 ## 0.13.1
