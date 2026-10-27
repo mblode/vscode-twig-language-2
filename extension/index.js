@@ -113,6 +113,16 @@ var require_package = __commonJS({
               "source.js": "javascript",
               "source.ts": "typescript"
             }
+          },
+          {
+            scopeName: "markdown.twig.codeblock",
+            path: "./src/syntaxes/markdown-twig.tmLanguage.json",
+            injectTo: [
+              "text.html.markdown"
+            ],
+            embeddedLanguages: {
+              "meta.embedded.block.twig": "twig"
+            }
           }
         ],
         configuration: {
