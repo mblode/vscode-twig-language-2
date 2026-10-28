@@ -10,11 +10,14 @@ test("provider discards stale results, cancels superseded requests and releases 
   const settings = { formatting: true };
   const vscode = {
     workspace: {
+      workspaceFolders: [],
       getConfiguration: () => ({
         get: (key, fallback) => settings[key] ?? fallback,
       }),
       asRelativePath: () => "test.twig",
       onDidChangeTextDocument: () => ({ dispose() {} }),
+      onDidChangeConfiguration: () => ({ dispose() {} }),
+      onDidChangeWorkspaceFolders: () => ({ dispose() {} }),
     },
     window: {
       createOutputChannel: () => ({ appendLine() {}, dispose() {} }),
